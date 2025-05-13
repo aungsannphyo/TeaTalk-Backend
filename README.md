@@ -1,4 +1,5 @@
 
+```
 go-chat-app/
 │
 ├── cmd/
@@ -35,3 +36,4 @@ go-chat-app/
 │
 ├── go.mod
 └── go.sum
+```
