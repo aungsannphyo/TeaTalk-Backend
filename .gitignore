@@ -1,0 +1,45 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+
+# Output of `go build`
+/bin/
+/build/
+/dist/
+*.log
+
+# Dependency directories (remove if you use vendoring)
+vendor/
+
+# Go workspace file
+go.work
+go.work.sum
+
+# Go module cache
+go.sum
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+
+# Air (live reload tool) default temp files
+tmp/
+.air/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Test cache
+*.coverprofile
+*.test
+
+# Local environment/config
+.env
+.env.*
