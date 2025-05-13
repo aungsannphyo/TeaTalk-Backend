@@ -3,18 +3,10 @@ package common
 import (
 	"net/http"
 
-	v "github.com/aungsannphyo/ywartalk/pkg/validator"
 	"github.com/gin-gonic/gin"
 )
 
 func BadRequestResponse(c *gin.Context, err error) {
-	if ve, ok := err.(v.ValidationErrors); ok {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"errors": ve,
-		})
-		return
-	}
-
 	c.JSON(http.StatusBadRequest, gin.H{
 		"error": err.Error(),
 	})

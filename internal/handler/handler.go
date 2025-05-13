@@ -22,7 +22,7 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	//Services
 	userService := service.NewUserService(userRepo)
 	friendRequestService := service.NewFriendRequestService(friendRequestRepo, friendRepo)
-	friendService := service.NewFriendService(friendRepo)
+	friendService := service.NewFriendService(friendRepo, friendRequestRepo)
 
 	return &HandlerSet{
 		UserHandler:          NewUserHandler(userService),

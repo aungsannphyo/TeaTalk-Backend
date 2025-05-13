@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
@@ -18,20 +19,26 @@ func NewFriendHandler(s *service.FriendService) *FriendHandler {
 }
 
 func (h *FriendHandler) MakeUnFriend(c *gin.Context) {
-	var duf dto.UnFriendDto
+	var mufDto dto.UnFriendDto
 
-	if err := c.ShouldBindJSON(&duf); err != nil {
+	if err := c.ShouldBindJSON(&mufDto); err != nil {
 		common.BadRequestResponse(c, err)
 		return
 	}
 
-	if err := dto.ValidateUnFriendRequest(duf); err != nil {
+	if err := dto.ValidateUnFriendRequest(mufDto); err != nil {
 		common.BadRequestResponse(c, err)
 		return
 	}
 
-	if err := h.fService.MakeUnFriend(&duf); err != nil {
+	muf := &models.Friend{
+		UserID:   c.GetString("userId"),
+		FriendID: mufDto.FriendID,
+	}
+
+	if err := h.fService.MakeUnFriend(muf); err != nil {
 		common.InternalServerResponse(c, err)
+		return
 	}
 
 	common.OkResponse(c, gin.H{"message": "Successfully Unfriend!"})

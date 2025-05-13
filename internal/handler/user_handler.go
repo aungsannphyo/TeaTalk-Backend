@@ -55,6 +55,7 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 
 	if err != nil {
 		common.UnauthorizedResponse(c, err)
+		return
 	}
 
 	loginResponse := response.NewLoginResponse(foundUser, token)
@@ -67,7 +68,8 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 
 	user, err := h.userService.GetUser(userId)
 	if err != nil {
-		common.InternalServerResponse(c, err)
+		common.NotFoundResponse(c, err)
+		return
 	}
 
 	userResponse := response.NewUserResponse(user)

@@ -3,6 +3,7 @@ package handler
 import (
 	"fmt"
 
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
@@ -20,19 +21,24 @@ func NewFriendRequestHandler(service *service.FriendRequestService) *FriendReque
 }
 
 func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
-	var fr dto.SendFriendRequestDto
+	var frDto dto.SendFriendRequestDto
 
-	if err := c.ShouldBindJSON(&fr); err != nil {
+	if err := c.ShouldBindJSON(&frDto); err != nil {
 		common.BadRequestResponse(c, err)
 		return
 	}
 
-	if err := dto.ValidateSendFriendRequest(fr); err != nil {
+	if err := dto.ValidateSendFriendRequest(frDto); err != nil {
 		common.BadRequestResponse(c, err)
 		return
 	}
 
-	if err := h.frService.SendFriendRequest(&fr); err != nil {
+	fr := &models.FriendRequest{
+		SenderId:   c.GetString("userId"),
+		ReceiverId: frDto.ReceiverId,
+	}
+
+	if err := h.frService.SendFriendRequest(fr); err != nil {
 		common.ConfictResponse(c, err)
 		return
 	}
@@ -41,23 +47,41 @@ func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
 }
 
 func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
-	var dfr dto.DecideFriendRequestDto
+	var dfrDto dto.DecideFriendRequestDto
 
-	if err := c.ShouldBindJSON(&dfr); err != nil {
+	if err := c.ShouldBindJSON(&dfrDto); err != nil {
 		common.BadRequestResponse(c, err)
 		return
 	}
 
-	if err := dto.ValidateDecideFriendRequest(dfr); err != nil {
+	if err := dto.ValidateDecideFriendRequest(dfrDto); err != nil {
 		common.BadRequestResponse(c, err)
 		return
 	}
 
-	if err := h.frService.DecideFriendRequest(&dfr); err != nil {
-		common.InternalServerResponse(c, err)
-		return
+	dfr := &models.FriendRequest{
+		ID:         dfrDto.FriendRequestId,
+		ReceiverId: c.GetString("userId"),
+		Status:     dfrDto.Status,
 	}
 
+	if err := h.frService.DecideFriendRequest(dfr); err != nil {
+		if _, ok := err.(*common.ForbiddenError); ok {
+			common.ConfictResponse(c, err)
+			return
+		}
+
+		if _, ok := err.(*common.InternalServerError); ok {
+			common.InternalServerResponse(c, err)
+			return
+		}
+
+		if _, ok := err.(*common.NotFoundError); ok {
+			common.NotFoundResponse(c, err)
+			return
+		}
+
+	}
 	common.OkResponse(c, gin.H{
 		"message": fmt.Sprintf("You have successfully %v for a friend request", dfr.Status),
 	})

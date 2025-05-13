@@ -47,7 +47,7 @@ func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(f.UserID, f.FriendID, f.FriendID, f.UserID)
+	_, err = stmt.Exec(f.UserID, f.FriendID, f.UserID, f.FriendID)
 
 	if err != nil {
 		return nil
