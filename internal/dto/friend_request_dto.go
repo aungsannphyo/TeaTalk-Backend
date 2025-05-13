@@ -27,6 +27,10 @@ func ValidateSendFriendRequest(sfrDto SendFriendRequestDto) error {
 		errs = append(errs, v.ValidationError{Field: "Receiver Id", Message: "Receiver Id is required"})
 	}
 
+	if len(errs) > 0 {
+		return errs
+	}
+
 	return nil
 }
 

@@ -37,7 +37,7 @@ func (r *friendRepo) CreateFriendShip(f *models.Friend) error {
 }
 
 func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
-	query := "DELETE FROM friends WHERE user_id = ? AND friend_id = ?"
+	query := "DELETE FROM friends WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ? )"
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -47,7 +47,7 @@ func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(f.UserID, f.FriendID)
+	_, err = stmt.Exec(f.UserID, f.FriendID, f.FriendID, f.UserID)
 
 	if err != nil {
 		return nil

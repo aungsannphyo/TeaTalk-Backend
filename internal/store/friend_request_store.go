@@ -74,33 +74,36 @@ func (r *friendRequestRepo) FindById(friendRequestId string) (*models.FriendRequ
 	return &fr, nil
 }
 
-func (r *friendRequestRepo) AlreadyFriends(senderId, receiverId string) (bool, error) {
-	query := `SELECT 1 FROM friends 
-	WHERE user_id =  ? AND friend_id = ?`
+func (r *friendRequestRepo) AlreadyFriends(senderId, receiverId string) bool {
+	query := `SELECT COUNT(*) FROM friends 
+	WHERE (user_id =  ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?)`
 
-	row := db.DBInstance.QueryRow(query, senderId, receiverId)
+	row := db.DBInstance.QueryRow(query, senderId, receiverId, receiverId, senderId)
 
 	var friend int64
 
 	err := row.Scan(&friend)
 	if err != nil {
-		return false, nil
+		return false
 	}
 
-	return true, nil
+	return friend > 0
 }
 
-func (r *friendRequestRepo) HasPendingRequest(senderId, receiverId string) (bool, error) {
-	query := `SELECT 1 FROM friend_requests 
-	WHERE sender_id = ? AND receiver_id  = ? AND status = "PENDING"`
+func (r *friendRequestRepo) HasPendingRequest(senderId, receiverId string) bool {
 
-	row := db.DBInstance.QueryRow(query, senderId, receiverId)
+	query := `SELECT COUNT(*) FROM friend_requests 
+		WHERE ((sender_id = ? AND receiver_id = ?) OR
+		       (receiver_id = ? AND sender_id = ?))
+		AND status = "PENDING"`
+
+	row := db.DBInstance.QueryRow(query, senderId, receiverId, receiverId, senderId)
 
 	var pending int64
 
 	err := row.Scan(&pending)
 	if err != nil {
-		return false, nil
+		return false
 	}
-	return true, nil
+	return pending > 0
 }

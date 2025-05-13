@@ -33,7 +33,8 @@ func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
 	}
 
 	if err := h.frService.SendFriendRequest(&fr); err != nil {
-		common.InternalServerResponse(c, err)
+		common.ConfictResponse(c, err)
+		return
 	}
 
 	common.OkResponse(c, gin.H{"message": "You have successfully sent a friend request"})
@@ -54,6 +55,7 @@ func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
 
 	if err := h.frService.DecideFriendRequest(&dfr); err != nil {
 		common.InternalServerResponse(c, err)
+		return
 	}
 
 	common.OkResponse(c, gin.H{
