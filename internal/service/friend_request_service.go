@@ -7,17 +7,20 @@ import (
 )
 
 type FriendRequestService struct {
-	frRepo repository.FriendRequestRepository
-	fRepo  repository.FriendRepository
+	frRepo  repository.FriendRequestRepository
+	fRepo   repository.FriendRepository
+	frlRepo repository.FriendRequestLogRepository
 }
 
 func NewFriendRequestService(
 	frRepo repository.FriendRequestRepository,
 	fRepo repository.FriendRepository,
+	frlRepo repository.FriendRequestLogRepository,
 ) *FriendRequestService {
 	return &FriendRequestService{
-		frRepo: frRepo,
-		fRepo:  fRepo,
+		frRepo:  frRepo,
+		fRepo:   fRepo,
+		frlRepo: frlRepo,
 	}
 }
 
@@ -38,6 +41,19 @@ func (s *FriendRequestService) SendFriendRequest(fr *models.FriendRequest) error
 	}
 
 	if !pending && !exist {
+
+		//make friend request log by default action SENT
+		frl := &models.FriendRequestLog{
+			SenderID:    fr.SenderId,
+			ReceiverID:  fr.ReceiverId,
+			Action:      models.ActionSend,
+			PerformedBy: fr.SenderId,
+		}
+		//default action SENT
+		err := s.frlRepo.CreateFriendRequestLog(frl)
+		if err != nil {
+			return &common.InternalServerError{Message: "Something went wrong. Please try agian laster!"}
+		}
 		//make friend request
 		return s.frRepo.SendFriendRequest(fr)
 	}
@@ -73,7 +89,36 @@ func (s *FriendRequestService) DecideFriendRequest(dfr *models.FriendRequest) er
 				FriendID: fr.ReceiverId,
 			}
 
+			//make friendship
 			s.fRepo.CreateFriendShip(f)
+
+			//make Action to ACCEPTED
+			acceptFrl := &models.FriendRequestLog{
+				SenderID:    dfr.ReceiverId,
+				ReceiverID:  dfr.ReceiverId,
+				Action:      models.ActionAccepted,
+				PerformedBy: dfr.ReceiverId,
+			}
+
+			err = s.frlRepo.CreateFriendRequestLog(acceptFrl)
+
+			if err != nil {
+				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+			}
+		}
+
+		//make Action to REJECTED
+		rejectFrl := &models.FriendRequestLog{
+			SenderID:    dfr.ReceiverId,
+			ReceiverID:  dfr.ReceiverId,
+			Action:      models.ActionAccepted,
+			PerformedBy: dfr.ReceiverId,
+		}
+
+		err := s.frlRepo.CreateFriendRequestLog(rejectFrl)
+
+		if err != nil {
+			return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
 		}
 
 		return s.frRepo.RejectFriendRequest(dfr)

@@ -37,7 +37,6 @@ func (r *friendRequestRepo) SendFriendRequest(fr *models.FriendRequest) error {
 	}
 
 	return nil
-
 }
 
 func (r *friendRequestRepo) RejectFriendRequest(dfr *models.FriendRequest) error {
