@@ -105,25 +105,26 @@ func (s *FriendRequestService) DecideFriendRequest(dfr *models.FriendRequest) er
 			if err != nil {
 				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
 			}
+		} else {
+			//Reject Case
+			//make Action to REJECTED
+			rejectFrl := &models.FriendRequestLog{
+				SenderID:    dfr.ReceiverId,
+				ReceiverID:  dfr.ReceiverId,
+				Action:      models.ActionRejected,
+				PerformedBy: dfr.ReceiverId,
+			}
+
+			err := s.frlRepo.CreateFriendRequestLog(rejectFrl)
+
+			if err != nil {
+				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+			}
+
+			return s.frRepo.RejectFriendRequest(dfr)
 		}
-
-		//make Action to REJECTED
-		rejectFrl := &models.FriendRequestLog{
-			SenderID:    dfr.ReceiverId,
-			ReceiverID:  dfr.ReceiverId,
-			Action:      models.ActionAccepted,
-			PerformedBy: dfr.ReceiverId,
-		}
-
-		err := s.frlRepo.CreateFriendRequestLog(rejectFrl)
-
-		if err != nil {
-			return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
-		}
-
-		return s.frRepo.RejectFriendRequest(dfr)
+	} else {
+		return &common.ForbiddenError{Message: "You are not allowed to do this action!"}
 	}
-
-	return &common.ForbiddenError{Message: "You are not allowed to do this action!"}
-
+	return nil
 }
