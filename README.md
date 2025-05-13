@@ -1,6 +1,6 @@
 
 ```
-go-chat-app/
+ywar-talk-app/
 │
 ├── cmd/
 │   └── main.go                      # App entry point
