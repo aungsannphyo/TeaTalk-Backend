@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"fmt"
+
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
@@ -73,4 +75,48 @@ func (s *ConversationsHandler) InviteGroup(c *gin.Context) {
 	}
 
 	common.OkResponse(c, gin.H{"message": "You have been successfully invited that you selected users!"})
+}
+
+func (s *ConversationsHandler) ModerateGroupInvite(c *gin.Context) {
+	var mgi dto.ModerateGroupInviteDto
+
+	if err := c.ShouldBindJSON(&mgi); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := dto.ValidateModerateGroupInvite(mgi); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := s.cService.ModerateGroupInvite(mgi, c); err != nil {
+		common.InternalServerResponse(c, err)
+		return
+	}
+
+	common.OkResponse(c, gin.H{
+		"message": fmt.Sprintf("You have been successfully %v!", mgi.Status),
+	})
+}
+
+func (s *ConversationsHandler) AssignAdmin(c *gin.Context) {
+	var aa dto.AssignAdminDto
+
+	if err := c.ShouldBindJSON(&aa); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := dto.ValidateAssignAdmin(aa); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := s.cService.AssignAdmin(aa, c); err != nil {
+		common.InternalServerResponse(c, err)
+		return
+	}
+
+	common.OkResponse(c, gin.H{"message": "You have been successfully made this action!"})
 }

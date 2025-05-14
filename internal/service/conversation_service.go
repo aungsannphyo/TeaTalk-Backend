@@ -69,7 +69,7 @@ func (s *ConversationService) CreateGroup(dto dto.CreateGroupDto, c *gin.Context
 }
 
 func (s *ConversationService) UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin.Context) error {
-	cID := c.Param("id")
+	cID := c.Param("groupId")
 
 	uc := &models.Conversation{
 		ID:   cID,
@@ -89,7 +89,7 @@ func (s *ConversationService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context
 	//insert into group_invites with status = "pending" if not admin is invite
 	//if admin is invite -> Add to conversation_members.
 
-	cID := c.Param("id")
+	cID := c.Param("groupId")
 	userID := c.GetString("userId")
 
 	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(cID, userID)
@@ -129,6 +129,71 @@ func (s *ConversationService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context
 			}
 		}
 
+	}
+
+	return nil
+}
+
+func (s *ConversationService) ModerateGroupInvite(dto dto.ModerateGroupInviteDto, c *gin.Context) error {
+	cID := c.Param("groupId")
+	inviteId := c.Param("inviteUserId")
+	userID := c.GetString("userId")
+
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(cID, userID)
+
+	if err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	if !isGroupAdmin {
+		return &common.ForbiddenError{Message: "You are not an admin of this group"}
+	}
+
+	mgi := &models.GroupInvite{
+		InvitedUserId:  inviteId,
+		ConversationID: cID,
+		Status:         dto.Status,
+	}
+
+	if err := s.giRepo.ModerateGroupInvite(mgi); err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	conversationMember := &models.ConversationMember{
+		ConversationID: cID,
+		UserID:         inviteId,
+	}
+
+	if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, please try again later"}
+	}
+
+	return nil
+}
+
+func (s *ConversationService) AssignAdmin(dto dto.AssignAdminDto, c *gin.Context) error {
+	cID := c.Param("groupId")
+	userID := c.GetString("userId")
+
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(cID, userID)
+
+	if err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	if !isGroupAdmin {
+		return &common.ForbiddenError{Message: "You are not an admin of this group"}
+	}
+
+	for _, iuser := range dto.InvitedUserId {
+		groupAdmin := &models.GroupAdmin{
+			ConversationID: cID,
+			UserID:         iuser,
+		}
+
+		if err := s.gaRepo.CreateGroupAdmin(groupAdmin); err != nil {
+			return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		}
 	}
 
 	return nil

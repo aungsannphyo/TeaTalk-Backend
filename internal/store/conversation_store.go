@@ -98,7 +98,3 @@ func (r *cRepo) UpdateGroupName(c *models.Conversation) error {
 
 	return nil
 }
-
-func (r *cRepo) InviteGroup(c *models.Conversation) error {
-	return nil
-}

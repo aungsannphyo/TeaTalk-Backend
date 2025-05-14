@@ -39,3 +39,23 @@ func (r *groupInviteRepo) CreateGroupInvite(cgi *models.GroupInvite) error {
 
 	return nil
 }
+
+func (r *groupInviteRepo) ModerateGroupInvite(mgi *models.GroupInvite) error {
+	query := "UPDATE group_invites SET status = ? WHERE conversation_id = ? AND invited_user_id = ?"
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(mgi.Status, mgi.ConversationID, mgi.InvitedUserId)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
