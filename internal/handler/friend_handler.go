@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
@@ -31,12 +30,7 @@ func (h *FriendHandler) MakeUnFriend(c *gin.Context) {
 		return
 	}
 
-	muf := &models.Friend{
-		UserID:   c.GetString("userId"),
-		FriendID: mufDto.FriendID,
-	}
-
-	if err := h.fService.MakeUnFriend(muf); err != nil {
+	if err := h.fService.MakeUnFriend(mufDto, c); err != nil {
 		common.InternalServerResponse(c, err)
 		return
 	}

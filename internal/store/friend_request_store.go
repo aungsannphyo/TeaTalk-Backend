@@ -91,22 +91,6 @@ func (r *friendRequestRepo) DeleteById(id string) error {
 	return nil
 }
 
-func (r *friendRequestRepo) AlreadyFriends(senderId, receiverId string) bool {
-	query := `SELECT COUNT(*) FROM friends 
-		WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?)`
-
-	row := db.DBInstance.QueryRow(query, senderId, receiverId, senderId, receiverId)
-
-	var friend int64
-
-	err := row.Scan(&friend)
-	if err != nil {
-		return false
-	}
-
-	return friend > 0
-}
-
 func (r *friendRequestRepo) HasPendingRequest(senderId, receiverId string) bool {
 
 	query := `SELECT COUNT(*) FROM friend_requests 

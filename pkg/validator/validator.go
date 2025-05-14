@@ -15,11 +15,8 @@ type ValidationError struct {
 type ValidationErrors []ValidationError
 
 func (v ValidationErrors) Error() string {
-	return "validation failed"
-}
-
-func (v ValidationErrors) String() string {
 	msg := "Validation failed:\n"
+
 	for _, err := range v {
 		msg += fmt.Sprintf("  - %s: %s\n", err.Field, err.Message)
 	}

@@ -3,7 +3,9 @@ package service
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
+	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
+	"github.com/gin-gonic/gin"
 )
 
 type FriendService struct {
@@ -25,10 +27,34 @@ func NewFriendService(
 }
 
 func (s *FriendService) CreateFriendShip(f *models.Friend) error {
-	return s.fRepo.CreateFriendShip(f)
+	//insert two row [bidirectional]
+	uf := &models.Friend{
+		UserID:   f.UserID,
+		FriendID: f.FriendID,
+	}
+
+	fu := &models.Friend{
+		UserID:   f.FriendID,
+		FriendID: f.UserID,
+	}
+
+	uferr := s.fRepo.CreateFriendShip(uf)
+	fuerr := s.fRepo.CreateFriendShip(fu)
+
+	if uferr != nil || fuerr != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	return nil
 }
 
-func (s *FriendService) MakeUnFriend(f *models.Friend) error {
+func (s *FriendService) MakeUnFriend(dto dto.UnFriendDto, c *gin.Context) error {
+
+	f := &models.Friend{
+		UserID:   c.GetString("userId"),
+		FriendID: dto.FriendID,
+	}
+
 	frl := &models.FriendRequestLog{
 		SenderID:    f.UserID,
 		ReceiverID:  f.FriendID,

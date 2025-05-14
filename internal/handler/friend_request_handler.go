@@ -3,7 +3,6 @@ package handler
 import (
 	"fmt"
 
-	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
@@ -33,12 +32,7 @@ func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
 		return
 	}
 
-	fr := &models.FriendRequest{
-		SenderId:   c.GetString("userId"),
-		ReceiverId: frDto.ReceiverId,
-	}
-
-	if err := h.frService.SendFriendRequest(fr); err != nil {
+	if err := h.frService.SendFriendRequest(frDto, c); err != nil {
 		common.ConfictResponse(c, err)
 		return
 	}
@@ -59,13 +53,7 @@ func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
 		return
 	}
 
-	dfr := &models.FriendRequest{
-		ID:         dfrDto.FriendRequestId,
-		ReceiverId: c.GetString("userId"),
-		Status:     dfrDto.Status,
-	}
-
-	if err := h.frService.DecideFriendRequest(dfr); err != nil {
+	if err := h.frService.DecideFriendRequest(dfrDto, c); err != nil {
 		if _, ok := err.(*common.ForbiddenError); ok {
 			common.ConfictResponse(c, err)
 			return
@@ -83,7 +71,7 @@ func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
 
 	}
 	common.OkResponse(c, gin.H{
-		"message": fmt.Sprintf("You have successfully %v for a friend request", dfr.Status),
+		"message": fmt.Sprintf("You have successfully %v for a friend request", dfrDto.Status),
 	})
 
 }

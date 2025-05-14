@@ -11,6 +11,7 @@ type HandlerSet struct {
 	UserHandler          *UserHandler
 	FriendRequestHandler *FriendRequestHandler
 	FriendHandler        *FriendHandler
+	MessageHandler       *MessageHandler
 }
 
 func InitHandler(db *sql.DB) *HandlerSet {
@@ -19,6 +20,9 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	friendRequestRepo := store.NewFriendRequestRepo(db)
 	friendRepo := store.NewFriendRepo(db)
 	friendRequestLogRepo := store.NewFriendRequestLogRepo(db)
+	messageRepo := store.NewMessageRepo(db)
+	conversationRepo := store.NewConversationRepo(db)
+	conversationMemberRepo := store.NewConversationMemberRepo(db)
 
 	//Services
 	userService := service.NewUserService(userRepo)
@@ -31,10 +35,17 @@ func InitHandler(db *sql.DB) *HandlerSet {
 		friendRequestRepo,
 		friendRequestLogRepo,
 	)
+	messageService := service.NewMessageService(
+		messageRepo,
+		friendRepo,
+		conversationRepo,
+		conversationMemberRepo,
+	)
 
 	return &HandlerSet{
 		UserHandler:          NewUserHandler(userService),
 		FriendRequestHandler: NewFriendRequestHandler(friendRequestService),
 		FriendHandler:        NewFriendHandler(friendService),
+		MessageHandler:       NewMessageHandler(messageService),
 	}
 }

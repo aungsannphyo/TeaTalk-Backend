@@ -47,3 +47,11 @@ type ConflictError struct {
 func (e *ConflictError) Error() string {
 	return e.Message
 }
+
+type UnexpectedRowCountError struct {
+	Message string
+}
+
+func (e *UnexpectedRowCountError) Error() string {
+	return e.Message
+}

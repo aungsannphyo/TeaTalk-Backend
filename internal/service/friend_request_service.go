@@ -3,7 +3,9 @@ package service
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
+	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
+	"github.com/gin-gonic/gin"
 )
 
 type FriendRequestService struct {
@@ -24,7 +26,11 @@ func NewFriendRequestService(
 	}
 }
 
-func (s *FriendRequestService) SendFriendRequest(fr *models.FriendRequest) error {
+func (s *FriendRequestService) SendFriendRequest(dto dto.SendFriendRequestDto, c *gin.Context) error {
+	fr := &models.FriendRequest{
+		SenderId:   c.GetString("userId"),
+		ReceiverId: dto.ReceiverId,
+	}
 
 	//check already send friend request
 	pending := s.frRepo.HasPendingRequest(fr.SenderId, fr.ReceiverId)
@@ -34,7 +40,7 @@ func (s *FriendRequestService) SendFriendRequest(fr *models.FriendRequest) error
 	}
 
 	//check already friend
-	exist := s.frRepo.AlreadyFriends(fr.SenderId, fr.ReceiverId)
+	exist := s.fRepo.AlreadyFriends(fr.SenderId, fr.ReceiverId)
 
 	if exist {
 		return &common.ConflictError{Message: "Already friend each other!"}
@@ -62,7 +68,13 @@ func (s *FriendRequestService) SendFriendRequest(fr *models.FriendRequest) error
 
 }
 
-func (s *FriendRequestService) DecideFriendRequest(dfr *models.FriendRequest) error {
+func (s *FriendRequestService) DecideFriendRequest(dto dto.DecideFriendRequestDto, c *gin.Context) error {
+
+	dfr := &models.FriendRequest{
+		ID:         dto.FriendRequestId,
+		ReceiverId: c.GetString("userId"),
+		Status:     dto.Status,
+	}
 
 	//check decide status is ACCEPTED
 	//then delete the friend request row
