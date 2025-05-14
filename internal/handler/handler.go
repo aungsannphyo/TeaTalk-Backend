@@ -18,8 +18,8 @@ type HandlerSet struct {
 func InitHandler(db *sql.DB) *HandlerSet {
 	//Repositories
 	repoFactory := store.NewRepositoryFactory(db)
-	serviceFactory := services.NewServiceFactory(repoFactory)
 	//Services
+	serviceFactory := services.NewServiceFactory(repoFactory)
 
 	return &HandlerSet{
 		UserHandler:          NewUserHandler(serviceFactory.UserService()),

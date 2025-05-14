@@ -92,3 +92,21 @@ func (r *conRepo) UpdateGroupName(c *models.Conversation) error {
 
 	return nil
 }
+
+func (r *conRepo) CheckExistsGroup(c *models.Conversation) bool {
+	query := `SELECT COUNT(*)
+	FROM conversations 
+	WHERE id = ? AND is_group = 1
+	`
+
+	row := db.DBInstance.QueryRow(query, c.ID)
+
+	var con int64
+
+	err := row.Scan(&con)
+	if err != nil {
+		return false
+	}
+
+	return con > 0
+}

@@ -19,63 +19,87 @@ type messageService struct {
 func (s *messageService) SendPrivateMessage(dto dto.SendPrivateMessageDto, c *gin.Context) error {
 	senderId := c.GetString("userId")
 
-	//check already friend
-	exist := s.fRepo.AlreadyFriends(senderId, dto.ReceiverId)
+	// Step 1: Ensure sender and receiver are friends
+	if !s.fRepo.AlreadyFriends(senderId, dto.ReceiverId) {
+		return &common.UnAuthorizedError{Message: "You can't send the message right now!"}
+	}
 
-	//if exists
-	if exist {
-		cID := uuid.NewString()
-		//check already have conversation
-		conversations, err := s.cRepo.CheckExistsConversation(senderId, dto.ReceiverId)
-		if err != nil {
+	// Step 2: Check for existing private conversation
+	conversations, err := s.cRepo.CheckExistsConversation(senderId, dto.ReceiverId)
+	if err != nil {
+		return &common.InternalServerError{Message: err.Error()}
+	}
+
+	var conversationID string
+	if len(conversations) != 2 {
+		// Create new conversation
+		conversationID = uuid.NewString()
+		conversation := &models.Conversation{
+			ID:        conversationID,
+			IsGroup:   false,
+			Name:      nil,
+			CreatedBy: nil,
+		}
+
+		if err := s.cRepo.CreateConversation(conversation); err != nil {
 			return &common.InternalServerError{Message: err.Error()}
 		}
 
-		//insert for first time sending message to create conversations
-		if len(conversations) != 2 {
-
-			conversation := &models.Conversation{
-				ID:        cID,
-				IsGroup:   false,
-				Name:      nil,
-				CreatedBy: nil,
-			}
-			err := s.cRepo.CreateConversation(conversation)
-
-			if err != nil {
-				return &common.InternalServerError{Message: err.Error()}
-			}
-
-			//insert into conversation member for both sender and receiver
-			cmSender := &models.ConversationMember{
-				ConversationID: cID,
-				UserID:         senderId,
-			}
-
-			cmReceiver := &models.ConversationMember{
-				ConversationID: cID,
-				UserID:         dto.ReceiverId,
-			}
-
-			// [bidirectional]
-			senderErr := s.cmRepo.CreateConversationMember(cmSender)
-			receiverErr := s.cmRepo.CreateConversationMember(cmReceiver)
-
-			if senderErr != nil || receiverErr != nil {
-				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
-			}
+		// Add both users as members
+		senderMember := &models.ConversationMember{
+			ConversationID: conversationID,
+			UserID:         senderId,
+		}
+		receiverMember := &models.ConversationMember{
+			ConversationID: conversationID,
+			UserID:         dto.ReceiverId,
 		}
 
-		//send the message here if both 2 user are connected as friends
-		m := &models.Message{
-			ConversationID: cID,
-			SenderID:       senderId,
-			Content:        dto.Content,
+		if err := s.cmRepo.CreateConversationMember(senderMember); err != nil {
+			return &common.InternalServerError{Message: "Failed to add sender to conversation"}
 		}
-
-		return s.mRepo.CreateMessage(m)
-
+		if err := s.cmRepo.CreateConversationMember(receiverMember); err != nil {
+			return &common.InternalServerError{Message: "Failed to add receiver to conversation"}
+		}
 	} else {
-		return &common.UnAuthorizedError{Message: "You cant send the message right now!"}
+		// Reuse existing conversation ID
+		conversationID = conversations[0].ID
 	}
+
+	// Step 3: Create and save the message
+	message := &models.Message{
+		ConversationID: conversationID,
+		SenderID:       senderId,
+		Content:        dto.Content,
+	}
+
+	return s.mRepo.CreateMessage(message)
+}
+
+func (s *messageService) SendGroupMessage(dto dto.SendGroupMessageDto, c *gin.Context) error {
+	cID := c.Param("groupId")
+	userId := c.GetString("userId")
+
+	var conversation models.Conversation
+	conversation.ID = cID
+
+	con := s.cRepo.CheckExistsGroup(&conversation)
+
+	var cMember models.ConversationMember
+	cMember.ConversationID = cID
+	cMember.UserID = userId
+
+	member := s.cmRepo.CheckConversationMember(&cMember)
+
+	if !con || !member {
+		return &common.ForbiddenError{Message: "You are not a member of this group."}
+	}
+
+	message := &models.Message{
+		ConversationID: cID,
+		SenderID:       userId,
+		Content:        dto.Content,
+	}
+
+	return s.mRepo.CreateMessage(message)
 }

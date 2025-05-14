@@ -38,3 +38,24 @@ func (h *MessageHandler) SendPrivateMessage(c *gin.Context) {
 
 	common.OkResponse(c, gin.H{"message": "Message send successfully!"})
 }
+
+func (h *MessageHandler) SendGroupMessage(c *gin.Context) {
+	var sgm dto.SendGroupMessageDto
+
+	if err := c.ShouldBindJSON(&sgm); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := dto.ValidateSendGroupMessage(sgm); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := h.mService.SendGroupMessage(sgm, c); err != nil {
+		common.InternalServerResponse(c, err)
+		return
+	}
+
+	common.OkResponse(c, gin.H{"message": "Message send successfully!"})
+}

@@ -6,4 +6,5 @@ type ConversationRepository interface {
 	CreateConversation(c *models.Conversation) error
 	CheckExistsConversation(senderId, receiverId string) ([]models.Conversation, error)
 	UpdateGroupName(c *models.Conversation) error
+	CheckExistsGroup(c *models.Conversation) bool
 }

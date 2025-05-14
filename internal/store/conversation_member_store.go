@@ -31,3 +31,21 @@ func (r *cmRepo) CreateConversationMember(cm *models.ConversationMember) error {
 	}
 	return nil
 }
+
+func (r *cmRepo) CheckConversationMember(cm *models.ConversationMember) bool {
+	query := `SELECT COUNT(*) 
+	FROM conversation_members
+	WHERE conversation_id = ? AND user_id = ?
+	`
+
+	row := db.DBInstance.QueryRow(query, cm.ConversationID, cm.UserID)
+
+	var member int64
+	err := row.Scan(&member)
+
+	if err != nil {
+		return false
+	}
+
+	return member > 0
+}

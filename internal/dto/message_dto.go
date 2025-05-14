@@ -12,6 +12,10 @@ type SendPrivateMessageDto struct {
 	Content    string `json:"content"`
 }
 
+type SendGroupMessageDto struct {
+	Content string `json:"content"`
+}
+
 func ValidateSendMessageRequest(smDto SendPrivateMessageDto) error {
 	var errs v.ValidationErrors
 	if strings.TrimSpace(smDto.ReceiverId) == "" {
@@ -20,6 +24,21 @@ func ValidateSendMessageRequest(smDto SendPrivateMessageDto) error {
 	}
 
 	if strings.TrimSpace(smDto.Content) == "" {
+		log.Print("Check Content")
+		errs = append(errs, v.ValidationError{Field: "Content", Message: "Content is required"})
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
+
+	return nil
+}
+
+func ValidateSendGroupMessage(sgm SendGroupMessageDto) error {
+	var errs v.ValidationErrors
+
+	if strings.TrimSpace(sgm.Content) == "" {
 		log.Print("Check Content")
 		errs = append(errs, v.ValidationError{Field: "Content", Message: "Content is required"})
 	}

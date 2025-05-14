@@ -8,5 +8,6 @@ import (
 
 func RegisterMessageRoute(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
-	rg.POST("/send", h.MessageHandler.SendPrivateMessage)
+	rg.POST("/private", h.MessageHandler.SendPrivateMessage)
+	rg.POST("/groups/:groupId", h.MessageHandler.SendGroupMessage)
 }
