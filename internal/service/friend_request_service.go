@@ -88,7 +88,7 @@ func (s *FriendRequestService) DecideFriendRequest(dto dto.DecideFriendRequestDt
 
 	//current user is equal to receiver
 	if fr.ReceiverId == dfr.ReceiverId {
-		if models.StatusAccepted == dfr.Status {
+		if models.FriendRequestAccepted == dfr.Status {
 
 			err := s.frRepo.DeleteById(fr.ID)
 
@@ -96,13 +96,23 @@ func (s *FriendRequestService) DecideFriendRequest(dto dto.DecideFriendRequestDt
 				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
 			}
 
-			f := &models.Friend{
+			//insert two row [bidirectional]
+			f1 := &models.Friend{
 				UserID:   fr.SenderId,
 				FriendID: fr.ReceiverId,
 			}
 
-			//make friendship
-			s.fRepo.CreateFriendShip(f)
+			f2 := &models.Friend{
+				UserID:   fr.ReceiverId,
+				FriendID: fr.SenderId,
+			}
+			//make friendship [bidirectional]
+			errf1 := s.fRepo.CreateFriendShip(f1)
+			errf2 := s.fRepo.CreateFriendShip(f2)
+
+			if errf1 != nil || errf2 != nil {
+				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+			}
 
 			//make Action to ACCEPTED
 			acceptFrl := &models.FriendRequestLog{

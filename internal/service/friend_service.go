@@ -26,28 +26,6 @@ func NewFriendService(
 	}
 }
 
-func (s *FriendService) CreateFriendShip(f *models.Friend) error {
-	//insert two row [bidirectional]
-	uf := &models.Friend{
-		UserID:   f.UserID,
-		FriendID: f.FriendID,
-	}
-
-	fu := &models.Friend{
-		UserID:   f.FriendID,
-		FriendID: f.UserID,
-	}
-
-	uferr := s.fRepo.CreateFriendShip(uf)
-	fuerr := s.fRepo.CreateFriendShip(fu)
-
-	if uferr != nil || fuerr != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
-	}
-
-	return nil
-}
-
 func (s *FriendService) MakeUnFriend(dto dto.UnFriendDto, c *gin.Context) error {
 
 	f := &models.Friend{

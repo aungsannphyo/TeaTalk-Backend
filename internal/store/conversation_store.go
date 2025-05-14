@@ -76,3 +76,29 @@ func (r *cRepo) CheckExistsConversation(senderId, receiverId string) ([]models.C
 
 	return conversations, nil
 }
+
+func (r *cRepo) UpdateGroupName(c *models.Conversation) error {
+	query := `UPDATE conversations 
+	SET name = ? 
+	WHERE id = ?
+	`
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(c.Name, c.ID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *cRepo) InviteGroup(c *models.Conversation) error {
+	return nil
+}

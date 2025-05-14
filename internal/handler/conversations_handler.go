@@ -37,3 +37,40 @@ func (s *ConversationsHandler) CreateGroup(c *gin.Context) {
 
 	common.CreateResponse(c, "You have been successfully created the group!")
 }
+
+func (s *ConversationsHandler) UpdateGroupName(c *gin.Context) {
+	var ugDto dto.UpdateGroupNameDto
+
+	if err := c.ShouldBindJSON(&ugDto); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := s.cService.UpdateGroupName(ugDto, c); err != nil {
+		common.InternalServerResponse(c, err)
+		return
+	}
+
+	common.OkResponse(c, gin.H{"message": "You have been successfully updated the group name!"})
+}
+
+func (s *ConversationsHandler) InviteGroup(c *gin.Context) {
+	var igdto dto.InviteGroupDto
+
+	if err := c.ShouldBindJSON(&igdto); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := dto.ValidateInviteGroup(igdto); err != nil {
+		common.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := s.cService.InviteGroup(igdto, c); err != nil {
+		common.InternalServerResponse(c, err)
+		return
+	}
+
+	common.OkResponse(c, gin.H{"message": "You have been successfully invited that you selected users!"})
+}

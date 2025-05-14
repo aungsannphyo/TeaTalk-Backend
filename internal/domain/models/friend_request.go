@@ -5,9 +5,9 @@ import "time"
 type FriendRequestStatus string
 
 const (
-	StatusPending  FriendRequestStatus = "PENDING"
-	StatusAccepted FriendRequestStatus = "ACCEPTED"
-	StatusRejected FriendRequestStatus = "REJECTED"
+	FriendRequestPending  FriendRequestStatus = "PENDING"
+	FriendRequestAccepted FriendRequestStatus = "ACCEPTED"
+	FriendRequestRejected FriendRequestStatus = "REJECTED"
 )
 
 type FriendRequest struct {

@@ -36,7 +36,7 @@ func ValidateDecideFriendRequest(dfr DecideFriendRequestDto) error {
 		errs = append(errs, v.ValidationError{Field: "Friend Request Id", Message: "Friend Request Id is required"})
 	}
 
-	if dfr.Status != models.StatusAccepted && dfr.Status != models.StatusRejected {
+	if dfr.Status != models.FriendRequestAccepted && dfr.Status != models.FriendRequestRejected {
 		errs = append(errs, v.ValidationError{
 			Field:   "Status",
 			Message: "Status should be ACCEPTED or REJECTED",

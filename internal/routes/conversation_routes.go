@@ -9,4 +9,6 @@ import (
 func RegisterConversationRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
 	rg.POST("/create-group", h.ConversationsHandler.CreateGroup)
+	rg.PUT("/update-group/:id", h.ConversationsHandler.UpdateGroupName)
+	rg.POST("/:id/invite", h.ConversationsHandler.InviteGroup)
 }

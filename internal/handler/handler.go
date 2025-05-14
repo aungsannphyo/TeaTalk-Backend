@@ -24,6 +24,8 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	messageRepo := store.NewMessageRepo(db)
 	conversationRepo := store.NewConversationRepo(db)
 	conversationMemberRepo := store.NewConversationMemberRepo(db)
+	groupAdminRepo := store.NewGroupAdminRepo(db)
+	groupInviteRepo := store.NewGroupInviteRepo(db)
 
 	//Services
 	userService := service.NewUserService(userRepo)
@@ -42,7 +44,13 @@ func InitHandler(db *sql.DB) *HandlerSet {
 		conversationRepo,
 		conversationMemberRepo,
 	)
-	conversationService := service.NewConversationService(conversationRepo)
+	conversationService := service.NewConversationService(
+		conversationRepo,
+		conversationMemberRepo,
+		groupAdminRepo,
+		groupInviteRepo,
+		friendRepo,
+	)
 
 	return &HandlerSet{
 		UserHandler:          NewUserHandler(userService),

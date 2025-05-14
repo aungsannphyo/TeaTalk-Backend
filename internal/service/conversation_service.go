@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
-	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
+	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
 	"github.com/gin-gonic/gin"
@@ -10,12 +10,26 @@ import (
 )
 
 type ConversationService struct {
-	cRepo repository.ConversationRepository
+	cRepo  r.ConversationRepository
+	cmRepo r.ConversationMemeberRepository
+	gaRepo r.GroupAdminRepository
+	giRepo r.GroupInviteRepository
+	fRepo  r.FriendRepository
 }
 
-func NewConversationService(cRepo repository.ConversationRepository) *ConversationService {
+func NewConversationService(
+	cRepo r.ConversationRepository,
+	cmRepo r.ConversationMemeberRepository,
+	gaRepo r.GroupAdminRepository,
+	giRepo r.GroupInviteRepository,
+	fRepo r.FriendRepository,
+) *ConversationService {
 	return &ConversationService{
-		cRepo: cRepo,
+		cRepo:  cRepo,
+		cmRepo: cmRepo,
+		gaRepo: gaRepo,
+		giRepo: giRepo,
+		fRepo:  fRepo,
 	}
 }
 
@@ -30,8 +44,92 @@ func (s *ConversationService) CreateGroup(dto dto.CreateGroupDto, c *gin.Context
 		CreatedBy: &userId,
 	}
 
+	conversationMember := &models.ConversationMember{
+		ConversationID: cID,
+		UserID:         userId,
+	}
+
+	groupAdmin := &models.GroupAdmin{
+		ConversationID: cID,
+		UserID:         userId,
+	}
+
 	if err := s.cRepo.CreateConversation(conversation); err != nil {
 		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
+
+	if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	if err := s.gaRepo.CreateGroupAdmin(groupAdmin); err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+	return nil
+}
+
+func (s *ConversationService) UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin.Context) error {
+	cID := c.Param("id")
+
+	uc := &models.Conversation{
+		ID:   cID,
+		Name: &dto.Name,
+	}
+
+	if err := s.cRepo.UpdateGroupName(uc); err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+	return nil
+}
+
+func (s *ConversationService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context) error {
+	//need to check current user is group admin or not
+	//check friendship between invitedBy and invited user
+	//insert into group_invites with status = "approved" if admin is invite
+	//insert into group_invites with status = "pending" if not admin is invite
+	//if admin is invite -> Add to conversation_members.
+
+	cID := c.Param("id")
+	userID := c.GetString("userId")
+
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(cID, userID)
+
+	if err != nil {
+		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	for _, iuser := range dto.InvitedUserId {
+		if !s.fRepo.AlreadyFriends(userID, iuser) {
+			continue
+		}
+
+		status := models.GroupPending
+		if isGroupAdmin {
+			status = models.GroupApproved
+		}
+
+		groupInvite := &models.GroupInvite{
+			ConversationID: cID,
+			InvitedBy:      userID,
+			InvitedUserId:  iuser,
+			Status:         status,
+		}
+
+		if err := s.giRepo.CreateGroupInvite(groupInvite); err != nil {
+			return &common.InternalServerError{Message: "Something went wrong, please try again later"}
+		}
+
+		if isGroupAdmin {
+			conversationMember := &models.ConversationMember{
+				ConversationID: cID,
+				UserID:         iuser,
+			}
+			if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
+				return &common.InternalServerError{Message: "Something went wrong, please try again later"}
+			}
+		}
+
+	}
+
 	return nil
 }

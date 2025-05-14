@@ -30,7 +30,7 @@ func (r *friendRequestRepo) SendFriendRequest(fr *models.FriendRequest) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(fr.SenderId, fr.ReceiverId, models.StatusPending)
+	_, err = stmt.Exec(fr.SenderId, fr.ReceiverId, models.FriendRequestPending)
 
 	if err != nil {
 		return err
@@ -53,7 +53,11 @@ func (r *friendRequestRepo) RejectFriendRequest(dfr *models.FriendRequest) error
 	defer stmt.Close()
 	_, err = stmt.Exec(dfr.Status, dfr.ReceiverId, dfr.ID)
 
-	return err
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (r *friendRequestRepo) FindById(id string) (*models.FriendRequest, error) {
