@@ -1,17 +1,17 @@
 package handler
 
 import (
+	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
 type MessageHandler struct {
-	mService *service.MessageService
+	mService s.MessageService
 }
 
-func NewMessageHandler(service *service.MessageService) *MessageHandler {
+func NewMessageHandler(service s.MessageService) *MessageHandler {
 	return &MessageHandler{
 		mService: service,
 	}

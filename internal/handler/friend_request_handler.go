@@ -3,17 +3,17 @@ package handler
 import (
 	"fmt"
 
+	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
 type FriendRequestHandler struct {
-	frService *service.FriendRequestService
+	frService s.FriendRequestService
 }
 
-func NewFriendRequestHandler(service *service.FriendRequestService) *FriendRequestHandler {
+func NewFriendRequestHandler(service s.FriendRequestService) *FriendRequestHandler {
 	return &FriendRequestHandler{
 		frService: service,
 	}

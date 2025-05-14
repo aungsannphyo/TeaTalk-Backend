@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -9,28 +9,14 @@ import (
 	"github.com/google/uuid"
 )
 
-type MessageService struct {
+type messageService struct {
 	mRepo  r.MessageRepository
 	fRepo  r.FriendRepository
 	cRepo  r.ConversationRepository
 	cmRepo r.ConversationMemeberRepository
 }
 
-func NewMessageService(
-	mRepo r.MessageRepository,
-	fRepo r.FriendRepository,
-	cRepo r.ConversationRepository,
-	cmRepo r.ConversationMemeberRepository,
-) *MessageService {
-	return &MessageService{
-		mRepo:  mRepo,
-		fRepo:  fRepo,
-		cRepo:  cRepo,
-		cmRepo: cmRepo,
-	}
-}
-
-func (s *MessageService) SendPrivateMessage(dto dto.SendPrivateMessageDto, c *gin.Context) error {
+func (s *messageService) SendPrivateMessage(dto dto.SendPrivateMessageDto, c *gin.Context) error {
 	senderId := c.GetString("userId")
 
 	//check already friend

@@ -7,17 +7,11 @@ import (
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
-type friendRequestRepo struct {
+type frRepo struct {
 	db *sql.DB
 }
 
-func NewFriendRequestRepo(db *sql.DB) *friendRequestRepo {
-	return &friendRequestRepo{
-		db: db,
-	}
-}
-
-func (r *friendRequestRepo) SendFriendRequest(fr *models.FriendRequest) error {
+func (r *frRepo) SendFriendRequest(fr *models.FriendRequest) error {
 	query := `INSERT INTO 
 	friend_requests (sender_id, receiver_id, status) 
 	VALUES (?, ?, ?)`
@@ -39,7 +33,7 @@ func (r *friendRequestRepo) SendFriendRequest(fr *models.FriendRequest) error {
 	return nil
 }
 
-func (r *friendRequestRepo) RejectFriendRequest(dfr *models.FriendRequest) error {
+func (r *frRepo) RejectFriendRequest(dfr *models.FriendRequest) error {
 	query := `UPDATE friend_requests 
 	SET  status = ? 
 	WHERE receiver_id = ? AND id = ?`
@@ -60,7 +54,7 @@ func (r *friendRequestRepo) RejectFriendRequest(dfr *models.FriendRequest) error
 	return nil
 }
 
-func (r *friendRequestRepo) FindById(id string) (*models.FriendRequest, error) {
+func (r *frRepo) FindById(id string) (*models.FriendRequest, error) {
 	query := "SELECT * FROM friend_requests WHERE id = ?"
 
 	row := db.DBInstance.QueryRow(query, id)
@@ -76,7 +70,7 @@ func (r *friendRequestRepo) FindById(id string) (*models.FriendRequest, error) {
 	return &fr, nil
 }
 
-func (r *friendRequestRepo) DeleteById(id string) error {
+func (r *frRepo) DeleteById(id string) error {
 	query := "DELETE FROM friend_requests WHERE id = ? "
 
 	stmt, err := db.DBInstance.Prepare(query)
@@ -95,7 +89,7 @@ func (r *friendRequestRepo) DeleteById(id string) error {
 	return nil
 }
 
-func (r *friendRequestRepo) HasPendingRequest(senderId, receiverId string) bool {
+func (r *frRepo) HasPendingRequest(senderId, receiverId string) bool {
 
 	query := `SELECT COUNT(*) FROM friend_requests 
 	WHERE ((sender_id = ? AND receiver_id = ?) OR

@@ -7,17 +7,11 @@ import (
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
-type groupInviteRepo struct {
+type giRepo struct {
 	db *sql.DB
 }
 
-func NewGroupInviteRepo(db *sql.DB) *groupInviteRepo {
-	return &groupInviteRepo{
-		db: db,
-	}
-}
-
-func (r *groupInviteRepo) CreateGroupInvite(cgi *models.GroupInvite) error {
+func (r *giRepo) CreateGroupInvite(cgi *models.GroupInvite) error {
 	query := `INSERT INTO 
 	group_invites (conversation_id, invited_by, invited_user_id, status) 
 	VALUES (?, ?, ?, ?)
@@ -40,7 +34,7 @@ func (r *groupInviteRepo) CreateGroupInvite(cgi *models.GroupInvite) error {
 	return nil
 }
 
-func (r *groupInviteRepo) ModerateGroupInvite(mgi *models.GroupInvite) error {
+func (r *giRepo) ModerateGroupInvite(mgi *models.GroupInvite) error {
 	query := "UPDATE group_invites SET status = ? WHERE conversation_id = ? AND invited_user_id = ?"
 
 	stmt, err := db.DBInstance.Prepare(query)

@@ -3,17 +3,17 @@ package handler
 import (
 	"fmt"
 
+	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/internal/service"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
 	"github.com/gin-gonic/gin"
 )
 
 type ConversationsHandler struct {
-	cService *service.ConversationService
+	cService s.ConversationService
 }
 
-func NewConversationHandler(s *service.ConversationService) *ConversationsHandler {
+func NewConversationHandler(s s.ConversationService) *ConversationsHandler {
 	return &ConversationsHandler{
 		cService: s,
 	}

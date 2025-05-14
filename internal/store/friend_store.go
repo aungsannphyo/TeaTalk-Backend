@@ -11,12 +11,6 @@ type friendRepo struct {
 	db *sql.DB
 }
 
-func NewFriendRepo(db *sql.DB) *friendRepo {
-	return &friendRepo{
-		db: db,
-	}
-}
-
 func (r *friendRepo) CreateFriendShip(f *models.Friend) error {
 	query := `INSERT INTO friends (user_id, friend_id ) VALUES (?, ?)`
 

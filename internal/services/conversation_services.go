@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type ConversationService struct {
+type conService struct {
 	cRepo  r.ConversationRepository
 	cmRepo r.ConversationMemeberRepository
 	gaRepo r.GroupAdminRepository
@@ -17,23 +17,7 @@ type ConversationService struct {
 	fRepo  r.FriendRepository
 }
 
-func NewConversationService(
-	cRepo r.ConversationRepository,
-	cmRepo r.ConversationMemeberRepository,
-	gaRepo r.GroupAdminRepository,
-	giRepo r.GroupInviteRepository,
-	fRepo r.FriendRepository,
-) *ConversationService {
-	return &ConversationService{
-		cRepo:  cRepo,
-		cmRepo: cmRepo,
-		gaRepo: gaRepo,
-		giRepo: giRepo,
-		fRepo:  fRepo,
-	}
-}
-
-func (s *ConversationService) CreateGroup(dto dto.CreateGroupDto, c *gin.Context) error {
+func (s *conService) CreateGroup(dto dto.CreateGroupDto, c *gin.Context) error {
 	cID := uuid.NewString()
 	userId := c.GetString("userId")
 
@@ -68,7 +52,7 @@ func (s *ConversationService) CreateGroup(dto dto.CreateGroupDto, c *gin.Context
 	return nil
 }
 
-func (s *ConversationService) UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin.Context) error {
+func (s *conService) UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin.Context) error {
 	cID := c.Param("groupId")
 
 	uc := &models.Conversation{
@@ -82,7 +66,7 @@ func (s *ConversationService) UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin
 	return nil
 }
 
-func (s *ConversationService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context) error {
+func (s *conService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context) error {
 	//need to check current user is group admin or not
 	//check friendship between invitedBy and invited user
 	//insert into group_invites with status = "approved" if admin is invite
@@ -134,7 +118,7 @@ func (s *ConversationService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context
 	return nil
 }
 
-func (s *ConversationService) ModerateGroupInvite(dto dto.ModerateGroupInviteDto, c *gin.Context) error {
+func (s *conService) ModerateGroupInvite(dto dto.ModerateGroupInviteDto, c *gin.Context) error {
 	cID := c.Param("groupId")
 	inviteId := c.Param("inviteUserId")
 	userID := c.GetString("userId")
@@ -171,7 +155,7 @@ func (s *ConversationService) ModerateGroupInvite(dto dto.ModerateGroupInviteDto
 	return nil
 }
 
-func (s *ConversationService) AssignAdmin(dto dto.AssignAdminDto, c *gin.Context) error {
+func (s *conService) AssignAdmin(dto dto.AssignAdminDto, c *gin.Context) error {
 	cID := c.Param("groupId")
 	userID := c.GetString("userId")
 

@@ -11,12 +11,6 @@ type userRepo struct {
 	db *sql.DB
 }
 
-func NewUserRepo(db *sql.DB) *userRepo {
-	return &userRepo{
-		db: db,
-	}
-}
-
 func (r *userRepo) Register(u *models.User) error {
 
 	query := "INSERT INTO users (username, email, password) VALUES (?, ?, ?)"

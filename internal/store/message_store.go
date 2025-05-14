@@ -7,17 +7,11 @@ import (
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
-type mRepo struct {
+type messageRepo struct {
 	db *sql.DB
 }
 
-func NewMessageRepo(db *sql.DB) *mRepo {
-	return &mRepo{
-		db: db,
-	}
-}
-
-func (r *mRepo) CreateMessage(m *models.Message) error {
+func (r *messageRepo) CreateMessage(m *models.Message) error {
 	query := `INSERT INTO messages (conversation_id, sender_id, content)
 	VALUES (?, ?, ?)
 	`

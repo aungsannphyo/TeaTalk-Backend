@@ -7,17 +7,11 @@ import (
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
-type groupAdminRepo struct {
+type gaRepo struct {
 	db *sql.DB
 }
 
-func NewGroupAdminRepo(db *sql.DB) *groupAdminRepo {
-	return &groupAdminRepo{
-		db: db,
-	}
-}
-
-func (r *groupAdminRepo) CreateGroupAdmin(cga *models.GroupAdmin) error {
+func (r *gaRepo) CreateGroupAdmin(cga *models.GroupAdmin) error {
 	query := "INSERT INTO group_admins (conversation_id, user_id) VALUES (? , ?)"
 
 	stmt, err := db.DBInstance.Prepare(query)
@@ -37,7 +31,7 @@ func (r *groupAdminRepo) CreateGroupAdmin(cga *models.GroupAdmin) error {
 	return nil
 }
 
-func (r *groupAdminRepo) IsGroupAdmin(cId, userId string) (bool, error) {
+func (r *gaRepo) IsGroupAdmin(cId, userId string) (bool, error) {
 	query := `SELECT COUNT(*) 
 	FROM group_admins 
 	WHERE conversation_id = ? AND user_id = ? 

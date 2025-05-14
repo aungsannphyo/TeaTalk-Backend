@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -8,25 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type FriendService struct {
+type fService struct {
 	fRepo   repository.FriendRepository
 	frRepo  repository.FriendRequestRepository
 	frlRepo repository.FriendRequestLogRepository
 }
 
-func NewFriendService(
-	fRepo repository.FriendRepository,
-	frRepo repository.FriendRequestRepository,
-	frlRepo repository.FriendRequestLogRepository,
-) *FriendService {
-	return &FriendService{
-		fRepo:   fRepo,
-		frRepo:  frRepo,
-		frlRepo: frlRepo,
-	}
-}
-
-func (s *FriendService) MakeUnFriend(dto dto.UnFriendDto, c *gin.Context) error {
+func (s *fService) MakeUnFriend(dto dto.UnFriendDto, c *gin.Context) error {
 
 	f := &models.Friend{
 		UserID:   c.GetString("userId"),

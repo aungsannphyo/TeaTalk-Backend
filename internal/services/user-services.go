@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -8,17 +8,11 @@ import (
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
 )
 
-type UserService struct {
+type userServices struct {
 	userRepo repository.UserRepository
 }
 
-func NewUserService(userRepo repository.UserRepository) *UserService {
-	return &UserService{
-		userRepo: userRepo,
-	}
-}
-
-func (s *UserService) Register(u *dto.RegisterRequestDto) error {
+func (s *userServices) Register(u *dto.RegisterRequestDto) error {
 	hashedPassword, err := utils.HashPassword(u.Password)
 
 	if err != nil {
@@ -32,7 +26,7 @@ func (s *UserService) Register(u *dto.RegisterRequestDto) error {
 	return s.userRepo.Register(user)
 }
 
-func (s *UserService) Login(u *dto.LoginRequestDto) (*models.User, string, error) {
+func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, error) {
 	user := &models.User{
 		Email:    u.Email,
 		Password: u.Password,
@@ -59,7 +53,7 @@ func (s *UserService) Login(u *dto.LoginRequestDto) (*models.User, string, error
 	return foundUser, token, nil
 }
 
-func (s *UserService) GetUser(userId string) (*models.User, error) {
+func (s *userServices) GetUser(userId string) (*models.User, error) {
 	user, err := s.userRepo.GetUser(userId)
 
 	if err != nil {

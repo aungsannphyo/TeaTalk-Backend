@@ -11,12 +11,6 @@ type frlRepo struct {
 	db *sql.DB
 }
 
-func NewFriendRequestLogRepo(db *sql.DB) *frlRepo {
-	return &frlRepo{
-		db: db,
-	}
-}
-
 func (r *frlRepo) CreateFriendRequestLog(frl *models.FriendRequestLog) error {
 	query := `INSERT INTO 
 	friend_request_logs (sender_id, receiver_id, action, performed_by)

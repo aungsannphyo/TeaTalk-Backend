@@ -7,17 +7,11 @@ import (
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
-type cRepo struct {
+type conRepo struct {
 	db *sql.DB
 }
 
-func NewConversationRepo(db *sql.DB) *cRepo {
-	return &cRepo{
-		db: db,
-	}
-}
-
-func (r *cRepo) CreateConversation(c *models.Conversation) error {
+func (r *conRepo) CreateConversation(c *models.Conversation) error {
 	query := `INSERT INTO 
 	conversations (id,is_group, name, created_by)
 	VALUES (? ,?, ?, ?)
@@ -40,7 +34,7 @@ func (r *cRepo) CreateConversation(c *models.Conversation) error {
 	return nil
 }
 
-func (r *cRepo) CheckExistsConversation(senderId, receiverId string) ([]models.Conversation, error) {
+func (r *conRepo) CheckExistsConversation(senderId, receiverId string) ([]models.Conversation, error) {
 	query := ` SELECT * FROM conversations c
 	JOIN conversation_members m1 ON c.id = m1.conversation_id 
 	JOIN conversation_members m2 ON c.id = m2.conversation_id 
@@ -77,7 +71,7 @@ func (r *cRepo) CheckExistsConversation(senderId, receiverId string) ([]models.C
 	return conversations, nil
 }
 
-func (r *cRepo) UpdateGroupName(c *models.Conversation) error {
+func (r *conRepo) UpdateGroupName(c *models.Conversation) error {
 	query := `UPDATE conversations 
 	SET name = ? 
 	WHERE id = ?

@@ -1,4 +1,4 @@
-package service
+package services
 
 import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -8,25 +8,13 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type FriendRequestService struct {
+type frService struct {
 	frRepo  repository.FriendRequestRepository
 	fRepo   repository.FriendRepository
 	frlRepo repository.FriendRequestLogRepository
 }
 
-func NewFriendRequestService(
-	frRepo repository.FriendRequestRepository,
-	fRepo repository.FriendRepository,
-	frlRepo repository.FriendRequestLogRepository,
-) *FriendRequestService {
-	return &FriendRequestService{
-		frRepo:  frRepo,
-		fRepo:   fRepo,
-		frlRepo: frlRepo,
-	}
-}
-
-func (s *FriendRequestService) SendFriendRequest(dto dto.SendFriendRequestDto, c *gin.Context) error {
+func (s *frService) SendFriendRequest(dto dto.SendFriendRequestDto, c *gin.Context) error {
 	fr := &models.FriendRequest{
 		SenderId:   c.GetString("userId"),
 		ReceiverId: dto.ReceiverId,
@@ -68,7 +56,7 @@ func (s *FriendRequestService) SendFriendRequest(dto dto.SendFriendRequestDto, c
 
 }
 
-func (s *FriendRequestService) DecideFriendRequest(dto dto.DecideFriendRequestDto, c *gin.Context) error {
+func (s *frService) DecideFriendRequest(dto dto.DecideFriendRequestDto, c *gin.Context) error {
 
 	dfr := &models.FriendRequest{
 		ID:         dto.FriendRequestId,

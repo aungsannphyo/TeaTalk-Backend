@@ -3,7 +3,7 @@ package handler
 import (
 	"database/sql"
 
-	"github.com/aungsannphyo/ywartalk/internal/service"
+	"github.com/aungsannphyo/ywartalk/internal/services"
 	"github.com/aungsannphyo/ywartalk/internal/store"
 )
 
@@ -17,46 +17,15 @@ type HandlerSet struct {
 
 func InitHandler(db *sql.DB) *HandlerSet {
 	//Repositories
-	userRepo := store.NewUserRepo(db)
-	friendRequestRepo := store.NewFriendRequestRepo(db)
-	friendRepo := store.NewFriendRepo(db)
-	friendRequestLogRepo := store.NewFriendRequestLogRepo(db)
-	messageRepo := store.NewMessageRepo(db)
-	conversationRepo := store.NewConversationRepo(db)
-	conversationMemberRepo := store.NewConversationMemberRepo(db)
-	groupAdminRepo := store.NewGroupAdminRepo(db)
-	groupInviteRepo := store.NewGroupInviteRepo(db)
-
+	repoFactory := store.NewRepositoryFactory(db)
+	serviceFactory := services.NewServiceFactory(repoFactory)
 	//Services
-	userService := service.NewUserService(userRepo)
-	friendRequestService := service.NewFriendRequestService(
-		friendRequestRepo,
-		friendRepo,
-		friendRequestLogRepo)
-	friendService := service.NewFriendService(
-		friendRepo,
-		friendRequestRepo,
-		friendRequestLogRepo,
-	)
-	messageService := service.NewMessageService(
-		messageRepo,
-		friendRepo,
-		conversationRepo,
-		conversationMemberRepo,
-	)
-	conversationService := service.NewConversationService(
-		conversationRepo,
-		conversationMemberRepo,
-		groupAdminRepo,
-		groupInviteRepo,
-		friendRepo,
-	)
 
 	return &HandlerSet{
-		UserHandler:          NewUserHandler(userService),
-		FriendRequestHandler: NewFriendRequestHandler(friendRequestService),
-		FriendHandler:        NewFriendHandler(friendService),
-		MessageHandler:       NewMessageHandler(messageService),
-		ConversationsHandler: NewConversationHandler(conversationService),
+		UserHandler:          NewUserHandler(serviceFactory.UserService()),
+		FriendRequestHandler: NewFriendRequestHandler(serviceFactory.FriendRequestService()),
+		FriendHandler:        NewFriendHandler(serviceFactory.FriendService()),
+		MessageHandler:       NewMessageHandler(serviceFactory.MessageService()),
+		ConversationsHandler: NewConversationHandler(serviceFactory.ConversationService()),
 	}
 }
