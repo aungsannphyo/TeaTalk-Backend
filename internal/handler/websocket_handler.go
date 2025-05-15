@@ -18,9 +18,8 @@ func NewWebSocketHandler(hub *websocket.Hub) *WebSocketHandler {
 func (h *WebSocketHandler) WebSocketHandler(c *gin.Context) {
 	userID, exists := c.Get("userId")
 	if !exists {
-		c.JSON(401, gin.H{"error": ""})
+		c.JSON(401, gin.H{"error": "unauthorized"})
 		return
 	}
-	// Upgrade HTTP to WS connection
 	websocket.HandleWebSocket(c.Writer, c.Request, userID.(string), h.hub)
 }
