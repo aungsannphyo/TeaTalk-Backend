@@ -4,7 +4,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 )
 
@@ -32,7 +32,7 @@ func (s *fService) MakeUnFriend(dto dto.UnFriendDto, c *gin.Context) error {
 	err := s.frlRepo.CreateFriendRequestLog(frl)
 
 	if err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	return s.fRepo.MakeUnFriend(f)

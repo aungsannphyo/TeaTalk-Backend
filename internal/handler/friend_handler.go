@@ -4,6 +4,7 @@ import (
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,17 +22,17 @@ func (h *FriendHandler) MakeUnFriend(c *gin.Context) {
 	var mufDto dto.UnFriendDto
 
 	if err := c.ShouldBindJSON(&mufDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateUnFriendRequest(mufDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := h.fService.MakeUnFriend(mufDto, c); err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 		return
 	}
 

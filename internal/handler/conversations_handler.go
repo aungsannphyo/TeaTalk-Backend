@@ -6,6 +6,7 @@ import (
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,17 +24,17 @@ func (s *ConversationsHandler) CreateGroup(c *gin.Context) {
 	var cgDto dto.CreateGroupDto
 
 	if err := c.ShouldBindJSON(&cgDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateCreateGroup(cgDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := s.cService.CreateGroup(c, cgDto); err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 		return
 	}
 
@@ -44,12 +45,12 @@ func (s *ConversationsHandler) UpdateGroupName(c *gin.Context) {
 	var ugDto dto.UpdateGroupNameDto
 
 	if err := c.ShouldBindJSON(&ugDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := s.cService.UpdateGroupName(c, ugDto); err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 		return
 	}
 
@@ -60,17 +61,17 @@ func (s *ConversationsHandler) InviteGroup(c *gin.Context) {
 	var igdto dto.InviteGroupDto
 
 	if err := c.ShouldBindJSON(&igdto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateInviteGroup(igdto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := s.cService.InviteGroup(c, igdto); err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 		return
 	}
 
@@ -81,17 +82,17 @@ func (s *ConversationsHandler) ModerateGroupInvite(c *gin.Context) {
 	var mgi dto.ModerateGroupInviteDto
 
 	if err := c.ShouldBindJSON(&mgi); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateModerateGroupInvite(mgi); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := s.cService.ModerateGroupInvite(c, mgi); err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 		return
 	}
 
@@ -104,17 +105,17 @@ func (s *ConversationsHandler) AssignAdmin(c *gin.Context) {
 	var aa dto.AssignAdminDto
 
 	if err := c.ShouldBindJSON(&aa); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateAssignAdmin(aa); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := s.cService.AssignAdmin(c, aa); err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 		return
 	}
 

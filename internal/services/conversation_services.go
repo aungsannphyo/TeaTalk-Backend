@@ -4,7 +4,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -39,15 +39,15 @@ func (s *conService) CreateGroup(c *gin.Context, dto dto.CreateGroupDto) error {
 	}
 
 	if err := s.cRepo.CreateConversation(conversation); err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	if err := s.gaRepo.CreateGroupAdmin(groupAdmin); err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 	return nil
 }
@@ -61,7 +61,7 @@ func (s *conService) UpdateGroupName(c *gin.Context, dto dto.UpdateGroupNameDto)
 	}
 
 	if err := s.cRepo.UpdateGroupName(uc); err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 	return nil
 }
@@ -79,7 +79,7 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
 
 	if err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	for _, iuser := range dto.InvitedUserId {
@@ -100,7 +100,7 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 		}
 
 		if err := s.giRepo.CreateGroupInvite(groupInvite); err != nil {
-			return &common.NotFoundError{Message: err.Error()}
+			return &e.NotFoundError{Message: err.Error()}
 		}
 
 		if isGroupAdmin {
@@ -109,7 +109,7 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 				UserID:         iuser,
 			}
 			if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
-				return &common.InternalServerError{Message: err.Error()}
+				return &e.InternalServerError{Message: err.Error()}
 			}
 		}
 
@@ -126,11 +126,11 @@ func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupIn
 	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
 
 	if err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	if !isGroupAdmin {
-		return &common.ForbiddenError{Message: "You are not an admin of this group"}
+		return &e.ForbiddenError{Message: "You are not an admin of this group"}
 	}
 
 	mgi := &models.GroupInvite{
@@ -140,7 +140,7 @@ func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupIn
 	}
 
 	if err := s.giRepo.ModerateGroupInvite(mgi); err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	conversationMember := &models.ConversationMember{
@@ -149,7 +149,7 @@ func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupIn
 	}
 
 	if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, please try again later"}
 	}
 
 	return nil
@@ -162,11 +162,11 @@ func (s *conService) AssignAdmin(c *gin.Context, dto dto.AssignAdminDto) error {
 	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
 
 	if err != nil {
-		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	if !isGroupAdmin {
-		return &common.ForbiddenError{Message: "You are not an admin of this group"}
+		return &e.ForbiddenError{Message: "You are not an admin of this group"}
 	}
 
 	for _, iuser := range dto.InvitedUserId {
@@ -176,7 +176,7 @@ func (s *conService) AssignAdmin(c *gin.Context, dto dto.AssignAdminDto) error {
 		}
 
 		if err := s.gaRepo.CreateGroupAdmin(groupAdmin); err != nil {
-			return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+			return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 		}
 	}
 

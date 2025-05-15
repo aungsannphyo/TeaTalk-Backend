@@ -6,6 +6,7 @@ import (
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 )
 
@@ -23,17 +24,17 @@ func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
 	var frDto dto.SendFriendRequestDto
 
 	if err := c.ShouldBindJSON(&frDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateSendFriendRequest(frDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := h.frService.SendFriendRequest(c, frDto); err != nil {
-		common.ConfictResponse(c, err)
+		e.ConfictResponse(c, err)
 		return
 	}
 
@@ -44,28 +45,28 @@ func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
 	var dfrDto dto.DecideFriendRequestDto
 
 	if err := c.ShouldBindJSON(&dfrDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateDecideFriendRequest(dfrDto); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := h.frService.DecideFriendRequest(c, dfrDto); err != nil {
-		if _, ok := err.(*common.ForbiddenError); ok {
-			common.ConfictResponse(c, err)
+		if _, ok := err.(*e.ForbiddenError); ok {
+			e.ConfictResponse(c, err)
 			return
 		}
 
-		if _, ok := err.(*common.InternalServerError); ok {
-			common.InternalServerResponse(c, err)
+		if _, ok := err.(*e.InternalServerError); ok {
+			e.InternalServerResponse(c, err)
 			return
 		}
 
-		if _, ok := err.(*common.NotFoundError); ok {
-			common.NotFoundResponse(c, err)
+		if _, ok := err.(*e.NotFoundError); ok {
+			e.NotFoundResponse(c, err)
 			return
 		}
 

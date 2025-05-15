@@ -4,7 +4,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
@@ -21,13 +21,13 @@ func (s *messageService) SendPrivateMessage(c *gin.Context, dto dto.SendPrivateM
 
 	// Step 1: Ensure sender and receiver are friends
 	if !s.fRepo.AlreadyFriends(c.Request.Context(), senderId, dto.ReceiverId) {
-		return &common.UnAuthorizedError{Message: "You can't send the message right now!"}
+		return &e.UnAuthorizedError{Message: "You can't send the message right now!"}
 	}
 
 	// Step 2: Check for existing private conversation
 	conversations, err := s.cRepo.CheckExistsConversation(c.Request.Context(), senderId, dto.ReceiverId)
 	if err != nil {
-		return &common.InternalServerError{Message: err.Error()}
+		return &e.InternalServerError{Message: err.Error()}
 	}
 
 	var conversationID string
@@ -42,7 +42,7 @@ func (s *messageService) SendPrivateMessage(c *gin.Context, dto dto.SendPrivateM
 		}
 
 		if err := s.cRepo.CreateConversation(conversation); err != nil {
-			return &common.InternalServerError{Message: err.Error()}
+			return &e.InternalServerError{Message: err.Error()}
 		}
 
 		// Add both users as members
@@ -56,10 +56,10 @@ func (s *messageService) SendPrivateMessage(c *gin.Context, dto dto.SendPrivateM
 		}
 
 		if err := s.cmRepo.CreateConversationMember(senderMember); err != nil {
-			return &common.InternalServerError{Message: "Failed to add sender to conversation"}
+			return &e.InternalServerError{Message: "Failed to add sender to conversation"}
 		}
 		if err := s.cmRepo.CreateConversationMember(receiverMember); err != nil {
-			return &common.InternalServerError{Message: "Failed to add receiver to conversation"}
+			return &e.InternalServerError{Message: "Failed to add receiver to conversation"}
 		}
 	} else {
 		// Reuse existing conversation ID
@@ -92,7 +92,7 @@ func (s *messageService) SendGroupMessage(c *gin.Context, dto dto.SendGroupMessa
 	member := s.cmRepo.CheckConversationMember(c.Request.Context(), &cMember)
 
 	if !con || !member {
-		return &common.ForbiddenError{Message: "You are not a member of this group."}
+		return &e.ForbiddenError{Message: "You are not a member of this group."}
 	}
 
 	message := &models.Message{

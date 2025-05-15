@@ -6,6 +6,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,16 +23,16 @@ func NewUserHandler(service s.UserService) *UserHandler {
 func (h *UserHandler) RegisterHandler(c *gin.Context) {
 	var user dto.RegisterRequestDto
 	if err := c.ShouldBindJSON(&user); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 	if err := dto.ValidateRegisterUser(user); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := h.userService.Register(&user); err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 		return
 	}
 
@@ -43,19 +44,19 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 	var u dto.LoginRequestDto
 
 	if err := c.ShouldBindJSON(&u); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	if err := dto.ValidateLoginUser(u); err != nil {
-		common.BadRequestResponse(c, err)
+		e.BadRequestResponse(c, err)
 		return
 	}
 
 	foundUser, token, err := h.userService.Login(&u)
 
 	if err != nil {
-		common.UnauthorizedResponse(c, err)
+		e.UnauthorizedResponse(c, err)
 		return
 	}
 
@@ -69,7 +70,7 @@ func (h *UserHandler) GetUserById(c *gin.Context) {
 
 	user, err := h.userService.GetUserById(c, userId)
 	if err != nil {
-		common.NotFoundResponse(c, err)
+		e.NotFoundResponse(c, err)
 		return
 	}
 
@@ -84,7 +85,7 @@ func (h *UserHandler) GetGroupUsers(c *gin.Context) {
 	groupUsers, err := h.userService.GetGroupUsers(c, groupId)
 
 	if err != nil {
-		common.InternalServerResponse(c, err)
+		e.InternalServerResponse(c, err)
 	}
 
 	var users []response.UserResponse

@@ -4,7 +4,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
+	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,14 +24,14 @@ func (s *frService) SendFriendRequest(c *gin.Context, dto dto.SendFriendRequestD
 	pending := s.frRepo.HasPendingRequest(c.Request.Context(), fr.SenderId, fr.ReceiverId)
 
 	if pending {
-		return &common.ConflictError{Message: "Friend request already send!"}
+		return &e.ConflictError{Message: "Friend request already send!"}
 	}
 
 	//check already friend
 	exist := s.fRepo.AlreadyFriends(c.Request.Context(), fr.SenderId, fr.ReceiverId)
 
 	if exist {
-		return &common.ConflictError{Message: "Already friend each other!"}
+		return &e.ConflictError{Message: "Already friend each other!"}
 	}
 
 	if !pending && !exist {
@@ -46,7 +46,7 @@ func (s *frService) SendFriendRequest(c *gin.Context, dto dto.SendFriendRequestD
 		//default action SENT
 		err := s.frlRepo.CreateFriendRequestLog(frl)
 		if err != nil {
-			return &common.InternalServerError{Message: "Something went wrong. Please try agian laster!"}
+			return &e.InternalServerError{Message: "Something went wrong. Please try agian laster!"}
 		}
 		//make friend request
 		return s.frRepo.SendFriendRequest(fr)
@@ -71,7 +71,7 @@ func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequ
 	fr, err := s.frRepo.FindById(c.Request.Context(), dfr.ID)
 
 	if err != nil {
-		return &common.NotFoundError{Message: "Friend Request Not Found!"}
+		return &e.NotFoundError{Message: "Friend Request Not Found!"}
 	}
 
 	//current user is equal to receiver
@@ -81,7 +81,7 @@ func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequ
 			err := s.frRepo.DeleteById(fr.ID)
 
 			if err != nil {
-				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 			}
 
 			//insert two row [bidirectional]
@@ -99,7 +99,7 @@ func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequ
 			errf2 := s.fRepo.CreateFriendShip(f2)
 
 			if errf1 != nil || errf2 != nil {
-				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 			}
 
 			//make Action to ACCEPTED
@@ -113,7 +113,7 @@ func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequ
 			err = s.frlRepo.CreateFriendRequestLog(acceptFrl)
 
 			if err != nil {
-				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 			}
 		} else {
 			//Reject Case
@@ -128,13 +128,13 @@ func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequ
 			err := s.frlRepo.CreateFriendRequestLog(rejectFrl)
 
 			if err != nil {
-				return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
+				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 			}
 
 			return s.frRepo.RejectFriendRequest(dfr)
 		}
 	} else {
-		return &common.ForbiddenError{Message: "You are not allowed to do this action!"}
+		return &e.ForbiddenError{Message: "You are not allowed to do this action!"}
 	}
 	return nil
 }

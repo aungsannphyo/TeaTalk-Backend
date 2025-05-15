@@ -1,4 +1,4 @@
-package common
+package error
 
 type ForbiddenError struct {
 	Message string
