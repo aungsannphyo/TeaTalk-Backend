@@ -32,7 +32,7 @@ func (s *ConversationsHandler) CreateGroup(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.CreateGroup(cgDto, c); err != nil {
+	if err := s.cService.CreateGroup(c, cgDto); err != nil {
 		common.InternalServerResponse(c, err)
 		return
 	}
@@ -48,7 +48,7 @@ func (s *ConversationsHandler) UpdateGroupName(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.UpdateGroupName(ugDto, c); err != nil {
+	if err := s.cService.UpdateGroupName(c, ugDto); err != nil {
 		common.InternalServerResponse(c, err)
 		return
 	}
@@ -69,7 +69,7 @@ func (s *ConversationsHandler) InviteGroup(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.InviteGroup(igdto, c); err != nil {
+	if err := s.cService.InviteGroup(c, igdto); err != nil {
 		common.InternalServerResponse(c, err)
 		return
 	}
@@ -90,7 +90,7 @@ func (s *ConversationsHandler) ModerateGroupInvite(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.ModerateGroupInvite(mgi, c); err != nil {
+	if err := s.cService.ModerateGroupInvite(c, mgi); err != nil {
 		common.InternalServerResponse(c, err)
 		return
 	}
@@ -113,7 +113,7 @@ func (s *ConversationsHandler) AssignAdmin(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.AssignAdmin(aa, c); err != nil {
+	if err := s.cService.AssignAdmin(c, aa); err != nil {
 		common.InternalServerResponse(c, err)
 		return
 	}

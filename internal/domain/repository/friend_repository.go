@@ -1,9 +1,13 @@
 package repository
 
-import "github.com/aungsannphyo/ywartalk/internal/domain/models"
+import (
+	"context"
+
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+)
 
 type FriendRepository interface {
 	CreateFriendShip(friend *models.Friend) error
 	MakeUnFriend(FriendRepository *models.Friend) error
-	AlreadyFriends(senderId, receiverId string) bool
+	AlreadyFriends(ctx context.Context, senderId, receiverId string) bool
 }

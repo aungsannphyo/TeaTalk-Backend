@@ -6,6 +6,6 @@ import (
 )
 
 type FriendRequestService interface {
-	SendFriendRequest(dto dto.SendFriendRequestDto, c *gin.Context) error
-	DecideFriendRequest(dto dto.DecideFriendRequestDto, c *gin.Context) error
+	SendFriendRequest(c *gin.Context, dto dto.SendFriendRequestDto) error
+	DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequestDto) error
 }

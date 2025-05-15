@@ -16,16 +16,16 @@ type messageService struct {
 	cmRepo r.ConversationMemeberRepository
 }
 
-func (s *messageService) SendPrivateMessage(dto dto.SendPrivateMessageDto, c *gin.Context) error {
+func (s *messageService) SendPrivateMessage(c *gin.Context, dto dto.SendPrivateMessageDto) error {
 	senderId := c.GetString("userId")
 
 	// Step 1: Ensure sender and receiver are friends
-	if !s.fRepo.AlreadyFriends(senderId, dto.ReceiverId) {
+	if !s.fRepo.AlreadyFriends(c.Request.Context(), senderId, dto.ReceiverId) {
 		return &common.UnAuthorizedError{Message: "You can't send the message right now!"}
 	}
 
 	// Step 2: Check for existing private conversation
-	conversations, err := s.cRepo.CheckExistsConversation(senderId, dto.ReceiverId)
+	conversations, err := s.cRepo.CheckExistsConversation(c.Request.Context(), senderId, dto.ReceiverId)
 	if err != nil {
 		return &common.InternalServerError{Message: err.Error()}
 	}
@@ -76,20 +76,20 @@ func (s *messageService) SendPrivateMessage(dto dto.SendPrivateMessageDto, c *gi
 	return s.mRepo.CreateMessage(message)
 }
 
-func (s *messageService) SendGroupMessage(dto dto.SendGroupMessageDto, c *gin.Context) error {
+func (s *messageService) SendGroupMessage(c *gin.Context, dto dto.SendGroupMessageDto) error {
 	cID := c.Param("groupId")
 	userId := c.GetString("userId")
 
 	var conversation models.Conversation
 	conversation.ID = cID
 
-	con := s.cRepo.CheckExistsGroup(&conversation)
+	con := s.cRepo.CheckExistsGroup(c.Request.Context(), &conversation)
 
 	var cMember models.ConversationMember
 	cMember.ConversationID = cID
 	cMember.UserID = userId
 
-	member := s.cmRepo.CheckConversationMember(&cMember)
+	member := s.cmRepo.CheckConversationMember(c.Request.Context(), &cMember)
 
 	if !con || !member {
 		return &common.ForbiddenError{Message: "You are not a member of this group."}

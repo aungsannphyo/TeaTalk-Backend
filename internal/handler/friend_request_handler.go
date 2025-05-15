@@ -32,7 +32,7 @@ func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
 		return
 	}
 
-	if err := h.frService.SendFriendRequest(frDto, c); err != nil {
+	if err := h.frService.SendFriendRequest(c, frDto); err != nil {
 		common.ConfictResponse(c, err)
 		return
 	}
@@ -53,7 +53,7 @@ func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
 		return
 	}
 
-	if err := h.frService.DecideFriendRequest(dfrDto, c); err != nil {
+	if err := h.frService.DecideFriendRequest(c, dfrDto); err != nil {
 		if _, ok := err.(*common.ForbiddenError); ok {
 			common.ConfictResponse(c, err)
 			return

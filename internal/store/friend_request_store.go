@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -54,10 +55,10 @@ func (r *frRepo) RejectFriendRequest(dfr *models.FriendRequest) error {
 	return nil
 }
 
-func (r *frRepo) FindById(id string) (*models.FriendRequest, error) {
+func (r *frRepo) FindById(ctx context.Context, id string) (*models.FriendRequest, error) {
 	query := "SELECT * FROM friend_requests WHERE id = ?"
 
-	row := db.DBInstance.QueryRow(query, id)
+	row := db.DBInstance.QueryRowContext(ctx, query, id)
 
 	var fr models.FriendRequest
 
@@ -89,14 +90,14 @@ func (r *frRepo) DeleteById(id string) error {
 	return nil
 }
 
-func (r *frRepo) HasPendingRequest(senderId, receiverId string) bool {
+func (r *frRepo) HasPendingRequest(ctx context.Context, senderId, receiverId string) bool {
 
 	query := `SELECT COUNT(*) FROM friend_requests 
 	WHERE ((sender_id = ? AND receiver_id = ?) OR
 		   (receiver_id = ? AND sender_id = ?))
 	AND status = "PENDING"`
 
-	row := db.DBInstance.QueryRow(query, senderId, receiverId, senderId, receiverId)
+	row := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId, senderId, receiverId)
 
 	var pending int64
 

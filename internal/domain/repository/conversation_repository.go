@@ -1,10 +1,14 @@
 package repository
 
-import "github.com/aungsannphyo/ywartalk/internal/domain/models"
+import (
+	"context"
+
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+)
 
 type ConversationRepository interface {
 	CreateConversation(c *models.Conversation) error
-	CheckExistsConversation(senderId, receiverId string) ([]models.Conversation, error)
+	CheckExistsConversation(ctx context.Context, senderId, receiverId string) ([]models.Conversation, error)
 	UpdateGroupName(c *models.Conversation) error
-	CheckExistsGroup(c *models.Conversation) bool
+	CheckExistsGroup(ctx context.Context, c *models.Conversation) bool
 }

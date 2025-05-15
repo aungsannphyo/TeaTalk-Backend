@@ -6,9 +6,9 @@ import (
 )
 
 type ConversationService interface {
-	CreateGroup(dto dto.CreateGroupDto, c *gin.Context) error
-	UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin.Context) error
-	InviteGroup(dto dto.InviteGroupDto, c *gin.Context) error
-	ModerateGroupInvite(dto dto.ModerateGroupInviteDto, c *gin.Context) error
-	AssignAdmin(dto dto.AssignAdminDto, c *gin.Context) error
+	CreateGroup(c *gin.Context, dto dto.CreateGroupDto) error
+	UpdateGroupName(c *gin.Context, dto dto.UpdateGroupNameDto) error
+	InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error
+	ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupInviteDto) error
+	AssignAdmin(c *gin.Context, dto dto.AssignAdminDto) error
 }

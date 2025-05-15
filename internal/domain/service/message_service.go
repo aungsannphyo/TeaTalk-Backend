@@ -6,6 +6,6 @@ import (
 )
 
 type MessageService interface {
-	SendPrivateMessage(dto dto.SendPrivateMessageDto, c *gin.Context) error
-	SendGroupMessage(dto dto.SendGroupMessageDto, c *gin.Context) error
+	SendPrivateMessage(c *gin.Context, dto dto.SendPrivateMessageDto) error
+	SendGroupMessage(c *gin.Context, dto dto.SendGroupMessageDto) error
 }

@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -34,7 +35,7 @@ func (r *conRepo) CreateConversation(c *models.Conversation) error {
 	return nil
 }
 
-func (r *conRepo) CheckExistsConversation(senderId, receiverId string) ([]models.Conversation, error) {
+func (r *conRepo) CheckExistsConversation(ctx context.Context, senderId, receiverId string) ([]models.Conversation, error) {
 	query := ` SELECT * FROM conversations c
 	JOIN conversation_members m1 ON c.id = m1.conversation_id 
 	JOIN conversation_members m2 ON c.id = m2.conversation_id 
@@ -46,7 +47,7 @@ func (r *conRepo) CheckExistsConversation(senderId, receiverId string) ([]models
 	HAVING COUNT(DISTINCT m1.user_id) = 1 AND COUNT(DISTINCT m2.user_id) = 1;
 	`
 
-	rows, err := db.DBInstance.Query(query, senderId, receiverId)
+	rows, err := db.DBInstance.QueryContext(ctx, query, senderId, receiverId)
 
 	if err != nil {
 		return nil, err
@@ -93,13 +94,13 @@ func (r *conRepo) UpdateGroupName(c *models.Conversation) error {
 	return nil
 }
 
-func (r *conRepo) CheckExistsGroup(c *models.Conversation) bool {
+func (r *conRepo) CheckExistsGroup(ctx context.Context, c *models.Conversation) bool {
 	query := `SELECT COUNT(*)
 	FROM conversations 
 	WHERE id = ? AND is_group = 1
 	`
 
-	row := db.DBInstance.QueryRow(query, c.ID)
+	row := db.DBInstance.QueryRowContext(ctx, query, c.ID)
 
 	var con int64
 

@@ -14,21 +14,21 @@ type frService struct {
 	frlRepo repository.FriendRequestLogRepository
 }
 
-func (s *frService) SendFriendRequest(dto dto.SendFriendRequestDto, c *gin.Context) error {
+func (s *frService) SendFriendRequest(c *gin.Context, dto dto.SendFriendRequestDto) error {
 	fr := &models.FriendRequest{
 		SenderId:   c.GetString("userId"),
 		ReceiverId: dto.ReceiverId,
 	}
 
 	//check already send friend request
-	pending := s.frRepo.HasPendingRequest(fr.SenderId, fr.ReceiverId)
+	pending := s.frRepo.HasPendingRequest(c.Request.Context(), fr.SenderId, fr.ReceiverId)
 
 	if pending {
 		return &common.ConflictError{Message: "Friend request already send!"}
 	}
 
 	//check already friend
-	exist := s.fRepo.AlreadyFriends(fr.SenderId, fr.ReceiverId)
+	exist := s.fRepo.AlreadyFriends(c.Request.Context(), fr.SenderId, fr.ReceiverId)
 
 	if exist {
 		return &common.ConflictError{Message: "Already friend each other!"}
@@ -56,7 +56,7 @@ func (s *frService) SendFriendRequest(dto dto.SendFriendRequestDto, c *gin.Conte
 
 }
 
-func (s *frService) DecideFriendRequest(dto dto.DecideFriendRequestDto, c *gin.Context) error {
+func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequestDto) error {
 
 	dfr := &models.FriendRequest{
 		ID:         dto.FriendRequestId,
@@ -68,7 +68,7 @@ func (s *frService) DecideFriendRequest(dto dto.DecideFriendRequestDto, c *gin.C
 	//then delete the friend request row
 	//write into friends database for both friendship 2 user id
 
-	fr, err := s.frRepo.FindById(dfr.ID)
+	fr, err := s.frRepo.FindById(c.Request.Context(), dfr.ID)
 
 	if err != nil {
 		return &common.NotFoundError{Message: "Friend Request Not Found!"}

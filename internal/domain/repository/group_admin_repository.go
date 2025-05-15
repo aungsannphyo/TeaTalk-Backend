@@ -1,8 +1,12 @@
 package repository
 
-import "github.com/aungsannphyo/ywartalk/internal/domain/models"
+import (
+	"context"
+
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+)
 
 type GroupAdminRepository interface {
 	CreateGroupAdmin(cga *models.GroupAdmin) error
-	IsGroupAdmin(cId, userId string) (bool, error)
+	IsGroupAdmin(ctx context.Context, cId, userId string) (bool, error)
 }

@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -32,13 +33,12 @@ func (r *cmRepo) CreateConversationMember(cm *models.ConversationMember) error {
 	return nil
 }
 
-func (r *cmRepo) CheckConversationMember(cm *models.ConversationMember) bool {
+func (r *cmRepo) CheckConversationMember(ctx context.Context, cm *models.ConversationMember) bool {
 	query := `SELECT COUNT(*) 
 	FROM conversation_members
 	WHERE conversation_id = ? AND user_id = ?
 	`
-
-	row := db.DBInstance.QueryRow(query, cm.ConversationID, cm.UserID)
+	row := db.DBInstance.QueryRowContext(ctx, query, cm.ConversationID, cm.UserID)
 
 	var member int64
 	err := row.Scan(&member)

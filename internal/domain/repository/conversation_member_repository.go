@@ -1,8 +1,12 @@
 package repository
 
-import "github.com/aungsannphyo/ywartalk/internal/domain/models"
+import (
+	"context"
+
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+)
 
 type ConversationMemeberRepository interface {
 	CreateConversationMember(cm *models.ConversationMember) error
-	CheckConversationMember(cm *models.ConversationMember) bool
+	CheckConversationMember(ctx context.Context, cm *models.ConversationMember) bool
 }

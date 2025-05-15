@@ -54,8 +54,8 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	return foundUser, token, nil
 }
 
-func (s *userServices) GetUserById(userId string) (*models.User, error) {
-	user, err := s.userRepo.GetUserById(userId)
+func (s *userServices) GetUserById(c *gin.Context, userId string) (*models.User, error) {
+	user, err := s.userRepo.GetUserById(c, userId)
 
 	if err != nil {
 		return nil, &common.NotFoundError{Message: "User not found"}
@@ -64,7 +64,7 @@ func (s *userServices) GetUserById(userId string) (*models.User, error) {
 	return user, nil
 }
 
-func (s *userServices) GetGroupUsers(conversationId string, c *gin.Context) ([]models.User, error) {
+func (s *userServices) GetGroupUsers(c *gin.Context, conversationId string) ([]models.User, error) {
 	users, err := s.userRepo.GetGroupUsers(c.Request.Context(), conversationId)
 	if err != nil {
 		return nil, &common.InternalServerError{Message: err.Error()}

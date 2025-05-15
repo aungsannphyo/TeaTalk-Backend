@@ -49,10 +49,10 @@ func (r *userRepo) Login(user *models.User) (*models.User, error) {
 	return &foundUser, nil
 }
 
-func (r *userRepo) GetUserById(userId string) (*models.User, error) {
-	query := "SELECT * FROM users WHERE id = ?"
+func (r *userRepo) GetUserById(ctx context.Context, userId string) (*models.User, error) {
+	query := "SELECT id, username, email, password, created_at FROM users WHERE id = ?"
 
-	row := db.DBInstance.QueryRow(query, userId)
+	row := db.DBInstance.QueryRowContext(ctx, query, userId)
 
 	var user models.User
 

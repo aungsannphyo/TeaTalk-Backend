@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -31,12 +32,12 @@ func (r *gaRepo) CreateGroupAdmin(cga *models.GroupAdmin) error {
 	return nil
 }
 
-func (r *gaRepo) IsGroupAdmin(cId, userId string) (bool, error) {
+func (r *gaRepo) IsGroupAdmin(ctx context.Context, cId, userId string) (bool, error) {
 	query := `SELECT COUNT(*) 
 	FROM group_admins 
 	WHERE conversation_id = ? AND user_id = ? 
 	`
-	row := db.DBInstance.QueryRow(query, cId, userId)
+	row := db.DBInstance.QueryRowContext(ctx, query, cId, userId)
 
 	var groupAdmin int64
 

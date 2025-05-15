@@ -17,7 +17,7 @@ type conService struct {
 	fRepo  r.FriendRepository
 }
 
-func (s *conService) CreateGroup(dto dto.CreateGroupDto, c *gin.Context) error {
+func (s *conService) CreateGroup(c *gin.Context, dto dto.CreateGroupDto) error {
 	cID := uuid.NewString()
 	userId := c.GetString("userId")
 
@@ -52,7 +52,7 @@ func (s *conService) CreateGroup(dto dto.CreateGroupDto, c *gin.Context) error {
 	return nil
 }
 
-func (s *conService) UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin.Context) error {
+func (s *conService) UpdateGroupName(c *gin.Context, dto dto.UpdateGroupNameDto) error {
 	cID := c.Param("groupId")
 
 	uc := &models.Conversation{
@@ -66,7 +66,7 @@ func (s *conService) UpdateGroupName(dto dto.UpdateGroupNameDto, c *gin.Context)
 	return nil
 }
 
-func (s *conService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context) error {
+func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 	//need to check current user is group admin or not
 	//check friendship between invitedBy and invited user
 	//insert into group_invites with status = "approved" if admin is invite
@@ -76,14 +76,14 @@ func (s *conService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context) error {
 	cID := c.Param("groupId")
 	userID := c.GetString("userId")
 
-	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(cID, userID)
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
 
 	if err != nil {
 		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	for _, iuser := range dto.InvitedUserId {
-		if !s.fRepo.AlreadyFriends(userID, iuser) {
+		if !s.fRepo.AlreadyFriends(c.Request.Context(), userID, iuser) {
 			continue
 		}
 
@@ -118,12 +118,12 @@ func (s *conService) InviteGroup(dto dto.InviteGroupDto, c *gin.Context) error {
 	return nil
 }
 
-func (s *conService) ModerateGroupInvite(dto dto.ModerateGroupInviteDto, c *gin.Context) error {
+func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupInviteDto) error {
 	cID := c.Param("groupId")
 	inviteId := c.Param("inviteUserId")
 	userID := c.GetString("userId")
 
-	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(cID, userID)
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
 
 	if err != nil {
 		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}
@@ -155,11 +155,11 @@ func (s *conService) ModerateGroupInvite(dto dto.ModerateGroupInviteDto, c *gin.
 	return nil
 }
 
-func (s *conService) AssignAdmin(dto dto.AssignAdminDto, c *gin.Context) error {
+func (s *conService) AssignAdmin(c *gin.Context, dto dto.AssignAdminDto) error {
 	cID := c.Param("groupId")
 	userID := c.GetString("userId")
 
-	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(cID, userID)
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
 
 	if err != nil {
 		return &common.InternalServerError{Message: "Something went wrong, Please try again later"}

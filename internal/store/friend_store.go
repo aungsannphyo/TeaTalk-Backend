@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -31,7 +32,6 @@ func (r *friendRepo) CreateFriendShip(f *models.Friend) error {
 }
 
 func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
-	//need to
 	query := "DELETE FROM friends WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?)"
 
 	stmt, err := db.DBInstance.Prepare(query)
@@ -52,11 +52,11 @@ func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
 	return nil
 }
 
-func (r *friendRepo) AlreadyFriends(senderId, receiverId string) bool {
+func (r *friendRepo) AlreadyFriends(ctx context.Context, senderId, receiverId string) bool {
 	query := `SELECT COUNT(*) FROM friends 
 		WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?)`
 
-	row := db.DBInstance.QueryRow(query, senderId, receiverId, senderId, receiverId)
+	row := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId, senderId, receiverId)
 
 	var friend int64
 

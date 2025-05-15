@@ -67,7 +67,7 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 func (h *UserHandler) GetUserById(c *gin.Context) {
 	userId := c.Param("id")
 
-	user, err := h.userService.GetUserById(userId)
+	user, err := h.userService.GetUserById(c, userId)
 	if err != nil {
 		common.NotFoundResponse(c, err)
 		return
@@ -81,7 +81,7 @@ func (h *UserHandler) GetUserById(c *gin.Context) {
 func (h *UserHandler) GetGroupUsers(c *gin.Context) {
 	groupId := c.Param("groupId")
 
-	groupUsers, err := h.userService.GetGroupUsers(groupId, c)
+	groupUsers, err := h.userService.GetGroupUsers(c, groupId)
 
 	if err != nil {
 		common.InternalServerResponse(c, err)
