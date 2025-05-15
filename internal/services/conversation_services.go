@@ -100,7 +100,7 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 		}
 
 		if err := s.giRepo.CreateGroupInvite(groupInvite); err != nil {
-			return &common.InternalServerError{Message: "Something went wrong, please try again later"}
+			return &common.NotFoundError{Message: err.Error()}
 		}
 
 		if isGroupAdmin {
@@ -109,7 +109,7 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 				UserID:         iuser,
 			}
 			if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
-				return &common.InternalServerError{Message: "Something went wrong, please try again later"}
+				return &common.InternalServerError{Message: err.Error()}
 			}
 		}
 
