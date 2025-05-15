@@ -1,12 +1,15 @@
 package services
 
 import (
+	"errors"
+
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
 	"github.com/gin-gonic/gin"
+	"github.com/go-sql-driver/mysql"
 )
 
 type userServices struct {
@@ -17,14 +20,26 @@ func (s *userServices) Register(u *dto.RegisterRequestDto) error {
 	hashedPassword, err := utils.HashPassword(u.Password)
 
 	if err != nil {
-		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+		return &e.InternalServerError{Message: "Password hashing failed"}
 	}
 	user := &models.User{
 		Username: u.Username,
 		Email:    u.Email,
 		Password: hashedPassword,
 	}
-	return s.userRepo.Register(user)
+
+	err = s.userRepo.Register(user)
+	if err != nil {
+		var mysqlErr *mysql.MySQLError
+		if errors.As(err, &mysqlErr) {
+			if mysqlErr.Number == 1062 {
+				return &e.BadRequestError{Message: "Email already exists"}
+			}
+		}
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	return nil
 }
 
 func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, error) {
@@ -42,13 +57,13 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	checkPassword := utils.CheckPasswordHash(user.Password, foundUser.Password)
 
 	if !checkPassword {
-		return nil, "", &e.InternalServerError{Message: "Something went wrong, Please try agian later"}
+		return nil, "", &e.InternalServerError{Message: "Something went wrong when checking password hash"}
 	}
 
 	token, err := utils.GenerateToken(foundUser.Email, foundUser.ID)
 
 	if err != nil {
-		return nil, "", &e.InternalServerError{Message: "Something went wrong, Please try agian later"}
+		return nil, "", &e.InternalServerError{Message: "Something went wrong while generating token"}
 	}
 
 	return foundUser, token, nil

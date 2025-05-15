@@ -5,8 +5,8 @@ import (
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/dto/response"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
+	"github.com/aungsannphyo/ywartalk/pkg/success"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,7 +36,7 @@ func (h *UserHandler) RegisterHandler(c *gin.Context) {
 		return
 	}
 
-	common.CreateResponse(c, "User have been created Successfull!")
+	success.CreateResponse(c, "User have been created Successfull!")
 
 }
 
@@ -62,7 +62,7 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 
 	loginResponse := response.NewLoginResponse(foundUser, token)
 
-	common.OkResponse(c, loginResponse)
+	success.OkResponse(c, loginResponse)
 }
 
 func (h *UserHandler) GetUserById(c *gin.Context) {
@@ -76,7 +76,7 @@ func (h *UserHandler) GetUserById(c *gin.Context) {
 
 	userResponse := response.NewUserResponse(user)
 
-	common.OkResponse(c, userResponse)
+	success.OkResponse(c, userResponse)
 }
 
 func (h *UserHandler) GetGroupUsers(c *gin.Context) {
@@ -101,5 +101,5 @@ func (h *UserHandler) GetGroupUsers(c *gin.Context) {
 		users = append(users, *userResponse)
 	}
 
-	common.OkResponse(c, users)
+	success.OkResponse(c, users)
 }

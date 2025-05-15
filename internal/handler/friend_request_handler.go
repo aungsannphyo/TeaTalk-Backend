@@ -5,8 +5,8 @@ import (
 
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
+	"github.com/aungsannphyo/ywartalk/pkg/success"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,7 +38,7 @@ func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
 		return
 	}
 
-	common.OkResponse(c, gin.H{"message": "You have successfully sent a friend request"})
+	success.OkResponse(c, gin.H{"message": "You have successfully sent a friend request"})
 }
 
 func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
@@ -71,7 +71,7 @@ func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
 		}
 
 	}
-	common.OkResponse(c, gin.H{
+	success.OkResponse(c, gin.H{
 		"message": fmt.Sprintf("You have successfully %v for a friend request", dfrDto.Status),
 	})
 

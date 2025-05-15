@@ -3,8 +3,8 @@ package handler
 import (
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
+	"github.com/aungsannphyo/ywartalk/pkg/success"
 	"github.com/gin-gonic/gin"
 )
 
@@ -36,5 +36,5 @@ func (h *FriendHandler) MakeUnFriend(c *gin.Context) {
 		return
 	}
 
-	common.OkResponse(c, gin.H{"message": "Successfully Unfriend!"})
+	success.OkResponse(c, gin.H{"message": "Successfully Unfriend!"})
 }

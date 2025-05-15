@@ -5,8 +5,8 @@ import (
 
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/aungsannphyo/ywartalk/pkg/common"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
+	"github.com/aungsannphyo/ywartalk/pkg/success"
 	"github.com/gin-gonic/gin"
 )
 
@@ -38,7 +38,7 @@ func (s *ConversationsHandler) CreateGroup(c *gin.Context) {
 		return
 	}
 
-	common.CreateResponse(c, "You have been successfully created the group!")
+	success.CreateResponse(c, "You have been successfully created the group!")
 }
 
 func (s *ConversationsHandler) UpdateGroupName(c *gin.Context) {
@@ -54,7 +54,7 @@ func (s *ConversationsHandler) UpdateGroupName(c *gin.Context) {
 		return
 	}
 
-	common.OkResponse(c, gin.H{"message": "You have been successfully updated the group name!"})
+	success.OkResponse(c, gin.H{"message": "You have been successfully updated the group name!"})
 }
 
 func (s *ConversationsHandler) InviteGroup(c *gin.Context) {
@@ -75,7 +75,7 @@ func (s *ConversationsHandler) InviteGroup(c *gin.Context) {
 		return
 	}
 
-	common.OkResponse(c, gin.H{"message": "You have been successfully invited that you selected users!"})
+	success.OkResponse(c, gin.H{"message": "You have been successfully invited that you selected users!"})
 }
 
 func (s *ConversationsHandler) ModerateGroupInvite(c *gin.Context) {
@@ -96,7 +96,7 @@ func (s *ConversationsHandler) ModerateGroupInvite(c *gin.Context) {
 		return
 	}
 
-	common.OkResponse(c, gin.H{
+	success.OkResponse(c, gin.H{
 		"message": fmt.Sprintf("You have been successfully %v!", mgi.Status),
 	})
 }
@@ -119,5 +119,5 @@ func (s *ConversationsHandler) AssignAdmin(c *gin.Context) {
 		return
 	}
 
-	common.OkResponse(c, gin.H{"message": "You have been successfully made this action!"})
+	success.OkResponse(c, gin.H{"message": "You have been successfully made this action!"})
 }
