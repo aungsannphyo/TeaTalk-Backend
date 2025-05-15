@@ -14,7 +14,7 @@ type loginResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-type userResponse struct {
+type UserResponse struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
@@ -32,8 +32,8 @@ func NewLoginResponse(user *models.User, token string) *loginResponse {
 
 }
 
-func NewUserResponse(user *models.User) *userResponse {
-	return &userResponse{
+func NewUserResponse(user *models.User) *UserResponse {
+	return &UserResponse{
 		ID:        user.ID,
 		Username:  user.Username,
 		Email:     user.Email,

@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/dto/response"
@@ -63,10 +64,10 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 	common.OkResponse(c, loginResponse)
 }
 
-func (h *UserHandler) GetUser(c *gin.Context) {
+func (h *UserHandler) GetUserById(c *gin.Context) {
 	userId := c.Param("id")
 
-	user, err := h.userService.GetUser(userId)
+	user, err := h.userService.GetUserById(userId)
 	if err != nil {
 		common.NotFoundResponse(c, err)
 		return
@@ -75,4 +76,29 @@ func (h *UserHandler) GetUser(c *gin.Context) {
 	userResponse := response.NewUserResponse(user)
 
 	common.OkResponse(c, userResponse)
+}
+
+func (h *UserHandler) GetGroupUsers(c *gin.Context) {
+	groupId := c.Param("groupId")
+
+	groupUsers, err := h.userService.GetGroupUsers(groupId, c)
+
+	if err != nil {
+		common.InternalServerResponse(c, err)
+	}
+
+	var users []response.UserResponse
+
+	for _, groupUser := range groupUsers {
+		user := &models.User{
+			ID:        groupUser.ID,
+			Email:     groupUser.Email,
+			Username:  groupUser.Username,
+			CreatedAt: groupUser.CreatedAt,
+		}
+		userResponse := response.NewUserResponse(user)
+		users = append(users, *userResponse)
+	}
+
+	common.OkResponse(c, users)
 }

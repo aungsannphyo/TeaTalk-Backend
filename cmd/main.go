@@ -14,7 +14,6 @@ import (
 func main() {
 	mysqlConfig := config.LoadMySQLConfig()
 	database.InitDb(mysqlConfig)
-
 	handler := handler.InitHandler(db.DBInstance)
 
 	s := gin.Default()

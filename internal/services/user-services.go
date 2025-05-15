@@ -6,6 +6,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/pkg/common"
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
+	"github.com/gin-gonic/gin"
 )
 
 type userServices struct {
@@ -53,12 +54,20 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	return foundUser, token, nil
 }
 
-func (s *userServices) GetUser(userId string) (*models.User, error) {
-	user, err := s.userRepo.GetUser(userId)
+func (s *userServices) GetUserById(userId string) (*models.User, error) {
+	user, err := s.userRepo.GetUserById(userId)
 
 	if err != nil {
 		return nil, &common.NotFoundError{Message: "User not found"}
 
 	}
 	return user, nil
+}
+
+func (s *userServices) GetGroupUsers(conversationId string, c *gin.Context) ([]models.User, error) {
+	users, err := s.userRepo.GetGroupUsers(c.Request.Context(), conversationId)
+	if err != nil {
+		return nil, &common.InternalServerError{Message: err.Error()}
+	}
+	return users, nil
 }

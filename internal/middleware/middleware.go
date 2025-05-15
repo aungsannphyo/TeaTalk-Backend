@@ -9,16 +9,21 @@ import (
 )
 
 func Middleware(c *gin.Context) {
-	header := c.Request.Header.Get("Authorization")
 
-	if header == "" || !strings.HasPrefix(header, "Bearer ") {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": " Authorization header missing or malformed"})
+	header := c.Request.Header.Get("Authorization")
+	var token string
+
+	if header != "" && strings.HasPrefix(header, "Bearer ") {
+		token = strings.TrimPrefix(header, "Bearer ")
+	} else {
+		token = c.Query("token")
+	}
+	if token == "" {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Token missing in header or query"})
 		return
 	}
 
-	token := strings.TrimPrefix(header, "Bearer ")
 	userId, err := utils.VerifyToken(token)
-
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not authorized."})
 		return
