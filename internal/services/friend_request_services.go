@@ -1,11 +1,12 @@
 package services
 
 import (
+	"context"
+
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
-	"github.com/gin-gonic/gin"
 )
 
 type frService struct {
@@ -14,21 +15,21 @@ type frService struct {
 	frlRepo repository.FriendRequestLogRepository
 }
 
-func (s *frService) SendFriendRequest(c *gin.Context, dto dto.SendFriendRequestDto) error {
+func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dto.SendFriendRequestDto) error {
 	fr := &models.FriendRequest{
-		SenderId:   c.GetString("userId"),
+		SenderId:   userID,
 		ReceiverId: dto.ReceiverId,
 	}
 
 	//check already send friend request
-	pending := s.frRepo.HasPendingRequest(c.Request.Context(), fr.SenderId, fr.ReceiverId)
+	pending := s.frRepo.HasPendingRequest(ctx, fr.SenderId, fr.ReceiverId)
 
 	if pending {
 		return &e.ConflictError{Message: "Friend request already send!"}
 	}
 
 	//check already friend
-	exist := s.fRepo.AlreadyFriends(c.Request.Context(), fr.SenderId, fr.ReceiverId)
+	exist := s.fRepo.AlreadyFriends(ctx, fr.SenderId, fr.ReceiverId)
 
 	if exist {
 		return &e.ConflictError{Message: "Already friend each other!"}
@@ -56,11 +57,11 @@ func (s *frService) SendFriendRequest(c *gin.Context, dto dto.SendFriendRequestD
 
 }
 
-func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequestDto) error {
+func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto dto.DecideFriendRequestDto) error {
 
 	dfr := &models.FriendRequest{
 		ID:         dto.FriendRequestId,
-		ReceiverId: c.GetString("userId"),
+		ReceiverId: userID,
 		Status:     dto.Status,
 	}
 
@@ -68,7 +69,7 @@ func (s *frService) DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequ
 	//then delete the friend request row
 	//write into friends database for both friendship 2 user id
 
-	fr, err := s.frRepo.FindById(c.Request.Context(), dfr.ID)
+	fr, err := s.frRepo.FindById(ctx, dfr.ID)
 
 	if err != nil {
 		return &e.NotFoundError{Message: "Friend Request Not Found!"}

@@ -7,7 +7,6 @@ import (
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -19,25 +18,24 @@ type conService struct {
 	fRepo  r.FriendRepository
 }
 
-func (s *conService) CreateGroup(c *gin.Context, dto dto.CreateGroupDto) error {
+func (s *conService) CreateGroup(userID string, dto dto.CreateGroupDto) error {
 	cID := uuid.NewString()
-	userId := c.GetString("userId")
 
 	conversation := &models.Conversation{
 		ID:        cID,
 		IsGroup:   true,
 		Name:      &dto.Name,
-		CreatedBy: &userId,
+		CreatedBy: &userID,
 	}
 
 	conversationMember := &models.ConversationMember{
 		ConversationID: cID,
-		UserID:         userId,
+		UserID:         userID,
 	}
 
 	groupAdmin := &models.GroupAdmin{
 		ConversationID: cID,
-		UserID:         userId,
+		UserID:         userID,
 	}
 
 	if err := s.cRepo.CreateConversation(conversation); err != nil {
@@ -54,11 +52,10 @@ func (s *conService) CreateGroup(c *gin.Context, dto dto.CreateGroupDto) error {
 	return nil
 }
 
-func (s *conService) UpdateGroupName(c *gin.Context, dto dto.UpdateGroupNameDto) error {
-	cID := c.Param("groupId")
+func (s *conService) UpdateGroupName(groupID string, dto dto.UpdateGroupNameDto) error {
 
 	uc := &models.Conversation{
-		ID:   cID,
+		ID:   groupID,
 		Name: &dto.Name,
 	}
 
@@ -68,24 +65,21 @@ func (s *conService) UpdateGroupName(c *gin.Context, dto dto.UpdateGroupNameDto)
 	return nil
 }
 
-func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
+func (s *conService) InviteGroup(ctx context.Context, groupID string, userID string, dto dto.InviteGroupDto) error {
 	//need to check current user is group admin or not
 	//check friendship between invitedBy and invited user
 	//insert into group_invites with status = "approved" if admin is invite
 	//insert into group_invites with status = "pending" if not admin is invite
 	//if admin is invite -> Add to conversation_members.
 
-	cID := c.Param("groupId")
-	userID := c.GetString("userId")
-
-	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(ctx, groupID, userID)
 
 	if err != nil {
 		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
 	for _, iuser := range dto.InvitedUserId {
-		if !s.fRepo.AlreadyFriends(c.Request.Context(), userID, iuser) {
+		if !s.fRepo.AlreadyFriends(ctx, userID, iuser) {
 			continue
 		}
 
@@ -95,7 +89,7 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 		}
 
 		groupInvite := &models.GroupInvite{
-			ConversationID: cID,
+			ConversationID: groupID,
 			InvitedBy:      userID,
 			InvitedUserId:  iuser,
 			Status:         status,
@@ -107,7 +101,7 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 
 		if isGroupAdmin {
 			conversationMember := &models.ConversationMember{
-				ConversationID: cID,
+				ConversationID: groupID,
 				UserID:         iuser,
 			}
 			if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
@@ -120,12 +114,11 @@ func (s *conService) InviteGroup(c *gin.Context, dto dto.InviteGroupDto) error {
 	return nil
 }
 
-func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupInviteDto) error {
-	cID := c.Param("groupId")
-	inviteId := c.Param("inviteUserId")
-	userID := c.GetString("userId")
+func (s *conService) ModerateGroupInvite(
+	ctx context.Context, groupID string, inviteID string, userID string, dto dto.ModerateGroupInviteDto,
+) error {
 
-	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(ctx, groupID, userID)
 
 	if err != nil {
 		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
@@ -136,8 +129,8 @@ func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupIn
 	}
 
 	mgi := &models.GroupInvite{
-		InvitedUserId:  inviteId,
-		ConversationID: cID,
+		InvitedUserId:  inviteID,
+		ConversationID: groupID,
 		Status:         dto.Status,
 	}
 
@@ -146,8 +139,8 @@ func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupIn
 	}
 
 	conversationMember := &models.ConversationMember{
-		ConversationID: cID,
-		UserID:         inviteId,
+		ConversationID: groupID,
+		UserID:         inviteID,
 	}
 
 	if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
@@ -157,11 +150,9 @@ func (s *conService) ModerateGroupInvite(c *gin.Context, dto dto.ModerateGroupIn
 	return nil
 }
 
-func (s *conService) AssignAdmin(c *gin.Context, dto dto.AssignAdminDto) error {
-	cID := c.Param("groupId")
-	userID := c.GetString("userId")
+func (s *conService) AssignAdmin(ctx context.Context, groupID string, userID string, dto dto.AssignAdminDto) error {
 
-	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(c.Request.Context(), cID, userID)
+	isGroupAdmin, err := s.gaRepo.IsGroupAdmin(ctx, groupID, userID)
 
 	if err != nil {
 		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
@@ -173,7 +164,7 @@ func (s *conService) AssignAdmin(c *gin.Context, dto dto.AssignAdminDto) error {
 
 	for _, iuser := range dto.InvitedUserId {
 		groupAdmin := &models.GroupAdmin{
-			ConversationID: cID,
+			ConversationID: groupID,
 			UserID:         iuser,
 		}
 

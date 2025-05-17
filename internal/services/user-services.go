@@ -81,8 +81,10 @@ func (s *userServices) GetUserById(ctx context.Context, userId string) (*models.
 
 func (s *userServices) GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error) {
 	conversations, err := s.userRepo.GetGroupsById(ctx, userID)
+
 	if err != nil {
 		return nil, &e.InternalServerError{Message: err.Error()}
 	}
+
 	return conversations, nil
 }

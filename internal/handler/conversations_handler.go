@@ -24,6 +24,7 @@ func NewConversationHandler(s s.ConversationService) *ConversationsHandler {
 
 func (s *ConversationsHandler) CreateGroupHandler(c *gin.Context) {
 	var cgDto dto.CreateGroupDto
+	userID := c.GetString("userID")
 
 	if err := c.ShouldBindJSON(&cgDto); err != nil {
 		e.BadRequestResponse(c, err)
@@ -35,7 +36,7 @@ func (s *ConversationsHandler) CreateGroupHandler(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.CreateGroup(c, cgDto); err != nil {
+	if err := s.cService.CreateGroup(userID, cgDto); err != nil {
 		e.InternalServerResponse(c, err)
 		return
 	}
@@ -46,12 +47,14 @@ func (s *ConversationsHandler) CreateGroupHandler(c *gin.Context) {
 func (s *ConversationsHandler) UpdateGroupNameHandler(c *gin.Context) {
 	var ugDto dto.UpdateGroupNameDto
 
+	groupID := c.Param("groupID")
+
 	if err := c.ShouldBindJSON(&ugDto); err != nil {
 		e.BadRequestResponse(c, err)
 		return
 	}
 
-	if err := s.cService.UpdateGroupName(c, ugDto); err != nil {
+	if err := s.cService.UpdateGroupName(groupID, ugDto); err != nil {
 		e.InternalServerResponse(c, err)
 		return
 	}
@@ -61,6 +64,8 @@ func (s *ConversationsHandler) UpdateGroupNameHandler(c *gin.Context) {
 
 func (s *ConversationsHandler) InviteGroupHandler(c *gin.Context) {
 	var igdto dto.InviteGroupDto
+	groupID := c.Param("groupID")
+	userID := c.GetString("userID")
 
 	if err := c.ShouldBindJSON(&igdto); err != nil {
 		e.BadRequestResponse(c, err)
@@ -72,7 +77,7 @@ func (s *ConversationsHandler) InviteGroupHandler(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.InviteGroup(c, igdto); err != nil {
+	if err := s.cService.InviteGroup(c.Request.Context(), groupID, userID, igdto); err != nil {
 		e.InternalServerResponse(c, err)
 		return
 	}
@@ -82,6 +87,10 @@ func (s *ConversationsHandler) InviteGroupHandler(c *gin.Context) {
 
 func (s *ConversationsHandler) ModerateGroupInviteHandler(c *gin.Context) {
 	var mgi dto.ModerateGroupInviteDto
+
+	userID := c.GetString("userID")
+	groupID := c.Param("groupID")
+	inviteUserID := c.Param("inviteUserID")
 
 	if err := c.ShouldBindJSON(&mgi); err != nil {
 		e.BadRequestResponse(c, err)
@@ -93,7 +102,7 @@ func (s *ConversationsHandler) ModerateGroupInviteHandler(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.ModerateGroupInvite(c, mgi); err != nil {
+	if err := s.cService.ModerateGroupInvite(c.Request.Context(), groupID, inviteUserID, userID, mgi); err != nil {
 		e.InternalServerResponse(c, err)
 		return
 	}
@@ -105,6 +114,8 @@ func (s *ConversationsHandler) ModerateGroupInviteHandler(c *gin.Context) {
 
 func (s *ConversationsHandler) AssignAdminHandler(c *gin.Context) {
 	var aa dto.AssignAdminDto
+	userID := c.GetString("userID")
+	groupID := c.Param("groupID")
 
 	if err := c.ShouldBindJSON(&aa); err != nil {
 		e.BadRequestResponse(c, err)
@@ -116,7 +127,7 @@ func (s *ConversationsHandler) AssignAdminHandler(c *gin.Context) {
 		return
 	}
 
-	if err := s.cService.AssignAdmin(c, aa); err != nil {
+	if err := s.cService.AssignAdmin(c.Request.Context(), groupID, userID, aa); err != nil {
 		e.InternalServerResponse(c, err)
 		return
 	}

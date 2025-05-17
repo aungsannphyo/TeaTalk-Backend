@@ -1,11 +1,12 @@
 package service
 
 import (
+	"context"
+
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/gin-gonic/gin"
 )
 
 type FriendRequestService interface {
-	SendFriendRequest(c *gin.Context, dto dto.SendFriendRequestDto) error
-	DecideFriendRequest(c *gin.Context, dto dto.DecideFriendRequestDto) error
+	SendFriendRequest(ctx context.Context, userID string, dto dto.SendFriendRequestDto) error
+	DecideFriendRequest(ctx context.Context, userID string, dto dto.DecideFriendRequestDto) error
 }

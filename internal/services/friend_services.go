@@ -5,7 +5,6 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
-	"github.com/gin-gonic/gin"
 )
 
 type fService struct {
@@ -14,10 +13,10 @@ type fService struct {
 	frlRepo repository.FriendRequestLogRepository
 }
 
-func (s *fService) MakeUnFriend(dto dto.UnFriendDto, c *gin.Context) error {
+func (s *fService) MakeUnFriend(userID string, dto dto.UnFriendDto) error {
 
 	f := &models.Friend{
-		UserID:   c.GetString("userId"),
+		UserID:   userID,
 		FriendID: dto.FriendID,
 	}
 

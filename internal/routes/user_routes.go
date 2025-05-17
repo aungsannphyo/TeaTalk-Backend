@@ -8,6 +8,6 @@ import (
 
 func RegisterUserRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
-	rg.GET("/:id", h.UserHandler.GetUserHandler)
+	rg.GET("/:userID", h.UserHandler.GetUserHandler)
 	rg.GET("/group", h.UserHandler.GetGroupsByIdHandler)
 }

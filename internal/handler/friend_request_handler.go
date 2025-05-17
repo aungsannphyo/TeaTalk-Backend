@@ -22,6 +22,7 @@ func NewFriendRequestHandler(service s.FriendRequestService) *FriendRequestHandl
 
 func (h *FriendRequestHandler) SendFriendRequestHandler(c *gin.Context) {
 	var frDto dto.SendFriendRequestDto
+	userID := c.GetString("userID")
 
 	if err := c.ShouldBindJSON(&frDto); err != nil {
 		e.BadRequestResponse(c, err)
@@ -33,7 +34,7 @@ func (h *FriendRequestHandler) SendFriendRequestHandler(c *gin.Context) {
 		return
 	}
 
-	if err := h.frService.SendFriendRequest(c, frDto); err != nil {
+	if err := h.frService.SendFriendRequest(c.Request.Context(), userID, frDto); err != nil {
 		e.ConfictResponse(c, err)
 		return
 	}
@@ -43,6 +44,7 @@ func (h *FriendRequestHandler) SendFriendRequestHandler(c *gin.Context) {
 
 func (h *FriendRequestHandler) DecideFriendRequestHandler(c *gin.Context) {
 	var dfrDto dto.DecideFriendRequestDto
+	userID := c.GetString("userID")
 
 	if err := c.ShouldBindJSON(&dfrDto); err != nil {
 		e.BadRequestResponse(c, err)
@@ -54,7 +56,7 @@ func (h *FriendRequestHandler) DecideFriendRequestHandler(c *gin.Context) {
 		return
 	}
 
-	if err := h.frService.DecideFriendRequest(c, dfrDto); err != nil {
+	if err := h.frService.DecideFriendRequest(c.Request.Context(), userID, dfrDto); err != nil {
 		if _, ok := err.(*e.ForbiddenError); ok {
 			e.ConfictResponse(c, err)
 			return

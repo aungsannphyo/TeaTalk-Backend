@@ -1,8 +1,6 @@
 package handler
 
 import (
-	"log"
-
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
@@ -68,7 +66,7 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) GetUserHandler(c *gin.Context) {
-	userId := c.Param("id")
+	userId := c.Param("userID")
 
 	user, err := h.userService.GetUserById(c.Request.Context(), userId)
 	if err != nil {
@@ -82,8 +80,7 @@ func (h *UserHandler) GetUserHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) GetGroupsByIdHandler(c *gin.Context) {
-	userID := c.GetString("userId")
-	log.Println("USERID", userID)
+	userID := c.GetString("userID")
 	groups, err := h.userService.GetGroupsById(c.Request.Context(), userID)
 
 	if err != nil {
@@ -92,17 +89,23 @@ func (h *UserHandler) GetGroupsByIdHandler(c *gin.Context) {
 	}
 
 	var groupList []response.Conversation
-	for _, c := range groups {
-		conversations := &models.Conversation{
-			ID:        c.ID,
-			IsGroup:   c.IsGroup,
-			Name:      c.Name,
-			CreatedBy: c.CreatedBy,
-			CreatedAt: c.CreatedAt,
+
+	if len(groupList) == 0 {
+		success.OkResponse(c, []models.Conversation{})
+	} else {
+		for _, c := range groups {
+			conversations := &models.Conversation{
+				ID:        c.ID,
+				IsGroup:   c.IsGroup,
+				Name:      c.Name,
+				CreatedBy: c.CreatedBy,
+				CreatedAt: c.CreatedAt,
+			}
+			cResponse := response.NewConversationResponse(conversations)
+			groupList = append(groupList, *cResponse)
 		}
-		cResponse := response.NewConversationResponse(conversations)
-		groupList = append(groupList, *cResponse)
+
+		success.OkResponse(c, groupList)
 	}
 
-	success.OkResponse(c, groupList)
 }

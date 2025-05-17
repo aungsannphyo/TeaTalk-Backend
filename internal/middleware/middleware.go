@@ -23,12 +23,12 @@ func Middleware(c *gin.Context) {
 		return
 	}
 
-	userId, err := utils.VerifyToken(token)
+	userID, err := utils.VerifyToken(token)
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"message": "Not authorized."})
 		return
 	}
 
-	c.Set("userId", userId)
+	c.Set("userID", userID)
 	c.Next()
 }

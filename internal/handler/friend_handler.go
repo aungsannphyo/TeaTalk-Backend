@@ -20,6 +20,7 @@ func NewFriendHandler(s s.FriendService) *FriendHandler {
 
 func (h *FriendHandler) MakeUnFriendHandler(c *gin.Context) {
 	var mufDto dto.UnFriendDto
+	userID := c.GetString("userID")
 
 	if err := c.ShouldBindJSON(&mufDto); err != nil {
 		e.BadRequestResponse(c, err)
@@ -31,7 +32,7 @@ func (h *FriendHandler) MakeUnFriendHandler(c *gin.Context) {
 		return
 	}
 
-	if err := h.fService.MakeUnFriend(mufDto, c); err != nil {
+	if err := h.fService.MakeUnFriend(userID, mufDto); err != nil {
 		e.InternalServerResponse(c, err)
 		return
 	}
