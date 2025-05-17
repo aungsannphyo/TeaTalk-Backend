@@ -183,3 +183,13 @@ func (s *conService) GetGroupMembers(ctx context.Context, conversationId string)
 	}
 	return users, nil
 }
+
+func (s *conService) GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error) {
+	conversations, err := s.cRepo.GetGroupsById(ctx, userID)
+
+	if err != nil {
+		return nil, &e.InternalServerError{Message: err.Error()}
+	}
+
+	return conversations, nil
+}

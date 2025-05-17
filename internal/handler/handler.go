@@ -25,7 +25,7 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	serviceFactory := services.NewServiceFactory(repoFactory)
 
 	//WebSocket
-	hub := websocket.NewHub(serviceFactory.UserService())
+	hub := websocket.NewHub(serviceFactory.ConversationService())
 	go hub.Run()
 
 	websocketHandler := ws.NewWebSocketHandler(

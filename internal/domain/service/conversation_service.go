@@ -14,4 +14,5 @@ type ConversationService interface {
 	ModerateGroupInvite(ctx context.Context, groupID string, inviteID string, userID string, dto dto.ModerateGroupInviteDto) error
 	AssignAdmin(ctx context.Context, groupID string, userID string, dto dto.AssignAdminDto) error
 	GetGroupMembers(ctx context.Context, conversationId string) ([]models.User, error)
+	GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error)
 }

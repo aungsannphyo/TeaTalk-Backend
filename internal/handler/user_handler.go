@@ -79,33 +79,32 @@ func (h *UserHandler) GetUserHandler(c *gin.Context) {
 	success.OkResponse(c, userResponse)
 }
 
-func (h *UserHandler) GetGroupsByIdHandler(c *gin.Context) {
+func (h *UserHandler) GetFriendsByIDHanlder(c *gin.Context) {
 	userID := c.GetString("userID")
-	groups, err := h.userService.GetGroupsById(c.Request.Context(), userID)
+	users, err := h.userService.GetFriendsByUserID(c.Request.Context(), userID)
 
 	if err != nil {
 		e.NotFoundResponse(c, err)
 		return
 	}
 
-	var groupList []response.Conversation
+	var userList []response.UserResponse
 
-	if len(groupList) == 0 {
+	if len(userList) == 0 {
 		success.OkResponse(c, []models.Conversation{})
 	} else {
-		for _, c := range groups {
-			conversations := &models.Conversation{
-				ID:        c.ID,
-				IsGroup:   c.IsGroup,
-				Name:      c.Name,
-				CreatedBy: c.CreatedBy,
-				CreatedAt: c.CreatedAt,
+		for _, user := range users {
+			user := &models.User{
+				ID:        user.ID,
+				Email:     user.Email,
+				Username:  user.Username,
+				CreatedAt: user.CreatedAt,
 			}
-			cResponse := response.NewConversationResponse(conversations)
-			groupList = append(groupList, *cResponse)
+			userResponse := response.NewUserResponse(user)
+			userList = append(userList, *userResponse)
 		}
 
-		success.OkResponse(c, groupList)
+		success.OkResponse(c, userList)
 	}
 
 }

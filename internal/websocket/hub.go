@@ -16,10 +16,10 @@ type Hub struct {
 	privateMessage chan PrivateMessage
 	groupMessage   chan GroupMessage
 	mu             sync.RWMutex
-	userService    service.UserService
+	convService    service.ConversationService
 }
 
-func NewHub(userService service.UserService) *Hub {
+func NewHub(convService service.ConversationService) *Hub {
 	return &Hub{
 		clients:        make(map[string]*Client),
 		groups:         make(map[string]map[string]*Client),
@@ -27,7 +27,7 @@ func NewHub(userService service.UserService) *Hub {
 		unregister:     make(chan *Client),
 		privateMessage: make(chan PrivateMessage),
 		groupMessage:   make(chan GroupMessage),
-		userService:    userService,
+		convService:    convService,
 	}
 }
 
@@ -47,7 +47,7 @@ func (h *Hub) Run() {
 			log.Printf("User %s connected", c.UserID)
 
 			ctx := context.Background()
-			groups, err := h.userService.GetGroupsById(ctx, c.UserID)
+			groups, err := h.convService.GetGroupsById(ctx, c.UserID)
 
 			if err != nil {
 				log.Println("fetch error")

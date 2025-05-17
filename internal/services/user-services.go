@@ -79,12 +79,12 @@ func (s *userServices) GetUserById(ctx context.Context, userId string) (*models.
 	return user, nil
 }
 
-func (s *userServices) GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error) {
-	conversations, err := s.userRepo.GetGroupsById(ctx, userID)
+func (s *userServices) GetFriendsByUserID(ctx context.Context, userID string) ([]models.User, error) {
+	users, err := s.userRepo.GetFriendsByUserID(ctx, userID)
 
 	if err != nil {
 		return nil, &e.InternalServerError{Message: err.Error()}
 	}
 
-	return conversations, nil
+	return users, nil
 }

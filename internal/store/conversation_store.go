@@ -127,3 +127,30 @@ func (r *conRepo) GetGroupMembers(ctx context.Context, conversationId string) ([
 
 	return users, nil
 }
+
+func (r *conRepo) GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error) {
+	query := `
+		SELECT c.id, c.is_group, c.name, c.created_by, c.created_at
+		FROM conversation_members cm
+		JOIN conversations c ON cm.conversation_id = c.id
+		WHERE cm.user_id = ?
+		AND c.is_group = TRUE 
+	`
+
+	rows, err := db.DBInstance.QueryContext(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var conversations []models.Conversation
+	for rows.Next() {
+		var c models.Conversation
+		if err := rows.Scan(&c.ID, &c.IsGroup, &c.Name, &c.CreatedBy, &c.CreatedAt); err != nil {
+			return nil, err
+		}
+		conversations = append(conversations, c)
+	}
+
+	return conversations, nil
+}

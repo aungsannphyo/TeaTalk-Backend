@@ -12,4 +12,5 @@ type ConversationRepository interface {
 	UpdateGroupName(c *models.Conversation) error
 	CheckExistsGroup(ctx context.Context, c *models.Conversation) bool
 	GetGroupMembers(ctx context.Context, conversationId string) ([]models.User, error)
+	GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error)
 }

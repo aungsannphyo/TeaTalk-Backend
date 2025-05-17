@@ -14,4 +14,5 @@ func RegisterConversationRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.PATCH("/:groupID/invite/:inviteUserID", h.ConversationsHandler.ModerateGroupInviteHandler)
 	rg.POST("/:groupID/assign-admin", h.ConversationsHandler.AssignAdminHandler)
 	rg.GET("/member/:groupID", h.ConversationsHandler.GetGroupMembersHandler)
+	rg.GET("/", h.ConversationsHandler.GetGroupsByIdHandler)
 }

@@ -159,3 +159,33 @@ func (h *ConversationsHandler) GetGroupMembersHandler(c *gin.Context) {
 
 	success.OkResponse(c, users)
 }
+
+func (h *ConversationsHandler) GetGroupsByIdHandler(c *gin.Context) {
+	userID := c.GetString("userID")
+	groups, err := h.cService.GetGroupsById(c.Request.Context(), userID)
+
+	if err != nil {
+		e.NotFoundResponse(c, err)
+		return
+	}
+
+	var groupList []response.Conversation
+
+	if len(groupList) == 0 {
+		success.OkResponse(c, []models.Conversation{})
+	} else {
+		for _, c := range groups {
+			conversation := &models.Conversation{
+				ID:        c.ID,
+				IsGroup:   c.IsGroup,
+				Name:      c.Name,
+				CreatedBy: c.CreatedBy,
+				CreatedAt: c.CreatedAt,
+			}
+			cResponse := response.NewConversationResponse(conversation)
+			groupList = append(groupList, *cResponse)
+		}
+
+		success.OkResponse(c, groupList)
+	}
+}

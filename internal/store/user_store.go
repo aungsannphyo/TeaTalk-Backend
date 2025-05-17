@@ -65,14 +65,13 @@ func (r *userRepo) GetUserById(ctx context.Context, userID string) (*models.User
 	return &user, nil
 }
 
-func (r *userRepo) GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error) {
+func (r *userRepo) GetFriendsByUserID(ctx context.Context, userID string) ([]models.User, error) {
 	query := `
-		SELECT c.id, c.is_group, c.name, c.created_by, c.created_at
-		FROM conversation_members cm
-		JOIN conversations c ON cm.conversation_id = c.id
-		WHERE cm.user_id = ?
-		AND c.is_group = TRUE 
-	`
+        SELECT u.id, u.username, u.email, u.created_at
+        FROM friends f
+        JOIN users u ON u.id = f.friend_id
+        WHERE f.user_id = ?
+    `
 
 	rows, err := db.DBInstance.QueryContext(ctx, query, userID)
 	if err != nil {
@@ -80,14 +79,15 @@ func (r *userRepo) GetGroupsById(ctx context.Context, userID string) ([]models.C
 	}
 	defer rows.Close()
 
-	var conversations []models.Conversation
+	var users []models.User
 	for rows.Next() {
-		var c models.Conversation
-		if err := rows.Scan(&c.ID, &c.IsGroup, &c.Name, &c.CreatedBy, &c.CreatedAt); err != nil {
+		var user models.User
+		if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt); err != nil {
 			return nil, err
 		}
-		conversations = append(conversations, c)
+		users = append(users, user)
 	}
 
-	return conversations, nil
+	return users, nil
+
 }
