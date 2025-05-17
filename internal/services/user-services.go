@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -8,7 +9,6 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
-	"github.com/gin-gonic/gin"
 	"github.com/go-sql-driver/mysql"
 )
 
@@ -57,7 +57,7 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	checkPassword := utils.CheckPasswordHash(user.Password, foundUser.Password)
 
 	if !checkPassword {
-		return nil, "", &e.InternalServerError{Message: "Something went wrong when checking password hash"}
+		return nil, "", &e.UnAuthorizedError{Message: "Password doesn't match"}
 	}
 
 	token, err := utils.GenerateToken(foundUser.Email, foundUser.ID)
@@ -69,8 +69,8 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	return foundUser, token, nil
 }
 
-func (s *userServices) GetUserById(c *gin.Context, userId string) (*models.User, error) {
-	user, err := s.userRepo.GetUserById(c, userId)
+func (s *userServices) GetUserById(ctx context.Context, userId string) (*models.User, error) {
+	user, err := s.userRepo.GetUserById(ctx, userId)
 
 	if err != nil {
 		return nil, &e.NotFoundError{Message: "User not found"}
@@ -79,10 +79,10 @@ func (s *userServices) GetUserById(c *gin.Context, userId string) (*models.User,
 	return user, nil
 }
 
-func (s *userServices) GetGroupUsers(c *gin.Context, conversationId string) ([]models.User, error) {
-	users, err := s.userRepo.GetGroupUsers(c.Request.Context(), conversationId)
+func (s *userServices) GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error) {
+	conversations, err := s.userRepo.GetGroupsById(ctx, userID)
 	if err != nil {
 		return nil, &e.InternalServerError{Message: err.Error()}
 	}
-	return users, nil
+	return conversations, nil
 }

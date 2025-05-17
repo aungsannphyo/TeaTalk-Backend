@@ -9,6 +9,6 @@ import (
 type UserRepository interface {
 	Register(user *models.User) error
 	Login(user *models.User) (*models.User, error)
-	GetUserById(ctx context.Context, userId string) (*models.User, error)
-	GetGroupUsers(ctx context.Context, conversationId string) ([]models.User, error)
+	GetUserById(ctx context.Context, userID string) (*models.User, error)
+	GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error)
 }

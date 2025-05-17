@@ -15,10 +15,10 @@ func (r *messageRepo) CreateMessage(m *models.Message) error {
 	query := `INSERT INTO messages (conversation_id, sender_id, content)
 	VALUES (?, ?, ?)
 	`
-
 	stmt, err := db.DBInstance.Prepare(query)
 
 	if err != nil {
+
 		return err
 	}
 

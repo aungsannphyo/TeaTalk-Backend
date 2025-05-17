@@ -1,8 +1,11 @@
 package websocket
 
 import (
+	"context"
 	"log"
 	"sync"
+
+	"github.com/aungsannphyo/ywartalk/internal/domain/service"
 )
 
 type Hub struct {
@@ -13,9 +16,10 @@ type Hub struct {
 	privateMessage chan PrivateMessage
 	groupMessage   chan GroupMessage
 	mu             sync.RWMutex
+	userService    service.UserService
 }
 
-func NewHub() *Hub {
+func NewHub(userService service.UserService) *Hub {
 	return &Hub{
 		clients:        make(map[string]*Client),
 		groups:         make(map[string]map[string]*Client),
@@ -23,6 +27,7 @@ func NewHub() *Hub {
 		unregister:     make(chan *Client),
 		privateMessage: make(chan PrivateMessage),
 		groupMessage:   make(chan GroupMessage),
+		userService:    userService,
 	}
 }
 
@@ -34,6 +39,17 @@ func (h *Hub) Run() {
 			h.clients[c.UserID] = c
 			h.mu.Unlock()
 			log.Printf("User %s connected", c.UserID)
+
+			ctx := context.Background()
+			groups, err := h.userService.GetGroupsById(ctx, c.UserID)
+
+			if err != nil {
+				log.Println("fetch error")
+			}
+
+			for _, group := range groups {
+				h.AddUserToGroup(group.ID, c.UserID, c)
+			}
 
 		case c := <-h.unregister:
 			h.mu.Lock()
@@ -77,6 +93,7 @@ func (h *Hub) AddUserToGroup(groupID, userID string, c *Client) {
 		h.groups[groupID] = make(map[string]*Client)
 	}
 	h.groups[groupID][userID] = c
+	log.Printf("User %s ADDED", c.UserID)
 }
 
 func (h *Hub) RemoveUserFromGroup(groupID, userID string) {
@@ -88,4 +105,5 @@ func (h *Hub) RemoveUserFromGroup(groupID, userID string) {
 			delete(h.groups, groupID)
 		}
 	}
+	log.Printf("User %s REMOVE", userID)
 }

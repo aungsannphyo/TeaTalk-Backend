@@ -35,8 +35,9 @@ func (r *conRepo) CreateConversation(c *models.Conversation) error {
 	return nil
 }
 
-func (r *conRepo) CheckExistsConversation(ctx context.Context, senderId, receiverId string) ([]models.Conversation, error) {
-	query := ` SELECT * FROM conversations c
+func (r *conRepo) CheckExistsConversation(ctx context.Context, senderId, receiverId string) (models.Conversation, error) {
+	query := ` SELECT c.id, c.is_group, c.name, c.created_by, c.created_at
+	FROM conversations c
 	JOIN conversation_members m1 ON c.id = m1.conversation_id 
 	JOIN conversation_members m2 ON c.id = m2.conversation_id 
 	WHERE c.is_group = FALSE
@@ -47,29 +48,17 @@ func (r *conRepo) CheckExistsConversation(ctx context.Context, senderId, receive
 	HAVING COUNT(DISTINCT m1.user_id) = 1 AND COUNT(DISTINCT m2.user_id) = 1;
 	`
 
-	rows, err := db.DBInstance.QueryContext(ctx, query, senderId, receiverId)
+	rows := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId)
+
+	var c models.Conversation
+
+	err := rows.Scan(&c.ID, &c.IsGroup, &c.Name, &c.CreatedBy, &c.CreatedAt)
 
 	if err != nil {
-		return nil, err
+		return models.Conversation{}, err
 	}
 
-	defer rows.Close()
-
-	var conversations []models.Conversation
-
-	for rows.Next() {
-		var c models.Conversation
-
-		err := rows.Scan(&c.ID, &c.IsGroup, &c.Name, &c.CreatedBy, &c.CreatedAt)
-
-		if err != nil {
-			return nil, err
-		}
-
-		conversations = append(conversations, c)
-	}
-
-	return conversations, nil
+	return c, nil
 }
 
 func (r *conRepo) UpdateGroupName(c *models.Conversation) error {
@@ -110,4 +99,31 @@ func (r *conRepo) CheckExistsGroup(ctx context.Context, c *models.Conversation) 
 	}
 
 	return con > 0
+}
+
+func (r *conRepo) GetGroupMembers(ctx context.Context, conversationId string) ([]models.User, error) {
+	query := `
+	SELECT  u.id, u.username, u.email, u.created_at
+	FROM conversation_members cm
+	JOIN users u ON cm.user_id = u.id
+	JOIN conversations c ON cm.conversation_id = c.id
+	WHERE c.id = ? AND c.is_group = TRUE
+	`
+
+	rows, err := r.db.QueryContext(ctx, query, conversationId)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []models.User
+	for rows.Next() {
+		var user models.User
+		if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
 }

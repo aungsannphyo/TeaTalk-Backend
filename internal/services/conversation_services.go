@@ -1,6 +1,8 @@
 package services
 
 import (
+	"context"
+
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
@@ -181,4 +183,12 @@ func (s *conService) AssignAdmin(c *gin.Context, dto dto.AssignAdminDto) error {
 	}
 
 	return nil
+}
+
+func (s *conService) GetGroupMembers(ctx context.Context, conversationId string) ([]models.User, error) {
+	users, err := s.cRepo.GetGroupMembers(ctx, conversationId)
+	if err != nil {
+		return nil, &e.InternalServerError{Message: err.Error()}
+	}
+	return users, nil
 }

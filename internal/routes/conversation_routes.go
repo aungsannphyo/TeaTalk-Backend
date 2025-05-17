@@ -8,9 +8,10 @@ import (
 
 func RegisterConversationRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
-	rg.POST("/create-group", h.ConversationsHandler.CreateGroup)
-	rg.PUT("/update-group/:groupId", h.ConversationsHandler.UpdateGroupName)
-	rg.POST("/:groupId/invite", h.ConversationsHandler.InviteGroup)
-	rg.PATCH("/:groupId/invite/:inviteUserId", h.ConversationsHandler.ModerateGroupInvite)
-	rg.POST("/:groupId/assign-admin", h.ConversationsHandler.AssignAdmin)
+	rg.POST("/create-group", h.ConversationsHandler.CreateGroupHandler)
+	rg.PUT("/update-group/:groupId", h.ConversationsHandler.UpdateGroupNameHandler)
+	rg.POST("/:groupId/invite", h.ConversationsHandler.InviteGroupHandler)
+	rg.PATCH("/:groupId/invite/:inviteUserId", h.ConversationsHandler.ModerateGroupInviteHandler)
+	rg.POST("/:groupId/assign-admin", h.ConversationsHandler.AssignAdminHandler)
+	rg.GET("/member/:groupId", h.ConversationsHandler.GetGroupMembersHandler)
 }

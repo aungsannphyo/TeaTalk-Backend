@@ -49,10 +49,10 @@ func (r *userRepo) Login(user *models.User) (*models.User, error) {
 	return &foundUser, nil
 }
 
-func (r *userRepo) GetUserById(ctx context.Context, userId string) (*models.User, error) {
+func (r *userRepo) GetUserById(ctx context.Context, userID string) (*models.User, error) {
 	query := "SELECT id, username, email, password, created_at FROM users WHERE id = ?"
 
-	row := db.DBInstance.QueryRowContext(ctx, query, userId)
+	row := db.DBInstance.QueryRowContext(ctx, query, userID)
 
 	var user models.User
 
@@ -65,29 +65,29 @@ func (r *userRepo) GetUserById(ctx context.Context, userId string) (*models.User
 	return &user, nil
 }
 
-func (r *userRepo) GetGroupUsers(ctx context.Context, conversationId string) ([]models.User, error) {
+func (r *userRepo) GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error) {
 	query := `
-	SELECT  u.id, u.username, u.email, u.created_at
-	FROM conversation_members cm
-	JOIN users u ON cm.user_id = u.id
-	JOIN conversations c ON cm.conversation_id = c.id
-	WHERE c.id = ? AND c.is_group = TRUE
+		SELECT c.id, c.is_group, c.name, c.created_by, c.created_at
+		FROM conversation_members cm
+		JOIN conversations c ON cm.conversation_id = c.id
+		WHERE cm.user_id = ?
+		AND c.is_group = TRUE 
 	`
 
-	rows, err := r.db.QueryContext(ctx, query, conversationId)
+	rows, err := db.DBInstance.QueryContext(ctx, query, userID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var users []models.User
+	var conversations []models.Conversation
 	for rows.Next() {
-		var user models.User
-		if err := rows.Scan(&user.ID, &user.Username, &user.Email, &user.CreatedAt); err != nil {
+		var c models.Conversation
+		if err := rows.Scan(&c.ID, &c.IsGroup, &c.Name, &c.CreatedBy, &c.CreatedAt); err != nil {
 			return nil, err
 		}
-		users = append(users, user)
+		conversations = append(conversations, c)
 	}
 
-	return users, nil
+	return conversations, nil
 }

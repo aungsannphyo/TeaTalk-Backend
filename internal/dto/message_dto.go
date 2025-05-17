@@ -8,7 +8,7 @@ import (
 )
 
 type SendPrivateMessageDto struct {
-	ReceiverId string `json:"receiverId"`
+	ReceiverId string `json:"to_user_id"`
 	Content    string `json:"content"`
 }
 

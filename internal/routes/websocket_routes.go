@@ -7,6 +7,6 @@ import (
 )
 
 func RegisterWebSocketRoute(rg *gin.RouterGroup, h *handler.HandlerSet) {
-	rg.Use(middleware.Middleware) // Auth middleware, if any
+	rg.Use(middleware.Middleware)
 	rg.GET("/ws", h.HubHandler.WebSocketHandler)
 }

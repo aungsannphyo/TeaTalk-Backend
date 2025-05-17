@@ -18,7 +18,7 @@ func NewFriendHandler(s s.FriendService) *FriendHandler {
 	}
 }
 
-func (h *FriendHandler) MakeUnFriend(c *gin.Context) {
+func (h *FriendHandler) MakeUnFriendHandler(c *gin.Context) {
 	var mufDto dto.UnFriendDto
 
 	if err := c.ShouldBindJSON(&mufDto); err != nil {

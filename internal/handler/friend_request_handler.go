@@ -20,7 +20,7 @@ func NewFriendRequestHandler(service s.FriendRequestService) *FriendRequestHandl
 	}
 }
 
-func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
+func (h *FriendRequestHandler) SendFriendRequestHandler(c *gin.Context) {
 	var frDto dto.SendFriendRequestDto
 
 	if err := c.ShouldBindJSON(&frDto); err != nil {
@@ -41,7 +41,7 @@ func (h *FriendRequestHandler) SendFriendRequest(c *gin.Context) {
 	success.OkResponse(c, gin.H{"message": "You have successfully sent a friend request"})
 }
 
-func (h *FriendRequestHandler) DecideFriendRequest(c *gin.Context) {
+func (h *FriendRequestHandler) DecideFriendRequestHandler(c *gin.Context) {
 	var dfrDto dto.DecideFriendRequestDto
 
 	if err := c.ShouldBindJSON(&dfrDto); err != nil {

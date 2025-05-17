@@ -1,11 +1,12 @@
 package service
 
 import (
+	"context"
+
 	"github.com/aungsannphyo/ywartalk/internal/dto"
-	"github.com/gin-gonic/gin"
 )
 
 type MessageService interface {
-	SendPrivateMessage(c *gin.Context, dto dto.SendPrivateMessageDto) error
-	SendGroupMessage(c *gin.Context, dto dto.SendGroupMessageDto) error
+	SendPrivateMessage(ctx context.Context, senderId string, dto dto.SendPrivateMessageDto) error
+	SendGroupMessage(ctx context.Context, cID string, userID string, dto dto.SendGroupMessageDto) error
 }

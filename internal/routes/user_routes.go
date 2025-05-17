@@ -2,10 +2,12 @@ package routes
 
 import (
 	"github.com/aungsannphyo/ywartalk/internal/handler"
+	"github.com/aungsannphyo/ywartalk/internal/middleware"
 	"github.com/gin-gonic/gin"
 )
 
 func RegisterUserRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
-	rg.GET("/:id", h.UserHandler.GetUserById)
-	rg.GET("/group/:groupId", h.UserHandler.GetGroupUsers)
+	rg.Use(middleware.Middleware)
+	rg.GET("/:id", h.UserHandler.GetUserHandler)
+	rg.GET("/group", h.UserHandler.GetGroupsByIdHandler)
 }

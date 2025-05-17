@@ -8,5 +8,5 @@ import (
 
 func RegisterFriendRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
-	rg.DELETE("/unfriend", h.FriendHandler.MakeUnFriend)
+	rg.DELETE("/unfriend", h.FriendHandler.MakeUnFriendHandler)
 }

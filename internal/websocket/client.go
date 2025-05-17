@@ -1,18 +1,23 @@
 package websocket
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"time"
 
+	"github.com/aungsannphyo/ywartalk/internal/domain/service"
+	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/gorilla/websocket"
 )
 
 type Client struct {
-	Hub    *Hub
-	Conn   *websocket.Conn
-	Send   chan []byte
-	UserID string
+	Hub            *Hub
+	Conn           *websocket.Conn
+	Send           chan []byte
+	UserID         string
+	MessageService service.MessageService
+	UserService    service.UserService
 }
 
 type PrivateMessage struct {
@@ -27,16 +32,23 @@ type GroupMessage struct {
 	Content    []byte
 }
 
+const (
+	writeWait      = 10 * time.Second
+	pongWait       = 60 * time.Second
+	pingPeriod     = (pongWait * 9) / 10
+	maxMessageSize = 512
+)
+
 func (c *Client) ReadPump() {
 	defer func() {
 		c.Hub.unregister <- c
 		c.Conn.Close()
 	}()
 
-	c.Conn.SetReadLimit(512)
-	c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+	c.Conn.SetReadLimit(maxMessageSize)
+	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.Conn.SetPongHandler(func(string) error {
-		c.Conn.SetReadDeadline(time.Now().Add(60 * time.Second))
+		c.Conn.SetReadDeadline(time.Now().Add(pongWait))
 		return nil
 	})
 
@@ -51,10 +63,10 @@ func (c *Client) ReadPump() {
 
 		var wsMsg WSMessage
 		if err := json.Unmarshal(message, &wsMsg); err != nil {
-			log.Println("Invalid message format:", err)
+			log.Println("Failed to marshal WSMessage:", err)
 			continue
 		}
-		wsMsg.CreatedAt = time.Now().Unix()
+		wsMsg.CreatedAt = time.Now()
 
 		switch wsMsg.Type {
 		case "private":
@@ -62,18 +74,46 @@ func (c *Client) ReadPump() {
 				log.Println("Missing to_user_id for private message")
 				continue
 			}
+
 			response, _ := json.Marshal(wsMsg)
+
+			dto := dto.SendPrivateMessageDto{
+				ReceiverId: wsMsg.ToUserID,
+				Content:    wsMsg.Content,
+			}
+			ctx := context.Background()
+			// insert into database
+			if err := c.MessageService.SendPrivateMessage(ctx, c.UserID, dto); err != nil {
+				log.Println("Error sending private message")
+			}
+
 			c.Hub.privateMessage <- PrivateMessage{
 				FromUserID: c.UserID,
 				ToUserID:   wsMsg.ToUserID,
 				Content:    response,
 			}
+
 		case "group":
 			if wsMsg.GroupID == "" {
 				log.Println("Missing group_id for group message")
 				continue
 			}
+			if wsMsg.GroupID != "" {
+				c.Hub.AddUserToGroup(wsMsg.GroupID, c.UserID, c)
+
+			}
+
 			response, _ := json.Marshal(wsMsg)
+
+			dto := dto.SendGroupMessageDto{
+				Content: wsMsg.Content,
+			}
+			ctx := context.Background()
+
+			if err := c.MessageService.SendGroupMessage(ctx, wsMsg.GroupID, c.UserID, dto); err != nil {
+				log.Println("Error sending group message")
+			}
+
 			c.Hub.groupMessage <- GroupMessage{
 				FromUserID: c.UserID,
 				GroupID:    wsMsg.GroupID,
@@ -86,25 +126,41 @@ func (c *Client) ReadPump() {
 }
 
 func (c *Client) WritePump() {
-	ticker := time.NewTicker(54 * time.Second)
+	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
+		c.Hub.unregister <- c
 		c.Conn.Close()
 	}()
 
 	for {
 		select {
 		case message, ok := <-c.Send:
-			c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-			if err := c.Conn.WriteMessage(websocket.TextMessage, message); err != nil {
+
+			w, err := c.Conn.NextWriter(websocket.TextMessage)
+			if err != nil {
 				return
 			}
+			w.Write(message)
+
+			// Queue drain
+			n := len(c.Send)
+			for i := 0; i < n; i++ {
+				w.Write([]byte("\n"))
+				w.Write(<-c.Send)
+			}
+
+			if err := w.Close(); err != nil {
+				return
+			}
+
 		case <-ticker.C:
-			c.Conn.SetWriteDeadline(time.Now().Add(10 * time.Second))
+			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}

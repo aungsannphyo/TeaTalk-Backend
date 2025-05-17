@@ -1,6 +1,8 @@
 package handler
 
 import (
+	"log"
+
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
@@ -65,10 +67,10 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 	success.OkResponse(c, loginResponse)
 }
 
-func (h *UserHandler) GetUserById(c *gin.Context) {
+func (h *UserHandler) GetUserHandler(c *gin.Context) {
 	userId := c.Param("id")
 
-	user, err := h.userService.GetUserById(c, userId)
+	user, err := h.userService.GetUserById(c.Request.Context(), userId)
 	if err != nil {
 		e.NotFoundResponse(c, err)
 		return
@@ -79,27 +81,28 @@ func (h *UserHandler) GetUserById(c *gin.Context) {
 	success.OkResponse(c, userResponse)
 }
 
-func (h *UserHandler) GetGroupUsers(c *gin.Context) {
-	groupId := c.Param("groupId")
-
-	groupUsers, err := h.userService.GetGroupUsers(c, groupId)
+func (h *UserHandler) GetGroupsByIdHandler(c *gin.Context) {
+	userID := c.GetString("userId")
+	log.Println("USERID", userID)
+	groups, err := h.userService.GetGroupsById(c.Request.Context(), userID)
 
 	if err != nil {
-		e.InternalServerResponse(c, err)
+		e.NotFoundResponse(c, err)
+		return
 	}
 
-	var users []response.UserResponse
-
-	for _, groupUser := range groupUsers {
-		user := &models.User{
-			ID:        groupUser.ID,
-			Email:     groupUser.Email,
-			Username:  groupUser.Username,
-			CreatedAt: groupUser.CreatedAt,
+	var groupList []response.Conversation
+	for _, c := range groups {
+		conversations := &models.Conversation{
+			ID:        c.ID,
+			IsGroup:   c.IsGroup,
+			Name:      c.Name,
+			CreatedBy: c.CreatedBy,
+			CreatedAt: c.CreatedAt,
 		}
-		userResponse := response.NewUserResponse(user)
-		users = append(users, *userResponse)
+		cResponse := response.NewConversationResponse(conversations)
+		groupList = append(groupList, *cResponse)
 	}
 
-	success.OkResponse(c, users)
+	success.OkResponse(c, groupList)
 }

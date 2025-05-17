@@ -1,11 +1,12 @@
 package services
 
 import (
+	"context"
+
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 )
 
@@ -16,22 +17,25 @@ type messageService struct {
 	cmRepo r.ConversationMemeberRepository
 }
 
-func (s *messageService) SendPrivateMessage(c *gin.Context, dto dto.SendPrivateMessageDto) error {
-	senderId := c.GetString("userId")
+func (s *messageService) SendPrivateMessage(
+	ctx context.Context,
+	senderID string,
+	dto dto.SendPrivateMessageDto,
+) error {
 
 	// Step 1: Ensure sender and receiver are friends
-	if !s.fRepo.AlreadyFriends(c.Request.Context(), senderId, dto.ReceiverId) {
+	if !s.fRepo.AlreadyFriends(ctx, senderID, dto.ReceiverId) {
 		return &e.UnAuthorizedError{Message: "You can't send the message right now!"}
 	}
 
 	// Step 2: Check for existing private conversation
-	conversations, err := s.cRepo.CheckExistsConversation(c.Request.Context(), senderId, dto.ReceiverId)
+	conversation, err := s.cRepo.CheckExistsConversation(ctx, senderID, dto.ReceiverId)
 	if err != nil {
 		return &e.InternalServerError{Message: err.Error()}
 	}
 
 	var conversationID string
-	if len(conversations) != 2 {
+	if conversation.ID == "" {
 		// Create new conversation
 		conversationID = uuid.NewString()
 		conversation := &models.Conversation{
@@ -48,7 +52,7 @@ func (s *messageService) SendPrivateMessage(c *gin.Context, dto dto.SendPrivateM
 		// Add both users as members
 		senderMember := &models.ConversationMember{
 			ConversationID: conversationID,
-			UserID:         senderId,
+			UserID:         senderID,
 		}
 		receiverMember := &models.ConversationMember{
 			ConversationID: conversationID,
@@ -62,34 +66,36 @@ func (s *messageService) SendPrivateMessage(c *gin.Context, dto dto.SendPrivateM
 			return &e.InternalServerError{Message: "Failed to add receiver to conversation"}
 		}
 	} else {
-		// Reuse existing conversation ID
-		conversationID = conversations[0].ID
+		conversationID = conversation.ID
 	}
 
 	// Step 3: Create and save the message
 	message := &models.Message{
 		ConversationID: conversationID,
-		SenderID:       senderId,
+		SenderID:       senderID,
 		Content:        dto.Content,
 	}
 
 	return s.mRepo.CreateMessage(message)
 }
 
-func (s *messageService) SendGroupMessage(c *gin.Context, dto dto.SendGroupMessageDto) error {
-	cID := c.Param("groupId")
-	userId := c.GetString("userId")
+func (s *messageService) SendGroupMessage(
+	ctx context.Context,
+	cID string,
+	userID string,
+	dto dto.SendGroupMessageDto,
+) error {
 
 	var conversation models.Conversation
 	conversation.ID = cID
 
-	con := s.cRepo.CheckExistsGroup(c.Request.Context(), &conversation)
+	con := s.cRepo.CheckExistsGroup(ctx, &conversation)
 
 	var cMember models.ConversationMember
 	cMember.ConversationID = cID
-	cMember.UserID = userId
+	cMember.UserID = userID
 
-	member := s.cmRepo.CheckConversationMember(c.Request.Context(), &cMember)
+	member := s.cmRepo.CheckConversationMember(ctx, &cMember)
 
 	if !con || !member {
 		return &e.ForbiddenError{Message: "You are not a member of this group."}
@@ -97,7 +103,7 @@ func (s *messageService) SendGroupMessage(c *gin.Context, dto dto.SendGroupMessa
 
 	message := &models.Message{
 		ConversationID: cID,
-		SenderID:       userId,
+		SenderID:       userID,
 		Content:        dto.Content,
 	}
 
