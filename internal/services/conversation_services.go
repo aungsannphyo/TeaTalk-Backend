@@ -162,7 +162,7 @@ func (s *conService) AssignAdmin(ctx context.Context, groupID string, userID str
 		return &e.ForbiddenError{Message: "You are not an admin of this group"}
 	}
 
-	for _, iuser := range dto.InvitedUserId {
+	for _, iuser := range dto.AssignUserID {
 		groupAdmin := &models.GroupAdmin{
 			ConversationID: groupID,
 			UserID:         iuser,

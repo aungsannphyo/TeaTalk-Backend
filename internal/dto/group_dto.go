@@ -21,7 +21,7 @@ type InviteGroupDto struct {
 }
 
 type AssignAdminDto struct {
-	InvitedUserId []string `json:"invitedUserId"`
+	AssignUserID []string `json:"assignUserId"`
 }
 
 type ModerateGroupInviteDto struct {
@@ -75,7 +75,7 @@ func ValidateInviteGroup(ig InviteGroupDto) error {
 func ValidateAssignAdmin(aa AssignAdminDto) error {
 	var errs v.ValidationErrors
 
-	if len(aa.InvitedUserId) == 0 {
+	if len(aa.AssignUserID) == 0 {
 		errs = append(errs, v.ValidationError{Field: "Invite Users Id", Message: "Invite users list is empty! "})
 	}
 
