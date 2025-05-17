@@ -36,6 +36,12 @@ func (h *Hub) Run() {
 		select {
 		case c := <-h.register:
 			h.mu.Lock()
+
+			// Close old connection if exists
+			if existing, ok := h.clients[c.UserID]; ok {
+				existing.Conn.Close()
+			}
+
 			h.clients[c.UserID] = c
 			h.mu.Unlock()
 			log.Printf("User %s connected", c.UserID)
@@ -64,8 +70,9 @@ func (h *Hub) Run() {
 			h.mu.Unlock()
 
 		case pm := <-h.privateMessage:
+
 			h.mu.RLock()
-			recipient, ok := h.clients[pm.ToUserID]
+			recipient, ok := h.clients[pm.ReceiverID]
 			h.mu.RUnlock()
 			if ok {
 				recipient.Send <- pm.Content
@@ -77,7 +84,8 @@ func (h *Hub) Run() {
 			h.mu.RUnlock()
 			if ok {
 				for uid, member := range members {
-					if uid != gm.FromUserID {
+					log.Printf("[GROUP-SEND] To UID: %s | ClientPtr: %p", uid, member)
+					if uid != gm.SenderID {
 						member.Send <- gm.Content
 					}
 				}
@@ -89,16 +97,15 @@ func (h *Hub) Run() {
 func (h *Hub) AddUserToGroup(groupID, userID string, c *Client) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
+	log.Printf("[GROUP-ADD] Adding %s to group %s | ClientPtr: %p", userID, groupID, c)
 	if h.groups[groupID] == nil {
 		h.groups[groupID] = make(map[string]*Client)
 	}
 	h.groups[groupID][userID] = c
-	log.Printf("User %s ADDED", c.UserID)
+
 }
 
 func (h *Hub) RemoveUserFromGroup(groupID, userID string) {
-	h.mu.Lock()
-	defer h.mu.Unlock()
 	if members, ok := h.groups[groupID]; ok {
 		delete(members, userID)
 		if len(members) == 0 {

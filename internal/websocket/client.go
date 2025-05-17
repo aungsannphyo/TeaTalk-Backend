@@ -1,13 +1,11 @@
 package websocket
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/service"
-	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/gorilla/websocket"
 )
 
@@ -21,15 +19,15 @@ type Client struct {
 }
 
 type PrivateMessage struct {
-	FromUserID string
-	ToUserID   string
+	SenderID   string
+	ReceiverID string
 	Content    []byte
 }
 
 type GroupMessage struct {
-	FromUserID string
-	GroupID    string
-	Content    []byte
+	SenderID string
+	GroupID  string
+	Content  []byte
 }
 
 const (
@@ -70,26 +68,26 @@ func (c *Client) ReadPump() {
 
 		switch wsMsg.Type {
 		case "private":
-			if wsMsg.ToUserID == "" {
+			if wsMsg.ReceiverID == "" {
 				log.Println("Missing to_user_id for private message")
 				continue
 			}
 
 			response, _ := json.Marshal(wsMsg)
 
-			dto := dto.SendPrivateMessageDto{
-				ReceiverId: wsMsg.ToUserID,
-				Content:    wsMsg.Content,
-			}
-			ctx := context.Background()
-			// insert into database
-			if err := c.MessageService.SendPrivateMessage(ctx, c.UserID, dto); err != nil {
-				log.Println("Error sending private message")
-			}
+			// dto := dto.SendPrivateMessageDto{
+			// 	ReceiverId: wsMsg.ReceiverID,
+			// 	Content:    wsMsg.Content,
+			// }
+			// ctx := context.Background()
+			// // insert into database
+			// if err := c.MessageService.SendPrivateMessage(ctx, c.UserID, dto); err != nil {
+			// 	log.Println("Error sending private message")
+			// }
 
 			c.Hub.privateMessage <- PrivateMessage{
-				FromUserID: c.UserID,
-				ToUserID:   wsMsg.ToUserID,
+				SenderID:   c.UserID,
+				ReceiverID: wsMsg.ReceiverID,
 				Content:    response,
 			}
 
@@ -98,26 +96,22 @@ func (c *Client) ReadPump() {
 				log.Println("Missing group_id for group message")
 				continue
 			}
-			if wsMsg.GroupID != "" {
-				c.Hub.AddUserToGroup(wsMsg.GroupID, c.UserID, c)
-
-			}
 
 			response, _ := json.Marshal(wsMsg)
 
-			dto := dto.SendGroupMessageDto{
-				Content: wsMsg.Content,
-			}
-			ctx := context.Background()
+			// dto := dto.SendGroupMessageDto{
+			// 	Content: wsMsg.Content,
+			// }
+			// ctx := context.Background()
 
-			if err := c.MessageService.SendGroupMessage(ctx, wsMsg.GroupID, c.UserID, dto); err != nil {
-				log.Println("Error sending group message")
-			}
+			// if err := c.MessageService.SendGroupMessage(ctx, wsMsg.GroupID, c.UserID, dto); err != nil {
+			// 	log.Println("Error sending group message")
+			// }
 
 			c.Hub.groupMessage <- GroupMessage{
-				FromUserID: c.UserID,
-				GroupID:    wsMsg.GroupID,
-				Content:    response,
+				SenderID: c.UserID,
+				GroupID:  wsMsg.GroupID,
+				Content:  response,
 			}
 		default:
 			log.Println("Unknown message type:", wsMsg.Type)
@@ -146,13 +140,9 @@ func (c *Client) WritePump() {
 			if err != nil {
 				return
 			}
-			w.Write(message)
-
-			// Queue drain
-			n := len(c.Send)
-			for i := 0; i < n; i++ {
-				w.Write([]byte("\n"))
-				w.Write(<-c.Send)
+			_, err = w.Write(message)
+			if err != nil {
+				return
 			}
 
 			if err := w.Close(); err != nil {
