@@ -6,8 +6,8 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/services"
 	store "github.com/aungsannphyo/ywartalk/internal/store/repo"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
-	"github.com/aungsannphyo/ywartalk/internal/websocket"
-	ws "github.com/aungsannphyo/ywartalk/internal/websocket"
+	"github.com/aungsannphyo/ywartalk/internal/websocket/group"
+	"github.com/aungsannphyo/ywartalk/internal/websocket/private"
 )
 
 type HandlerSet struct {
@@ -15,7 +15,8 @@ type HandlerSet struct {
 	FriendRequestHandler *FriendRequestHandler
 	FriendHandler        *FriendHandler
 	ConversationsHandler *ConversationsHandler
-	HubHandler           *ws.WebSocketHandler
+	PrivateHubHandler    *private.WebSocketPrivateHandler
+	GroupHubHandler      *group.WebSocketGroupHandler
 }
 
 func InitHandler(db *sql.DB) *HandlerSet {
@@ -29,16 +30,15 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	serviceFactory := services.NewServiceFactory(repoFactory)
 
 	//WebSocket
-	hub := websocket.NewHub(serviceFactory.ConversationService())
-	go hub.Run()
+	privateHub := private.NewPrivateHub()
+	groupHub := group.NewGroupHub(serviceFactory.ConversationService())
 
-	websocketHandler := ws.NewWebSocketHandler(
-		hub,
-		serviceFactory.MessageService(),
-		serviceFactory.UserService())
+	go privateHub.RunPrivateWebSocket()
+	go groupHub.RunGroupWebSocket()
 
 	return &HandlerSet{
-		HubHandler:           websocketHandler,
+		PrivateHubHandler:    private.NewWebSocketPrivateHandler(privateHub, serviceFactory.MessageService()),
+		GroupHubHandler:      group.NewWebSocketGroupHandler(groupHub, serviceFactory.MessageService()),
 		UserHandler:          NewUserHandler(serviceFactory.UserService()),
 		FriendRequestHandler: NewFriendRequestHandler(serviceFactory.FriendRequestService()),
 		FriendHandler:        NewFriendHandler(serviceFactory.FriendService()),
