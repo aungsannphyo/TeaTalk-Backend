@@ -1,0 +1,1 @@
+SELECT id, username, email, password FROM users WHERE email = ?

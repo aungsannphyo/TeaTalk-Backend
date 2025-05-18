@@ -31,7 +31,7 @@ func NewWebSocketHandler(
 }
 
 func (h *WebSocketHandler) WebSocketHandler(c *gin.Context) {
-	userID := c.GetString("userId")
+	userID := c.GetString("userID")
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

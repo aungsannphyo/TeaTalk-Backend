@@ -38,14 +38,15 @@ func (r *cmRepo) CheckConversationMember(ctx context.Context, cm *models.Convers
 	FROM conversation_members
 	WHERE conversation_id = ? AND user_id = ?
 	`
+
 	row := db.DBInstance.QueryRowContext(ctx, query, cm.ConversationID, cm.UserID)
 
-	var member int64
-	err := row.Scan(&member)
+	var count int64
+	err := row.Scan(&count)
 
 	if err != nil {
 		return false
 	}
 
-	return member > 0
+	return count > 0
 }

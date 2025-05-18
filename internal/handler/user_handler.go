@@ -79,32 +79,20 @@ func (h *UserHandler) GetUserHandler(c *gin.Context) {
 	success.OkResponse(c, userResponse)
 }
 
-func (h *UserHandler) GetFriendsByIDHanlder(c *gin.Context) {
+func (h *UserHandler) GetChatListByUserId(c *gin.Context) {
 	userID := c.GetString("userID")
-	users, err := h.userService.GetFriendsByUserID(c.Request.Context(), userID)
+	chatList, err := h.userService.GetChatListByUserId(c.Request.Context(), userID)
 
 	if err != nil {
 		e.NotFoundResponse(c, err)
 		return
 	}
 
-	var userList []response.UserResponse
-
-	if len(userList) == 0 {
-		success.OkResponse(c, []models.Conversation{})
+	if len(chatList) == 0 {
+		success.OkResponse(c, []models.ChatListItem{})
 	} else {
-		for _, user := range users {
-			user := &models.User{
-				ID:        user.ID,
-				Email:     user.Email,
-				Username:  user.Username,
-				CreatedAt: user.CreatedAt,
-			}
-			userResponse := response.NewUserResponse(user)
-			userList = append(userList, *userResponse)
-		}
 
-		success.OkResponse(c, userList)
+		success.OkResponse(c, chatList)
 	}
 
 }

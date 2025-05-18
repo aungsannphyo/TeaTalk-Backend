@@ -1,11 +1,13 @@
 package websocket
 
 import (
+	"context"
 	"encoding/json"
 	"log"
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/service"
+	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/gorilla/websocket"
 )
 
@@ -75,15 +77,15 @@ func (c *Client) ReadPump() {
 
 			response, _ := json.Marshal(wsMsg)
 
-			// dto := dto.SendPrivateMessageDto{
-			// 	ReceiverId: wsMsg.ReceiverID,
-			// 	Content:    wsMsg.Content,
-			// }
-			// ctx := context.Background()
-			// // insert into database
-			// if err := c.MessageService.SendPrivateMessage(ctx, c.UserID, dto); err != nil {
-			// 	log.Println("Error sending private message")
-			// }
+			dto := dto.SendPrivateMessageDto{
+				ReceiverId: wsMsg.ReceiverID,
+				Content:    wsMsg.Content,
+			}
+			ctx := context.Background()
+			// insert into database
+			if err := c.MessageService.SendPrivateMessage(ctx, c.UserID, dto); err != nil {
+				log.Println(err)
+			}
 
 			c.Hub.privateMessage <- PrivateMessage{
 				SenderID:   c.UserID,
@@ -99,14 +101,14 @@ func (c *Client) ReadPump() {
 
 			response, _ := json.Marshal(wsMsg)
 
-			// dto := dto.SendGroupMessageDto{
-			// 	Content: wsMsg.Content,
-			// }
-			// ctx := context.Background()
+			dto := dto.SendGroupMessageDto{
+				Content: wsMsg.Content,
+			}
+			ctx := context.Background()
 
-			// if err := c.MessageService.SendGroupMessage(ctx, wsMsg.GroupID, c.UserID, dto); err != nil {
-			// 	log.Println("Error sending group message")
-			// }
+			if err := c.MessageService.SendGroupMessage(ctx, wsMsg.GroupID, c.UserID, dto); err != nil {
+				log.Println(err)
+			}
 
 			c.Hub.groupMessage <- GroupMessage{
 				SenderID: c.UserID,

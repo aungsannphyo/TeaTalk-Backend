@@ -6,7 +6,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 )
 
-type loginResponse struct {
+type LoginResponse struct {
 	ID        string    `json:"id"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
@@ -21,8 +21,8 @@ type UserResponse struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
-func NewLoginResponse(user *models.User, token string) *loginResponse {
-	return &loginResponse{
+func NewLoginResponse(user *models.User, token string) *LoginResponse {
+	return &LoginResponse{
 		ID:        user.ID,
 		Username:  user.Username,
 		Email:     user.Email,

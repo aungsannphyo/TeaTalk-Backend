@@ -3,6 +3,8 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"log"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
@@ -36,25 +38,27 @@ func (r *conRepo) CreateConversation(c *models.Conversation) error {
 }
 
 func (r *conRepo) CheckExistsConversation(ctx context.Context, senderId, receiverId string) (models.Conversation, error) {
-	query := ` SELECT c.id, c.is_group, c.name, c.created_by, c.created_at
+	query := `SELECT c.id, c.is_group, c.name, c.created_by, c.created_at
 	FROM conversations c
 	JOIN conversation_members m1 ON c.id = m1.conversation_id 
 	JOIN conversation_members m2 ON c.id = m2.conversation_id 
 	WHERE c.is_group = FALSE
-	AND m1.user_id = ?
-	AND m2.user_id = ?
-	AND m1.user_id != m2.user_id
+	  AND m1.user_id = ?
+	  AND m2.user_id = ?
+	  AND m1.user_id != m2.user_id
 	GROUP BY c.id
 	HAVING COUNT(DISTINCT m1.user_id) = 1 AND COUNT(DISTINCT m2.user_id) = 1;
 	`
 
-	rows := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId)
+	row := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId)
 
 	var c models.Conversation
-
-	err := rows.Scan(&c.ID, &c.IsGroup, &c.Name, &c.CreatedBy, &c.CreatedAt)
+	err := row.Scan(&c.ID, &c.IsGroup, &c.Name, &c.CreatedBy, &c.CreatedAt)
 
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return models.Conversation{}, nil
+		}
 		return models.Conversation{}, err
 	}
 
@@ -95,6 +99,10 @@ func (r *conRepo) CheckExistsGroup(ctx context.Context, c *models.Conversation) 
 
 	err := row.Scan(&con)
 	if err != nil {
+		log.Println("ERR", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			return false
+		}
 		return false
 	}
 

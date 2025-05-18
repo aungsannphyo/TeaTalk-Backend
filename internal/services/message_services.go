@@ -30,6 +30,7 @@ func (s *messageService) SendPrivateMessage(
 
 	// Step 2: Check for existing private conversation
 	conversation, err := s.cRepo.CheckExistsConversation(ctx, senderID, dto.ReceiverId)
+
 	if err != nil {
 		return &e.InternalServerError{Message: err.Error()}
 	}
@@ -46,6 +47,7 @@ func (s *messageService) SendPrivateMessage(
 		}
 
 		if err := s.cRepo.CreateConversation(conversation); err != nil {
+
 			return &e.InternalServerError{Message: err.Error()}
 		}
 
@@ -60,9 +62,11 @@ func (s *messageService) SendPrivateMessage(
 		}
 
 		if err := s.cmRepo.CreateConversationMember(senderMember); err != nil {
+
 			return &e.InternalServerError{Message: "Failed to add sender to conversation"}
 		}
 		if err := s.cmRepo.CreateConversationMember(receiverMember); err != nil {
+
 			return &e.InternalServerError{Message: "Failed to add receiver to conversation"}
 		}
 	} else {

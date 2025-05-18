@@ -58,12 +58,12 @@ func (r *friendRepo) AlreadyFriends(ctx context.Context, senderId, receiverId st
 
 	row := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId, senderId, receiverId)
 
-	var friend int64
+	var count int64
 
-	err := row.Scan(&friend)
+	err := row.Scan(&count)
 	if err != nil {
 		return false
 	}
 
-	return friend > 0
+	return count > 0
 }

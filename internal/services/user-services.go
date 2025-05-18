@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"log"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
@@ -36,6 +37,7 @@ func (s *userServices) Register(u *dto.RegisterRequestDto) error {
 				return &e.BadRequestError{Message: "Email already exists"}
 			}
 		}
+		log.Println("ERR", err)
 		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
@@ -79,12 +81,12 @@ func (s *userServices) GetUserById(ctx context.Context, userId string) (*models.
 	return user, nil
 }
 
-func (s *userServices) GetFriendsByUserID(ctx context.Context, userID string) ([]models.User, error) {
-	users, err := s.userRepo.GetFriendsByUserID(ctx, userID)
+func (s *userServices) GetChatListByUserId(ctx context.Context, userID string) ([]models.ChatListItem, error) {
+	chatList, err := s.userRepo.GetChatListByUserId(ctx, userID)
 
 	if err != nil {
 		return nil, &e.InternalServerError{Message: err.Error()}
 	}
 
-	return users, nil
+	return chatList, nil
 }

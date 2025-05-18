@@ -169,23 +169,10 @@ func (h *ConversationsHandler) GetGroupsByIdHandler(c *gin.Context) {
 		return
 	}
 
-	var groupList []response.Conversation
-
-	if len(groupList) == 0 {
+	if len(groups) == 0 {
 		success.OkResponse(c, []models.Conversation{})
 	} else {
-		for _, c := range groups {
-			conversation := &models.Conversation{
-				ID:        c.ID,
-				IsGroup:   c.IsGroup,
-				Name:      c.Name,
-				CreatedBy: c.CreatedBy,
-				CreatedAt: c.CreatedAt,
-			}
-			cResponse := response.NewConversationResponse(conversation)
-			groupList = append(groupList, *cResponse)
-		}
 
-		success.OkResponse(c, groupList)
+		success.OkResponse(c, groups)
 	}
 }

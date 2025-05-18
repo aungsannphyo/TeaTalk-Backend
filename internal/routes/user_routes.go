@@ -9,5 +9,5 @@ import (
 func RegisterUserRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
 	rg.GET("/:userID", h.UserHandler.GetUserHandler)
-	rg.GET("/:userID/friend", h.UserHandler.GetFriendsByIDHanlder)
+	rg.GET("/:userID/chat-list", h.UserHandler.GetChatListByUserId)
 }
