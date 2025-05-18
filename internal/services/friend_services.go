@@ -15,17 +15,25 @@ type fService struct {
 
 func (s *fService) MakeUnFriend(userID string, dto dto.UnFriendDto) error {
 
-	f := &models.Friend{
+	user := &models.Friend{
 		UserID:   userID,
 		FriendID: dto.FriendID,
 	}
 
-	frl := &models.FriendRequestLog{
-		SenderID:    f.UserID,
-		ReceiverID:  f.FriendID,
-		Action:      models.ActionUnFriended,
-		PerformedBy: f.UserID,
+	friend := &models.Friend{
+		UserID:   dto.FriendID,
+		FriendID: userID,
 	}
+
+	frl := &models.FriendRequestLog{
+		SenderID:    userID,
+		ReceiverID:  dto.FriendID,
+		Action:      models.ActionUnFriended,
+		PerformedBy: userID,
+	}
+
+	// 	_, firstErr := stmt.Exec(f.UserID, f.FriendID, f.UserID, f.FriendID)
+	// _, secondErr := stmt.Exec(f.FriendID, f.UserID, f.FriendID, f.UserID)
 
 	//make Action to UnFriended
 	err := s.frlRepo.CreateFriendRequestLog(frl)
@@ -34,5 +42,13 @@ func (s *fService) MakeUnFriend(userID string, dto dto.UnFriendDto) error {
 		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
-	return s.fRepo.MakeUnFriend(f)
+	if err = s.fRepo.MakeUnFriend(user); err != nil {
+		return err
+	}
+
+	if err = s.fRepo.MakeUnFriend(friend); err != nil {
+		return err
+	}
+
+	return nil
 }

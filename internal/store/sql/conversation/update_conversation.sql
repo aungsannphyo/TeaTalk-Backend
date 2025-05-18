@@ -1,0 +1,1 @@
+UPDATE conversations SET name = ? WHERE id = ?

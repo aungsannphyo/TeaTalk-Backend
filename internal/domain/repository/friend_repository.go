@@ -8,6 +8,6 @@ import (
 
 type FriendRepository interface {
 	CreateFriendShip(friend *models.Friend) error
-	MakeUnFriend(FriendRepository *models.Friend) error
+	MakeUnFriend(friend *models.Friend) error
 	AlreadyFriends(ctx context.Context, senderId, receiverId string) bool
 }

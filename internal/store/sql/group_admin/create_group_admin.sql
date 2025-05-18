@@ -1,0 +1,1 @@
+INSERT INTO group_admins (conversation_id, user_id) VALUES (?, ?)

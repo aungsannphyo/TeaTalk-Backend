@@ -3,31 +3,24 @@ package store
 import (
 	"context"
 	"database/sql"
-	"embed"
-	"fmt"
-	"log"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
-//go:embed sql/**/*.sql
-var sqlFiles embed.FS
-
 type userRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	loader sqlloader.SQLLoader
 }
 
 func (r *userRepo) Register(u *models.User) error {
 
-	queryBytes, err := sqlFiles.ReadFile("sql/auth/register.sql")
+	query, err := r.loader.LoadQuery("sql/auth/register.sql")
 
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
-
-	query := string(queryBytes)
-	fmt.Println("SQL query:", query)
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -47,9 +40,11 @@ func (r *userRepo) Register(u *models.User) error {
 }
 
 func (r *userRepo) Login(user *models.User) (*models.User, error) {
-	queryBytes, err := sqlFiles.ReadFile("sql/auth/login.sql")
+	query, err := r.loader.LoadQuery("sql/auth/login.sql")
 
-	query := string(queryBytes)
+	if err != nil {
+		return nil, err
+	}
 
 	row := db.DBInstance.QueryRow(query, user.Email)
 
@@ -65,9 +60,11 @@ func (r *userRepo) Login(user *models.User) (*models.User, error) {
 }
 
 func (r *userRepo) GetUserById(ctx context.Context, userID string) (*models.User, error) {
-	queryBytes, err := sqlFiles.ReadFile("sql/user/get_user_by_id.sql")
+	query, err := r.loader.LoadQuery("sql/user/get_user_by_id.sql")
 
-	query := string(queryBytes)
+	if err != nil {
+		return nil, err
+	}
 
 	row := db.DBInstance.QueryRowContext(ctx, query, userID)
 
@@ -83,9 +80,11 @@ func (r *userRepo) GetUserById(ctx context.Context, userID string) (*models.User
 }
 
 func (r *userRepo) GetChatListByUserId(ctx context.Context, userID string) ([]models.ChatListItem, error) {
-	queryBytes, err := sqlFiles.ReadFile("sql/user/get_chat_list_by_id.sql")
+	query, err := r.loader.LoadQuery("sql/user/get_chat_list_by_id.sql")
 
-	query := string(queryBytes)
+	if err != nil {
+		return nil, err
+	}
 
 	rows, err := db.DBInstance.QueryContext(ctx, query, userID, userID, userID, userID, userID, userID)
 	if err != nil {

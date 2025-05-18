@@ -5,18 +5,22 @@ import (
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
 type cmRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	loader sqlloader.SQLLoader
 }
 
 func (r *cmRepo) CreateConversationMember(cm *models.ConversationMember) error {
-	query := `INSERT INTO 
-	conversation_members (conversation_id, user_id )
-	VALUES (? , ?)
-	`
+	query, err := r.loader.LoadQuery("sql/conversation_member/create_conversation_member.sql")
+
+	if err != nil {
+		return err
+	}
+
 	stmt, err := db.DBInstance.Prepare(query)
 
 	if err != nil {
@@ -34,15 +38,16 @@ func (r *cmRepo) CreateConversationMember(cm *models.ConversationMember) error {
 }
 
 func (r *cmRepo) CheckConversationMember(ctx context.Context, cm *models.ConversationMember) bool {
-	query := `SELECT COUNT(*) 
-	FROM conversation_members
-	WHERE conversation_id = ? AND user_id = ?
-	`
+	query, err := r.loader.LoadQuery("sql/conversation_member/check_conversation_member.sql")
+
+	if err != nil {
+		return false
+	}
 
 	row := db.DBInstance.QueryRowContext(ctx, query, cm.ConversationID, cm.UserID)
 
 	var count int64
-	err := row.Scan(&count)
+	err = row.Scan(&count)
 
 	if err != nil {
 		return false

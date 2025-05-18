@@ -5,17 +5,21 @@ import (
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
 type frRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	loader sqlloader.SQLLoader
 }
 
 func (r *frRepo) SendFriendRequest(fr *models.FriendRequest) error {
-	query := `INSERT INTO 
-	friend_requests (sender_id, receiver_id, status) 
-	VALUES (?, ?, ?)`
+	query, err := r.loader.LoadQuery("sql/friend_request/send_friend_request.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -35,9 +39,11 @@ func (r *frRepo) SendFriendRequest(fr *models.FriendRequest) error {
 }
 
 func (r *frRepo) RejectFriendRequest(dfr *models.FriendRequest) error {
-	query := `UPDATE friend_requests 
-	SET  status = ? 
-	WHERE receiver_id = ? AND id = ?`
+	query, err := r.loader.LoadQuery("sql/friend_request/reject_friend_request.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -55,14 +61,18 @@ func (r *frRepo) RejectFriendRequest(dfr *models.FriendRequest) error {
 	return nil
 }
 
-func (r *frRepo) FindById(ctx context.Context, id string) (*models.FriendRequest, error) {
-	query := "SELECT * FROM friend_requests WHERE id = ?"
+func (r *frRepo) GetFriendRequestById(ctx context.Context, id string) (*models.FriendRequest, error) {
+	query, err := r.loader.LoadQuery("sql/friend_request/get_friend_request_by_id.sql")
+
+	if err != nil {
+		return nil, err
+	}
 
 	row := db.DBInstance.QueryRowContext(ctx, query, id)
 
 	var fr models.FriendRequest
 
-	err := row.Scan(&fr.ID, &fr.SenderId, &fr.ReceiverId, &fr.Status, &fr.CreatedAt)
+	err = row.Scan(&fr.ID, &fr.SenderId, &fr.ReceiverId, &fr.Status, &fr.CreatedAt)
 
 	if err != nil {
 		return nil, err
@@ -71,8 +81,12 @@ func (r *frRepo) FindById(ctx context.Context, id string) (*models.FriendRequest
 	return &fr, nil
 }
 
-func (r *frRepo) DeleteById(id string) error {
-	query := "DELETE FROM friend_requests WHERE id = ? "
+func (r *frRepo) DeleteFriendRequestById(id string) error {
+	query, err := r.loader.LoadQuery("sql/friend_request/delete_friend_request_by_id.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -92,16 +106,17 @@ func (r *frRepo) DeleteById(id string) error {
 
 func (r *frRepo) HasPendingRequest(ctx context.Context, senderId, receiverId string) bool {
 
-	query := `SELECT COUNT(*) FROM friend_requests 
-	WHERE ((sender_id = ? AND receiver_id = ?) OR
-		   (receiver_id = ? AND sender_id = ?))
-	AND status = "PENDING"`
+	query, err := r.loader.LoadQuery("sql/friend_request/has_pending_request.sql")
+
+	if err != nil {
+		return false
+	}
 
 	row := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId, senderId, receiverId)
 
 	var pending int64
 
-	err := row.Scan(&pending)
+	err = row.Scan(&pending)
 	if err != nil {
 		return false
 	}

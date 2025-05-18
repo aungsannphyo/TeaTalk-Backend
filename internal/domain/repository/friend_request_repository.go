@@ -10,6 +10,6 @@ type FriendRequestRepository interface {
 	SendFriendRequest(fr *models.FriendRequest) error
 	RejectFriendRequest(fr *models.FriendRequest) error
 	HasPendingRequest(ctx context.Context, senderId, receiverId string) bool
-	DeleteById(id string) error
-	FindById(ctx context.Context, id string) (*models.FriendRequest, error)
+	DeleteFriendRequestById(id string) error
+	GetFriendRequestById(ctx context.Context, id string) (*models.FriendRequest, error)
 }

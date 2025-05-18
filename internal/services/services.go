@@ -2,7 +2,7 @@ package services
 
 import (
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
-	"github.com/aungsannphyo/ywartalk/internal/store"
+	store "github.com/aungsannphyo/ywartalk/internal/store/repo"
 )
 
 type ServiceFactory interface {

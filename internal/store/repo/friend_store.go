@@ -5,15 +5,21 @@ import (
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
 type friendRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	loader sqlloader.SQLLoader
 }
 
 func (r *friendRepo) CreateFriendShip(f *models.Friend) error {
-	query := `INSERT INTO friends (user_id, friend_id ) VALUES (?, ?)`
+	query, err := r.loader.LoadQuery("sql/friend/create_friend_ship.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -32,7 +38,11 @@ func (r *friendRepo) CreateFriendShip(f *models.Friend) error {
 }
 
 func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
-	query := "DELETE FROM friends WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?)"
+	query, err := r.loader.LoadQuery("sql/friend/make_un_friend.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -42,10 +52,9 @@ func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
 
 	defer stmt.Close()
 
-	_, firstErr := stmt.Exec(f.UserID, f.FriendID, f.UserID, f.FriendID)
-	_, secondErr := stmt.Exec(f.FriendID, f.UserID, f.FriendID, f.UserID)
+	_, err = stmt.Exec(f.UserID, f.FriendID, f.UserID, f.FriendID)
 
-	if firstErr != nil || secondErr != nil {
+	if err != nil {
 		return nil
 	}
 
@@ -53,14 +62,17 @@ func (r *friendRepo) MakeUnFriend(f *models.Friend) error {
 }
 
 func (r *friendRepo) AlreadyFriends(ctx context.Context, senderId, receiverId string) bool {
-	query := `SELECT COUNT(*) FROM friends 
-		WHERE (user_id = ? AND friend_id = ?) OR (friend_id = ? AND user_id = ?)`
+	query, err := r.loader.LoadQuery("sql/friend/already_friends.sql")
+
+	if err != nil {
+		return false
+	}
 
 	row := db.DBInstance.QueryRowContext(ctx, query, senderId, receiverId, senderId, receiverId)
 
 	var count int64
 
-	err := row.Scan(&count)
+	err = row.Scan(&count)
 	if err != nil {
 		return false
 	}

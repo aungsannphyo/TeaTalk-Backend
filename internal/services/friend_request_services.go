@@ -69,7 +69,7 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 	//then delete the friend request row
 	//write into friends database for both friendship 2 user id
 
-	fr, err := s.frRepo.FindById(ctx, dfr.ID)
+	fr, err := s.frRepo.GetFriendRequestById(ctx, dfr.ID)
 
 	if err != nil {
 		return &e.NotFoundError{Message: "Friend Request Not Found!"}
@@ -79,7 +79,7 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 	if fr.ReceiverId == dfr.ReceiverId {
 		if models.FriendRequestAccepted == dfr.Status {
 
-			err := s.frRepo.DeleteById(fr.ID)
+			err := s.frRepo.DeleteFriendRequestById(fr.ID)
 
 			if err != nil {
 				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}

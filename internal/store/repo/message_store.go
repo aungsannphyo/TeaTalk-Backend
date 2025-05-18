@@ -4,17 +4,22 @@ import (
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
 type messageRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	loader sqlloader.SQLLoader
 }
 
 func (r *messageRepo) CreateMessage(m *models.Message) error {
-	query := `INSERT INTO messages (conversation_id, sender_id, content)
-	VALUES (?, ?, ?)
-	`
+	query, err := r.loader.LoadQuery("sql/message/create_message.sql")
+
+	if err != nil {
+		return err
+	}
+
 	stmt, err := db.DBInstance.Prepare(query)
 
 	if err != nil {

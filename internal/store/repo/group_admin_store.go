@@ -5,15 +5,21 @@ import (
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
 type gaRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	loader sqlloader.SQLLoader
 }
 
 func (r *gaRepo) CreateGroupAdmin(cga *models.GroupAdmin) error {
-	query := "INSERT INTO group_admins (conversation_id, user_id) VALUES (? , ?)"
+	query, err := r.loader.LoadQuery("sql/group_admin/create_group_admin.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -33,10 +39,12 @@ func (r *gaRepo) CreateGroupAdmin(cga *models.GroupAdmin) error {
 }
 
 func (r *gaRepo) IsGroupAdmin(ctx context.Context, cId, userId string) (bool, error) {
-	query := `SELECT COUNT(*) 
-	FROM group_admins 
-	WHERE conversation_id = ? AND user_id = ? 
-	`
+	query, err := r.loader.LoadQuery("sql/group_admin/is_group_admin.sql")
+
+	if err != nil {
+		return false, err
+	}
+
 	row := db.DBInstance.QueryRowContext(ctx, query, cId, userId)
 
 	var groupAdmin int64

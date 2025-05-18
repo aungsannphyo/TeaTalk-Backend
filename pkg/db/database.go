@@ -27,6 +27,8 @@ func InitDb(dbCfg *config.MariadbConfig) *sql.DB {
 			log.Fatalf("Failed to connect to database: %v", err)
 		}
 
+		defer db.Close()
+
 		_, err = db.Exec(fmt.Sprintf("CREATE DATABASE IF NOT EXISTS %s", dbCfg.DBName))
 		if err != nil {
 			log.Fatalf("Failed to create database %s: %v", dbCfg.DBName, err)

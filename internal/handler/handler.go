@@ -4,7 +4,8 @@ import (
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/services"
-	"github.com/aungsannphyo/ywartalk/internal/store"
+	store "github.com/aungsannphyo/ywartalk/internal/store/repo"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/internal/websocket"
 	ws "github.com/aungsannphyo/ywartalk/internal/websocket"
 )
@@ -19,8 +20,11 @@ type HandlerSet struct {
 
 func InitHandler(db *sql.DB) *HandlerSet {
 
+	//sql loader
+	sqlLoader := sqlloader.SQLLoaderFactory(sqlloader.EmbedLoader)
+
 	//Repositories
-	repoFactory := store.NewRepositoryFactory(db)
+	repoFactory := store.NewRepositoryFactory(db, sqlLoader)
 	//Services
 	serviceFactory := services.NewServiceFactory(repoFactory)
 

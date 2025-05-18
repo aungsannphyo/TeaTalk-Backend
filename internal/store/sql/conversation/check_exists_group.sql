@@ -1,0 +1,1 @@
+SELECT COUNT(*) FROM conversations WHERE id = ? AND is_group = 1

@@ -4,18 +4,21 @@ import (
 	"database/sql"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
 
 type giRepo struct {
-	db *sql.DB
+	db     *sql.DB
+	loader sqlloader.SQLLoader
 }
 
 func (r *giRepo) CreateGroupInvite(cgi *models.GroupInvite) error {
-	query := `INSERT INTO 
-	group_invites (conversation_id, invited_by, invited_user_id, status) 
-	VALUES (?, ?, ?, ?)
-	`
+	query, err := r.loader.LoadQuery("sql/group_invite/create_group_invite.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
@@ -35,7 +38,11 @@ func (r *giRepo) CreateGroupInvite(cgi *models.GroupInvite) error {
 }
 
 func (r *giRepo) ModerateGroupInvite(mgi *models.GroupInvite) error {
-	query := "UPDATE group_invites SET status = ? WHERE conversation_id = ? AND invited_user_id = ?"
+	query, err := r.loader.LoadQuery("sql/group_invite/moderate_group_invite.sql")
+
+	if err != nil {
+		return err
+	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
