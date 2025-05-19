@@ -30,7 +30,7 @@ func NewWebSocketGroupHandler(
 }
 
 func (h *WebSocketGroupHandler) NewWebSocketGroupHandler(c *gin.Context) {
-	userID := c.GetString("userId")
+	userID := c.GetString("userID")
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

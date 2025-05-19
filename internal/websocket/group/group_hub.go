@@ -73,7 +73,6 @@ func (h *GroupHub) RunGroupWebSocket() {
 			h.mu.RUnlock()
 			if ok {
 				for uid, member := range members {
-					log.Printf("[GROUP-SEND] To UID: %s | ClientPtr: %p", uid, member)
 					if uid != gm.SenderID {
 						member.send <- gm.Content
 					}
@@ -86,7 +85,6 @@ func (h *GroupHub) RunGroupWebSocket() {
 func (h *GroupHub) AddUserToGroup(groupID, userID string, c *GroupClient) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	log.Printf("[GROUP-ADD] Adding %s to group %s | ClientPtr: %p", userID, groupID, c)
 	if h.groups[groupID] == nil {
 		h.groups[groupID] = make(map[string]*GroupClient)
 	}
@@ -101,5 +99,4 @@ func (h *GroupHub) RemoveUserFromGroup(groupID, userID string) {
 			delete(h.groups, groupID)
 		}
 	}
-	log.Printf("User %s REMOVE", userID)
 }

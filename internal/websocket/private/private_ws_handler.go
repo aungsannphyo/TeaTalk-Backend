@@ -29,7 +29,7 @@ func NewWebSocketPrivateHandler(
 }
 
 func (h *WebSocketPrivateHandler) WebSocketPrivateHandler(c *gin.Context) {
-	userID := c.GetString("userId")
+	userID := c.GetString("userID")
 
 	conn, err := upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {

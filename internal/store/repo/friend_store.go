@@ -65,6 +65,7 @@ func (r *friendRepo) AlreadyFriends(ctx context.Context, senderId, receiverId st
 	query, err := r.loader.LoadQuery("sql/friend/already_friends.sql")
 
 	if err != nil {
+
 		return false
 	}
 
