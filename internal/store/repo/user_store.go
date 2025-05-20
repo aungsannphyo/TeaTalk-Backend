@@ -114,3 +114,27 @@ func (r *userRepo) GetChatListByUserId(ctx context.Context, userID string) ([]mo
 	return chatList, nil
 
 }
+
+func (r *userRepo) CreatePersonalDetail(ps *models.PersonalDetails) error {
+	query, err := r.loader.LoadQuery("sql/user/create_personal_details.sql")
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(ps.UserID, ps.ProfileImage, ps.Gender, ps.DateOfBirth, ps.Bio)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

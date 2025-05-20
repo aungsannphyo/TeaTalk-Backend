@@ -96,3 +96,26 @@ func (h *UserHandler) GetChatListByUserId(c *gin.Context) {
 	}
 
 }
+
+func (h *UserHandler) CreatePersonalDetail(c *gin.Context) {
+	userID := c.GetString("userID")
+	var ps dto.PersonalDetailDto
+
+	if err := c.ShouldBindJSON(&ps); err != nil {
+		e.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := dto.ValidateCreatePersonalDetails(ps); err != nil {
+		e.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := h.userService.CreatePersonalDetail(userID, &ps); err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+
+	success.CreateResponse(c, "Personal details have been created Successfull!")
+
+}

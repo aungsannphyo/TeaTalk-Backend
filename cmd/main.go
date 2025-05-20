@@ -8,6 +8,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/pkg/config"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 	database "github.com/aungsannphyo/ywartalk/pkg/db"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -17,6 +18,7 @@ func main() {
 	handler := handler.InitHandler(db.DBInstance)
 
 	s := gin.Default()
+	s.Use(cors.Default())
 	err := s.SetTrustedProxies([]string{
 		"127.0.0.1", // localhost
 	})

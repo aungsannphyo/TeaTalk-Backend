@@ -12,4 +12,5 @@ type UserService interface {
 	Login(u *dto.LoginRequestDto) (*models.User, string, error)
 	GetUserById(ctx context.Context, userID string) (*models.User, error)
 	GetChatListByUserId(ctx context.Context, userID string) ([]models.ChatListItem, error)
+	CreatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error
 }

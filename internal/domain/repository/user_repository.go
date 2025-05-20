@@ -11,4 +11,5 @@ type UserRepository interface {
 	Login(user *models.User) (*models.User, error)
 	GetUserById(ctx context.Context, userID string) (*models.User, error)
 	GetChatListByUserId(ctx context.Context, userID string) ([]models.ChatListItem, error)
+	CreatePersonalDetail(ps *models.PersonalDetails) error
 }
