@@ -6,10 +6,9 @@ import (
 )
 
 type PersonalDetailDto struct {
-	ProfileImage *string        `json:"profile_image"` // Nullable
-	Gender       *models.Gender `json:"gender"`        // Nullable ENUM
-	DateOfBirth  *string        `json:"date_of_birth"` // Nullable DATE
-	Bio          *string        `json:"bio"`           // Nullable TEXT
+	Gender      *models.Gender `json:"gender"`        // Nullable ENUM
+	DateOfBirth *string        `json:"date_of_birth"` // Nullable DATE
+	Bio         *string        `json:"bio"`           // Nullable TEXT
 }
 
 func ValidateCreatePersonalDetails(pd PersonalDetailDto) error {

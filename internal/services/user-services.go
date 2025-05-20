@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"os"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
@@ -92,16 +93,64 @@ func (s *userServices) GetChatListByUserId(ctx context.Context, userID string) (
 func (s *userServices) CreatePersonalDetail(userID string, dto *dto.PersonalDetailDto) error {
 
 	ps := &models.PersonalDetails{
-		UserID:       userID,
-		ProfileImage: dto.ProfileImage,
-		Gender:       dto.Gender,
-		DateOfBirth:  dto.DateOfBirth,
-		Bio:          dto.Bio,
+		UserID:      userID,
+		Gender:      dto.Gender,
+		DateOfBirth: dto.DateOfBirth,
+		Bio:         dto.Bio,
 	}
 	err := s.userRepo.CreatePersonalDetail(ps)
 
 	if err != nil {
 		return &e.InternalServerError{Message: err.Error()}
 	}
+	return nil
+}
+
+func (s *userServices) UpdatePersonalDetail(userID string, dto *dto.PersonalDetailDto) error {
+	ps := &models.PersonalDetails{
+		UserID:      userID,
+		Gender:      dto.Gender,
+		DateOfBirth: dto.DateOfBirth,
+		Bio:         dto.Bio,
+	}
+
+	err := s.userRepo.UpdatePersonalDetail(ps)
+
+	if err != nil {
+		return &e.InternalServerError{Message: err.Error()}
+	}
+
+	return nil
+}
+
+func (s *userServices) UploadProfileImage(ctx context.Context, userID string, imagePath string) error {
+	oldPath, err := s.userRepo.GetProfileImagePath(ctx, userID)
+
+	if err != nil {
+		return &e.InternalServerError{Message: err.Error()}
+	}
+
+	if oldPath != "" {
+		filePath := "." + oldPath
+		os.Remove(filePath)
+		return nil
+	} else {
+		ps := &models.PersonalDetails{
+			UserID:       userID,
+			ProfileImage: &imagePath,
+		}
+		err := s.userRepo.CreatePersonalDetail(ps)
+
+		if err != nil {
+			return &e.InternalServerError{Message: err.Error()}
+		}
+	}
+
+	err = s.userRepo.UploadProfileImage(userID, imagePath)
+
+	if err != nil {
+		return &e.InternalServerError{Message: err.Error()}
+	}
+
 	return nil
 }

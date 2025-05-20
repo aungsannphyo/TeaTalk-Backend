@@ -13,4 +13,6 @@ type UserService interface {
 	GetUserById(ctx context.Context, userID string) (*models.User, error)
 	GetChatListByUserId(ctx context.Context, userID string) ([]models.ChatListItem, error)
 	CreatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error
+	UpdatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error
+	UploadProfileImage(ctx context.Context, userID string, imagePath string) error
 }

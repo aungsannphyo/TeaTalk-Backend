@@ -1,0 +1,1 @@
+UPDATE personal_details SET profile_image = ? WHERE user_id = ?

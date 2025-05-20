@@ -7,6 +7,7 @@ import (
 
 func SetupRoutes(r *gin.Engine, h *handler.HandlerSet) {
 	api := r.Group("/api")
+	api.Static("/static/profiles", "./uploads/profiles")
 	AuthRoutes(api.Group("/"), h)
 	RegisterUserRoutes(api.Group("/user"), h)
 	RegisterFriendRequestRoutes(api.Group("/friend"), h)

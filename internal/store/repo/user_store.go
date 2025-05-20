@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
@@ -130,7 +131,79 @@ func (r *userRepo) CreatePersonalDetail(ps *models.PersonalDetails) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(ps.UserID, ps.ProfileImage, ps.Gender, ps.DateOfBirth, ps.Bio)
+	_, err = stmt.Exec(ps.UserID, ps.Gender, ps.DateOfBirth, ps.Bio)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *userRepo) UpdatePersonalDetail(ps *models.PersonalDetails) error {
+	query, err := r.loader.LoadQuery("sql/user/update_personal_details.sql")
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(ps.Gender, ps.DateOfBirth, ps.Bio, ps.UserID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
+func (r *userRepo) GetProfileImagePath(ctx context.Context, userID string) (string, error) {
+	query, err := r.loader.LoadQuery("sql/user/get_profile_image_by_id.sql")
+
+	if err != nil {
+		return "", err
+	}
+
+	row := db.DBInstance.QueryRowContext(ctx, query, userID)
+
+	var profileImage string
+
+	err = row.Scan(&profileImage)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return "", nil
+		}
+		return "", err
+	}
+
+	return profileImage, nil
+}
+
+func (r *userRepo) UploadProfileImage(userID string, imagePath string) error {
+	query, err := r.loader.LoadQuery("sql/user/update_profile_image.sql")
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(imagePath, userID)
 
 	if err != nil {
 		return err

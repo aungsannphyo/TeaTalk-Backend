@@ -1,0 +1,1 @@
+SELECT profile_image FROM personal_details WHERE user_id = ?

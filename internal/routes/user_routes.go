@@ -9,6 +9,8 @@ import (
 func RegisterUserRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
 	rg.GET("/:userID", h.UserHandler.GetUserHandler)
-	rg.GET("/:userID/chat-list", h.UserHandler.GetChatListByUserId)
-	rg.POST("/:userID/personal-details", h.UserHandler.CreatePersonalDetail)
+	rg.GET("/:userID/chat-list", h.UserHandler.GetChatListByUserIdHandler)
+	rg.POST("/:userID/personal-details", h.UserHandler.CreatePersonalDetailsHandler)
+	rg.PUT("/:userID/personal-details", h.UserHandler.UpdatePersonalDetailsHandler)
+	rg.PATCH("/:userID/upload-profile-image", h.UserHandler.UploadProfileImageHandler)
 }

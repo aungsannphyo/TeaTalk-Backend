@@ -1,6 +1,11 @@
 package handler
 
 import (
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
@@ -79,7 +84,7 @@ func (h *UserHandler) GetUserHandler(c *gin.Context) {
 	success.OkResponse(c, userResponse)
 }
 
-func (h *UserHandler) GetChatListByUserId(c *gin.Context) {
+func (h *UserHandler) GetChatListByUserIdHandler(c *gin.Context) {
 	userID := c.GetString("userID")
 	chatList, err := h.userService.GetChatListByUserId(c.Request.Context(), userID)
 
@@ -97,7 +102,29 @@ func (h *UserHandler) GetChatListByUserId(c *gin.Context) {
 
 }
 
-func (h *UserHandler) CreatePersonalDetail(c *gin.Context) {
+func (h *UserHandler) CreatePersonalDetailsHandler(c *gin.Context) {
+	userID := c.GetString("userID")
+
+	var pd dto.PersonalDetailDto
+	if err := c.ShouldBindJSON(&pd); err != nil {
+		e.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := dto.ValidateCreatePersonalDetails(pd); err != nil {
+		e.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := h.userService.CreatePersonalDetail(userID, &pd); err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+
+	success.CreateResponse(c, "Personal details created successfully!")
+}
+
+func (h *UserHandler) UpdatePersonalDetailsHandler(c *gin.Context) {
 	userID := c.GetString("userID")
 	var ps dto.PersonalDetailDto
 
@@ -106,16 +133,44 @@ func (h *UserHandler) CreatePersonalDetail(c *gin.Context) {
 		return
 	}
 
-	if err := dto.ValidateCreatePersonalDetails(ps); err != nil {
-		e.BadRequestResponse(c, err)
-		return
-	}
-
-	if err := h.userService.CreatePersonalDetail(userID, &ps); err != nil {
+	if err := h.userService.UpdatePersonalDetail(userID, &ps); err != nil {
 		e.InternalServerResponse(c, err)
 		return
 	}
 
-	success.CreateResponse(c, "Personal details have been created Successfull!")
+	success.CreateResponse(c, "Personal details have been updated Successfull!")
+}
 
+func (h *UserHandler) UploadProfileImageHandler(c *gin.Context) {
+	userID := c.GetString("userID")
+
+	file, err := c.FormFile("profile_image")
+	if err != nil {
+		e.BadRequestResponse(c, errors.New("image file is required"))
+		return
+	}
+
+	ext := filepath.Ext(file.Filename)
+	filename := fmt.Sprintf("user_%s%s", userID, ext)
+	savePath := filepath.Join("uploads", "profiles", filename)
+
+	if err := os.MkdirAll(filepath.Dir(savePath), os.ModePerm); err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+
+	if err := c.SaveUploadedFile(file, savePath); err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+
+	imageURL := "/static/profiles/" + filename
+
+	// Update profile_image in DB
+	if err := h.userService.UploadProfileImage(c.Request.Context(), userID, imageURL); err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+
+	success.OkResponse(c, gin.H{"message": "Profile image updated successfully"})
 }
