@@ -73,7 +73,7 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 func (h *UserHandler) GetUserHandler(c *gin.Context) {
 	userId := c.Param("userID")
 
-	user, err := h.userService.GetUserById(c.Request.Context(), userId)
+	user, err := h.userService.GetUserByID(c.Request.Context(), userId)
 	if err != nil {
 		e.NotFoundResponse(c, err)
 		return
@@ -86,7 +86,7 @@ func (h *UserHandler) GetUserHandler(c *gin.Context) {
 
 func (h *UserHandler) GetChatListByUserIdHandler(c *gin.Context) {
 	userID := c.GetString("userID")
-	chatList, err := h.userService.GetChatListByUserId(c.Request.Context(), userID)
+	chatList, err := h.userService.GetChatListByUserID(c.Request.Context(), userID)
 
 	if err != nil {
 		e.NotFoundResponse(c, err)

@@ -4,15 +4,48 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"fmt"
+	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
+	"github.com/aungsannphyo/ywartalk/pkg/utils"
 )
 
 type userRepo struct {
 	db     *sql.DB
 	loader sqlloader.SQLLoader
+}
+
+func (r *userRepo) isUserIdentityUnique(identity string) bool {
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer cancel()
+
+	query, _ := r.loader.LoadQuery("sql/user/is_user_identity_unique.sql")
+
+	var exists bool
+
+	row := db.DBInstance.QueryRowContext(ctx, query, identity)
+
+	_ = row.Scan(&exists)
+
+	return !exists
+}
+
+func (r *userRepo) getUniqueUserIdentity(base string) string {
+	normalized := utils.NormalizeNameToUsername(base)
+	identity := "@" + normalized
+	suffix := 1
+
+	for !r.isUserIdentityUnique(identity) {
+		identity = fmt.Sprintf("@%s%d", normalized, suffix)
+		suffix++
+	}
+
+	return identity
 }
 
 func (r *userRepo) Register(u *models.User) error {
@@ -31,7 +64,9 @@ func (r *userRepo) Register(u *models.User) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(u.Username, u.Email, u.Password)
+	userIdentity := r.getUniqueUserIdentity(u.Username)
+
+	_, err = stmt.Exec(u.Username, userIdentity, u.Email, u.Password)
 
 	if err != nil {
 		return err

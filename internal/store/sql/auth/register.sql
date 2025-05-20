@@ -1,1 +1,8 @@
-INSERT INTO users (username, email, password) VALUES (?, ?, ?)
+INSERT INTO
+    users (
+        username,
+        user_identity,
+        email,
+        password
+    )
+VALUES (?, ?, ?, ?)

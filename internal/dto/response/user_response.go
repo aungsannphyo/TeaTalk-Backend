@@ -15,10 +15,11 @@ type LoginResponse struct {
 }
 
 type UserResponse struct {
-	ID        string    `json:"id"`
-	Username  string    `json:"username"`
-	Email     string    `json:"email"`
-	CreatedAt time.Time `json:"created_at"`
+	ID           string    `json:"id"`
+	UserIdentity string    `json:"user_identity"`
+	Username     string    `json:"username"`
+	Email        string    `json:"email"`
+	CreatedAt    time.Time `json:"created_at"`
 }
 
 func NewLoginResponse(user *models.User, token string) *LoginResponse {
@@ -34,9 +35,10 @@ func NewLoginResponse(user *models.User, token string) *LoginResponse {
 
 func NewUserResponse(user *models.User) *UserResponse {
 	return &UserResponse{
-		ID:        user.ID,
-		Username:  user.Username,
-		Email:     user.Email,
-		CreatedAt: user.CreatedAt,
+		ID:           user.ID,
+		UserIdentity: user.UserIdentity,
+		Username:     user.Username,
+		Email:        user.Email,
+		CreatedAt:    user.CreatedAt,
 	}
 }

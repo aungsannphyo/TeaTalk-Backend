@@ -5,9 +5,10 @@ import (
 )
 
 type User struct {
-	ID        string    `json:"id"`
-	Email     string    `json:"email"`
-	Username  string    `json:"username"`
-	Password  string    `json:"password"`
-	CreatedAt time.Time `json:"created_at"`
+	ID           string    `json:"id"`
+	UserIdentity string    `json:"user_identity"`
+	Email        string    `json:"email"`
+	Username     string    `json:"username"`
+	Password     string    `json:"password"`
+	CreatedAt    time.Time `json:"created_at"`
 }

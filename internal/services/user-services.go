@@ -70,7 +70,7 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	return foundUser, token, nil
 }
 
-func (s *userServices) GetUserById(ctx context.Context, userId string) (*models.User, error) {
+func (s *userServices) GetUserByID(ctx context.Context, userId string) (*models.User, error) {
 	user, err := s.userRepo.GetUserById(ctx, userId)
 
 	if err != nil {
@@ -80,7 +80,7 @@ func (s *userServices) GetUserById(ctx context.Context, userId string) (*models.
 	return user, nil
 }
 
-func (s *userServices) GetChatListByUserId(ctx context.Context, userID string) ([]models.ChatListItem, error) {
+func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
 	chatList, err := s.userRepo.GetChatListByUserId(ctx, userID)
 
 	if err != nil {
