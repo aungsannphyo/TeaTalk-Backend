@@ -99,7 +99,6 @@ func (h *UserHandler) GetChatListByUserIdHandler(c *gin.Context) {
 
 		success.OkResponse(c, chatList)
 	}
-
 }
 
 func (h *UserHandler) CreatePersonalDetailsHandler(c *gin.Context) {
@@ -173,4 +172,19 @@ func (h *UserHandler) UploadProfileImageHandler(c *gin.Context) {
 	}
 
 	success.OkResponse(c, gin.H{"message": "Profile image updated successfully"})
+}
+
+func (h *UserHandler) SearchUserHandler(c *gin.Context) {
+	var dto dto.SearchUserRequestDto
+
+	user, err := h.userService.SearchUser(c.Request.Context(), dto.SearchInput)
+
+	if err != nil {
+		e.NotFoundResponse(c, err)
+		return
+	}
+
+	userResponse := response.NewUserResponse(user)
+
+	success.OkResponse(c, userResponse)
 }

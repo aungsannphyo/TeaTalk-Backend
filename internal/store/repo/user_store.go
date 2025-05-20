@@ -95,7 +95,7 @@ func (r *userRepo) Login(user *models.User) (*models.User, error) {
 	return &foundUser, nil
 }
 
-func (r *userRepo) GetUserById(ctx context.Context, userID string) (*models.User, error) {
+func (r *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
 	query, err := r.loader.LoadQuery("sql/user/get_user_by_id.sql")
 
 	if err != nil {
@@ -115,7 +115,7 @@ func (r *userRepo) GetUserById(ctx context.Context, userID string) (*models.User
 	return &user, nil
 }
 
-func (r *userRepo) GetChatListByUserId(ctx context.Context, userID string) ([]models.ChatListItem, error) {
+func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
 	query, err := r.loader.LoadQuery("sql/user/get_chat_list_by_id.sql")
 
 	if err != nil {
@@ -245,4 +245,26 @@ func (r *userRepo) UploadProfileImage(userID string, imagePath string) error {
 	}
 
 	return nil
+}
+
+func (r *userRepo) SearchUser(ctx context.Context, searchInput string) (*models.User, error) {
+	query, err := r.loader.LoadQuery("sql/user/search_user_by_email_or_identity.sql")
+	if err != nil {
+		return nil, err
+	}
+
+	row := db.DBInstance.QueryRowContext(ctx, query, searchInput, searchInput)
+
+	var user *models.User
+
+	err = row.Scan(&user.ID, &user.Email, &user.Username, &user.UserIdentity, &user.CreatedAt)
+
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, err
+	}
+
+	return user, nil
 }

@@ -71,7 +71,7 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 }
 
 func (s *userServices) GetUserByID(ctx context.Context, userId string) (*models.User, error) {
-	user, err := s.userRepo.GetUserById(ctx, userId)
+	user, err := s.userRepo.GetUserByID(ctx, userId)
 
 	if err != nil {
 		return nil, &e.NotFoundError{Message: "User not found"}
@@ -81,7 +81,7 @@ func (s *userServices) GetUserByID(ctx context.Context, userId string) (*models.
 }
 
 func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
-	chatList, err := s.userRepo.GetChatListByUserId(ctx, userID)
+	chatList, err := s.userRepo.GetChatListByUserID(ctx, userID)
 
 	if err != nil {
 		return nil, &e.InternalServerError{Message: err.Error()}
@@ -153,4 +153,14 @@ func (s *userServices) UploadProfileImage(ctx context.Context, userID string, im
 	}
 
 	return nil
+}
+
+func (s *userServices) SearchUser(ctx context.Context, searchInput string) (*models.User, error) {
+	user, err := s.userRepo.SearchUser(ctx, searchInput)
+
+	if err != nil {
+		return nil, &e.NotFoundError{Message: "User not found"}
+	}
+
+	return user, nil
 }
