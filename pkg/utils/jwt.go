@@ -19,6 +19,7 @@ func GenerateToken(email string, userId string) (string, error) {
 }
 
 func VerifyToken(token string) (string, error) {
+
 	parseToken, error := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		_, ok := token.Method.(*jwt.SigningMethodHMAC)
 

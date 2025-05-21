@@ -6,6 +6,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
+	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
 )
 
@@ -25,14 +26,14 @@ func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dt
 	pending := s.frRepo.HasPendingRequest(ctx, fr.SenderId, fr.ReceiverId)
 
 	if pending {
-		return &e.ConflictError{Message: "Friend request already send!"}
+		return &e.ConflictError{Message: "Hang tight! Friend request already sent."}
 	}
 
 	//check already friend
 	exist := s.fRepo.AlreadyFriends(ctx, fr.SenderId, fr.ReceiverId)
 
 	if exist {
-		return &e.ConflictError{Message: "Already friend each other!"}
+		return &e.ConflictError{Message: "You're already connected."}
 	}
 
 	if !pending && !exist {
@@ -69,7 +70,7 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 	//then delete the friend request row
 	//write into friends database for both friendship 2 user id
 
-	fr, err := s.frRepo.GetFriendRequestById(ctx, dfr.ID)
+	fr, err := s.frRepo.GetFriendRequestByID(ctx, dfr.ID)
 
 	if err != nil {
 		return &e.NotFoundError{Message: "Friend Request Not Found!"}
@@ -79,7 +80,7 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 	if fr.ReceiverId == dfr.ReceiverId {
 		if models.FriendRequestAccepted == dfr.Status {
 
-			err := s.frRepo.DeleteFriendRequestById(fr.ID)
+			err := s.frRepo.DeleteFriendRequestByID(fr.ID)
 
 			if err != nil {
 				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
@@ -138,4 +139,13 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 		return &e.ForbiddenError{Message: "You are not allowed to do this action!"}
 	}
 	return nil
+}
+
+func (s *frService) GetAllFriendRequestLog(ctx context.Context, userID string) ([]response.FriendRequestResponse, error) {
+	logs, err := s.frlRepo.GetAllFriendRequestLog(ctx, userID)
+
+	if err != nil {
+		return nil, &e.InternalServerError{Message: err.Error()}
+	}
+	return logs, nil
 }

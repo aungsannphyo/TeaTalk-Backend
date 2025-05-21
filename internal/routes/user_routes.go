@@ -13,4 +13,5 @@ func RegisterUserRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.POST("/:userID/personal-details", h.UserHandler.CreatePersonalDetailsHandler)
 	rg.PUT("/:userID/personal-details", h.UserHandler.UpdatePersonalDetailsHandler)
 	rg.PATCH("/:userID/upload-profile-image", h.UserHandler.UploadProfileImageHandler)
+	rg.GET("/search", h.UserHandler.SearchUserHandler)
 }

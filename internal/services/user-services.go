@@ -8,6 +8,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
+	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
 	"github.com/go-sql-driver/mysql"
@@ -155,10 +156,14 @@ func (s *userServices) UploadProfileImage(ctx context.Context, userID string, im
 	return nil
 }
 
-func (s *userServices) SearchUser(ctx context.Context, searchInput string) (*models.User, error) {
-	user, err := s.userRepo.SearchUser(ctx, searchInput)
+func (s *userServices) SearchUser(ctx context.Context, userID string, searchInput string) (*response.SearchResultResponse, error) {
+	user, err := s.userRepo.SearchUser(ctx, userID, searchInput)
 
 	if err != nil {
+		return nil, &e.NotFoundError{Message: "User not found"}
+	}
+
+	if user == nil {
 		return nil, &e.NotFoundError{Message: "User not found"}
 	}
 

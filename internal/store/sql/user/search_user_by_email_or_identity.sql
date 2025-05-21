@@ -1,11 +1,30 @@
 SELECT
-    id,
-    email,
-    username,
-    user_identity,
-    created_at
-FROM users
-WHERE
-    email = ?
-    OR user_identity = ?
-LIMIT 1
+    u.id,
+    u.email,
+    u.username,
+    u.user_identity,
+    IF(
+        EXISTS (
+            SELECT 1
+            FROM friends f
+            WHERE (
+                    f.user_id = ?
+                    AND f.friend_id = u.id
+                )
+                OR (
+                    f.friend_id = ?
+                    AND f.user_id = u.id
+                )
+        ),
+        TRUE,
+        FALSE
+    ) AS is_friend,
+    COALESCE(pd.profile_image, '') AS profile_image
+FROM users u
+    LEFT JOIN personal_details pd ON u.id = pd.user_id
+WHERE (
+        u.email = ?
+        OR u.user_identity = ?
+    )
+    AND u.id != ?
+LIMIT 1;

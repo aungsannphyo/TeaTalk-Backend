@@ -76,5 +76,16 @@ func (h *FriendRequestHandler) DecideFriendRequestHandler(c *gin.Context) {
 	success.OkResponse(c, gin.H{
 		"message": fmt.Sprintf("You have successfully %v for a friend request", dfrDto.Status),
 	})
+}
 
+func (h *FriendRequestHandler) GetAllFriendRequestHandler(c *gin.Context) {
+	userID := c.GetString("userID")
+
+	logs, err := h.frService.GetAllFriendRequestLog(c.Request.Context(), userID)
+
+	if err != nil {
+		e.InternalServerResponse(c, err)
+	}
+
+	success.OkResponse(c, logs)
 }

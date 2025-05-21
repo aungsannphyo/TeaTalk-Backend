@@ -175,16 +175,15 @@ func (h *UserHandler) UploadProfileImageHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) SearchUserHandler(c *gin.Context) {
-	var dto dto.SearchUserRequestDto
+	input := c.Query("q")
+	userID := c.GetString("userID")
 
-	user, err := h.userService.SearchUser(c.Request.Context(), dto.SearchInput)
+	user, err := h.userService.SearchUser(c.Request.Context(), userID, input)
 
 	if err != nil {
 		e.NotFoundResponse(c, err)
 		return
 	}
 
-	userResponse := response.NewUserResponse(user)
-
-	success.OkResponse(c, userResponse)
+	success.OkResponse(c, user)
 }

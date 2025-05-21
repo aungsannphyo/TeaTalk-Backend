@@ -56,7 +56,7 @@ func (c *PrivateClient) ReadPrivatePump() {
 		wsMsg.CreatedAt = time.Now()
 
 		if wsMsg.ReceiverID == "" {
-			log.Println("Missing to_user_id for private message")
+			log.Println("Missing receiverId for private message")
 			continue
 		}
 

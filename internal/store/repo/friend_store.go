@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
@@ -75,6 +76,9 @@ func (r *friendRepo) AlreadyFriends(ctx context.Context, senderId, receiverId st
 
 	err = row.Scan(&count)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false
+		}
 		return false
 	}
 

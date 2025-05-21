@@ -5,6 +5,7 @@ import (
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
+	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 )
 
 type UserService interface {
@@ -15,5 +16,5 @@ type UserService interface {
 	CreatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error
 	UpdatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error
 	UploadProfileImage(ctx context.Context, userID string, imagePath string) error
-	SearchUser(ctx context.Context, searchInput string) (*models.User, error)
+	SearchUser(ctx context.Context, userID string, searchInput string) (*response.SearchResultResponse, error)
 }

@@ -5,9 +5,11 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
@@ -66,7 +68,7 @@ func (r *userRepo) Register(u *models.User) error {
 
 	userIdentity := r.getUniqueUserIdentity(u.Username)
 
-	_, err = stmt.Exec(u.Username, userIdentity, u.Email, u.Password)
+	_, err = stmt.Exec(u.Username, userIdentity, strings.ToLower(u.Email), u.Password)
 
 	if err != nil {
 		return err
@@ -247,18 +249,29 @@ func (r *userRepo) UploadProfileImage(userID string, imagePath string) error {
 	return nil
 }
 
-func (r *userRepo) SearchUser(ctx context.Context, searchInput string) (*models.User, error) {
+func (r *userRepo) SearchUser(
+	ctx context.Context,
+	userID string,
+	searchInput string,
+) (*response.SearchResultResponse, error) {
+
 	query, err := r.loader.LoadQuery("sql/user/search_user_by_email_or_identity.sql")
 	if err != nil {
 		return nil, err
 	}
 
-	row := db.DBInstance.QueryRowContext(ctx, query, searchInput, searchInput)
+	row := db.DBInstance.QueryRowContext(
+		ctx, query,
+		userID,
+		userID,
+		strings.ToLower(searchInput),
+		strings.ToLower(searchInput),
+		userID,
+	)
 
-	var user *models.User
+	var user response.SearchResultResponse
 
-	err = row.Scan(&user.ID, &user.Email, &user.Username, &user.UserIdentity, &user.CreatedAt)
-
+	err = row.Scan(&user.ID, &user.Email, &user.Username, &user.UserIdentity, &user.IsFriend, &user.ProfileImage)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, nil
@@ -266,5 +279,6 @@ func (r *userRepo) SearchUser(ctx context.Context, searchInput string) (*models.
 		return nil, err
 	}
 
-	return user, nil
+	return &user, nil
+
 }

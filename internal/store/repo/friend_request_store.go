@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"errors"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
@@ -61,7 +62,7 @@ func (r *frRepo) RejectFriendRequest(dfr *models.FriendRequest) error {
 	return nil
 }
 
-func (r *frRepo) GetFriendRequestById(ctx context.Context, id string) (*models.FriendRequest, error) {
+func (r *frRepo) GetFriendRequestByID(ctx context.Context, id string) (*models.FriendRequest, error) {
 	query, err := r.loader.LoadQuery("sql/friend_request/get_friend_request_by_id.sql")
 
 	if err != nil {
@@ -81,7 +82,7 @@ func (r *frRepo) GetFriendRequestById(ctx context.Context, id string) (*models.F
 	return &fr, nil
 }
 
-func (r *frRepo) DeleteFriendRequestById(id string) error {
+func (r *frRepo) DeleteFriendRequestByID(id string) error {
 	query, err := r.loader.LoadQuery("sql/friend_request/delete_friend_request_by_id.sql")
 
 	if err != nil {
@@ -118,6 +119,9 @@ func (r *frRepo) HasPendingRequest(ctx context.Context, senderId, receiverId str
 
 	err = row.Scan(&pending)
 	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return false
+		}
 		return false
 	}
 	return pending > 0

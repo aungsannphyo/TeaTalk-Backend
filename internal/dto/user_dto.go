@@ -17,10 +17,6 @@ type LoginRequestDto struct {
 	Password string `json:"password"`
 }
 
-type SearchUserRequestDto struct {
-	SearchInput string `json:"search_input"`
-}
-
 func ValidateRegisterUser(user RegisterRequestDto) error {
 	var errs v.ValidationErrors
 

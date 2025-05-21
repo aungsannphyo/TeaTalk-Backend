@@ -11,15 +11,24 @@ type LoginResponse struct {
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Token     string    `json:"token"`
-	CreatedAt time.Time `json:"created_at"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type UserResponse struct {
 	ID           string    `json:"id"`
-	UserIdentity string    `json:"user_identity"`
+	UserIdentity string    `json:"userIdentity"`
 	Username     string    `json:"username"`
 	Email        string    `json:"email"`
-	CreatedAt    time.Time `json:"created_at"`
+	CreatedAt    time.Time `json:"createdAt"`
+}
+
+type SearchResultResponse struct {
+	ID           string `json:"id"`
+	Username     string `json:"username"`
+	Email        string `json:"email"`
+	UserIdentity string `json:"userIdentity"`
+	IsFriend     bool   `json:"isFriend"`
+	ProfileImage string `json:"profileImage"`
 }
 
 func NewLoginResponse(user *models.User, token string) *LoginResponse {
