@@ -253,32 +253,40 @@ func (r *userRepo) SearchUser(
 	ctx context.Context,
 	userID string,
 	searchInput string,
-) (*response.SearchResultResponse, error) {
+) ([]response.SearchResultResponse, error) {
 
 	query, err := r.loader.LoadQuery("sql/user/search_user_by_email_or_identity.sql")
 	if err != nil {
 		return nil, err
 	}
 
-	row := db.DBInstance.QueryRowContext(
+	rows, err := db.DBInstance.QueryContext(
 		ctx, query,
 		userID,
 		userID,
-		strings.ToLower(searchInput),
-		strings.ToLower(searchInput),
+		searchInput,
+		searchInput,
+		searchInput,
 		userID,
 	)
 
-	var user response.SearchResultResponse
+	defer rows.Close()
 
-	err = row.Scan(&user.ID, &user.Email, &user.Username, &user.UserIdentity, &user.IsFriend, &user.ProfileImage)
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil
+	var users []response.SearchResultResponse
+
+	for rows.Next() {
+		var user response.SearchResultResponse
+		err = rows.Scan(&user.ID, &user.Email, &user.Username, &user.UserIdentity, &user.IsFriend, &user.ProfileImage)
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, nil
+			}
+			return nil, err
 		}
-		return nil, err
+
+		users = append(users, user)
 	}
 
-	return &user, nil
+	return users, nil
 
 }

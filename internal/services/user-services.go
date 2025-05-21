@@ -156,16 +156,12 @@ func (s *userServices) UploadProfileImage(ctx context.Context, userID string, im
 	return nil
 }
 
-func (s *userServices) SearchUser(ctx context.Context, userID string, searchInput string) (*response.SearchResultResponse, error) {
-	user, err := s.userRepo.SearchUser(ctx, userID, searchInput)
+func (s *userServices) SearchUser(ctx context.Context, userID string, searchInput string) ([]response.SearchResultResponse, error) {
+	users, err := s.userRepo.SearchUser(ctx, userID, searchInput)
 
 	if err != nil {
 		return nil, &e.NotFoundError{Message: "User not found"}
 	}
 
-	if user == nil {
-		return nil, &e.NotFoundError{Message: "User not found"}
-	}
-
-	return user, nil
+	return users, nil
 }

@@ -16,5 +16,5 @@ type UserRepository interface {
 	UpdatePersonalDetail(pd *models.PersonalDetails) error
 	GetProfileImagePath(ctx context.Context, userID string) (string, error)
 	UploadProfileImage(userID string, imagePath string) error
-	SearchUser(ctx context.Context, userID string, searchInput string) (*response.SearchResultResponse, error)
+	SearchUser(ctx context.Context, userID string, searchInput string) ([]response.SearchResultResponse, error)
 }
