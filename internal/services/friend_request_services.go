@@ -47,6 +47,7 @@ func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dt
 		}
 		//default action SENT
 		err := s.frlRepo.CreateFriendRequestLog(frl)
+
 		if err != nil {
 			return &e.InternalServerError{Message: "Something went wrong. Please try agian laster!"}
 		}
@@ -142,7 +143,7 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 }
 
 func (s *frService) GetAllFriendRequestLog(ctx context.Context, userID string) ([]response.FriendRequestResponse, error) {
-	logs, err := s.frlRepo.GetAllFriendRequestLog(ctx, userID)
+	logs, err := s.frRepo.GetAllFriendRequestLog(ctx, userID)
 
 	if err != nil {
 		return nil, &e.InternalServerError{Message: err.Error()}

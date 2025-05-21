@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 )
 
 type FriendRequestRepository interface {
@@ -12,4 +13,5 @@ type FriendRequestRepository interface {
 	HasPendingRequest(ctx context.Context, senderId, receiverId string) bool
 	DeleteFriendRequestByID(id string) error
 	GetFriendRequestByID(ctx context.Context, id string) (*models.FriendRequest, error)
+	GetAllFriendRequestLog(ctx context.Context, userID string) ([]response.FriendRequestResponse, error)
 }

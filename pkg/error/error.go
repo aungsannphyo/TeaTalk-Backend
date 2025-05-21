@@ -36,6 +36,6 @@ func NotFoundResponse(c *gin.Context, err error) {
 	c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 }
 
-func ConfictResponse(c *gin.Context, err error) {
+func ConflictResponse(c *gin.Context, err error) {
 	c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
 }

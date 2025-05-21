@@ -7,6 +7,6 @@ type FriendRequestResponse struct {
 	SenderID     string    `json:"senderId"`
 	Username     string    `json:"username"`
 	Email        string    `json:"email"`
-	ProfileImage string    `json:"profileImage"`
+	ProfileImage *string   `json:"profileImage"`
 	CreateAt     time.Time `json:"createAt"`
 }
