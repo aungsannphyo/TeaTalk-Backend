@@ -6,4 +6,5 @@ import (
 
 type FriendRequestLogRepository interface {
 	CreateFriendRequestLog(frl *models.FriendRequestLog) error
+	HasRejectedFriendRequestLog(frl *models.FriendRequestLog) (bool, error)
 }

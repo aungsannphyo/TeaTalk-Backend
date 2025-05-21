@@ -32,11 +32,17 @@ func (s *fService) MakeUnFriend(userID string, dto dto.UnFriendDto) error {
 		PerformedBy: userID,
 	}
 
-	// 	_, firstErr := stmt.Exec(f.UserID, f.FriendID, f.UserID, f.FriendID)
-	// _, secondErr := stmt.Exec(f.FriendID, f.UserID, f.FriendID, f.UserID)
+	canSend, err := s.frlRepo.HasRejectedFriendRequestLog(frl)
+
+	if err != nil {
+		return err
+	}
+	if !canSend {
+		return &e.BadRequestError{Message: "cannot send friend request: duplicate or active request exists"}
+	}
 
 	//make Action to UnFriended
-	err := s.frlRepo.CreateFriendRequestLog(frl)
+	err = s.frlRepo.CreateFriendRequestLog(frl)
 
 	if err != nil {
 		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}

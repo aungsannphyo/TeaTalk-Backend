@@ -1,12 +1,16 @@
 CREATE TABLE friend_request_logs (
-    id VARCHAR(255) PRIMARY KEY DEFAULT (UUID()),
+    id VARCHAR(255) PRIMARY KEY DEFAULT(UUID()),
     sender_id VARCHAR(255) NOT NULL,
     receiver_id VARCHAR(255) NOT NULL,
-    action ENUM('SENT', 'ACCEPTED', 'REJECTED', 'CANCELLED', 'UNFRIENDED') NOT NULL,
+    action ENUM(
+        'SENT',
+        'ACCEPTED',
+        'REJECTED',
+        'UNFRIENDED'
+    ) NOT NULL,
     performed_by VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (performed_by) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (sender_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (receiver_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (performed_by) REFERENCES users (id) ON DELETE CASCADE
 );

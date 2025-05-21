@@ -8,7 +8,6 @@ const (
 	ActionSend       FriendRequestAction = "SENT"
 	ActionAccepted   FriendRequestAction = "ACCEPTED"
 	ActionRejected   FriendRequestAction = "REJECTED"
-	ActionCancelled  FriendRequestAction = "CANCELLED"
 	ActionUnFriended FriendRequestAction = "UNFRIENDED"
 )
 

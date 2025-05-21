@@ -46,7 +46,15 @@ func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dt
 			PerformedBy: fr.SenderId,
 		}
 		//default action SENT
-		err := s.frlRepo.CreateFriendRequestLog(frl)
+		canSend, err := s.frlRepo.HasRejectedFriendRequestLog(frl)
+
+		if err != nil {
+			return err
+		}
+		if !canSend {
+			return &e.BadRequestError{Message: "cannot send friend request: duplicate or active request exists"}
+		}
+		err = s.frlRepo.CreateFriendRequestLog(frl)
 
 		if err != nil {
 			return &e.InternalServerError{Message: "Something went wrong. Please try agian laster!"}
@@ -113,6 +121,15 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 				PerformedBy: dfr.ReceiverId,
 			}
 
+			canSend, err := s.frlRepo.HasRejectedFriendRequestLog(acceptFrl)
+
+			if err != nil {
+				return err
+			}
+			if !canSend {
+				return &e.BadRequestError{Message: "cannot send friend request: duplicate or active request exists"}
+			}
+
 			err = s.frlRepo.CreateFriendRequestLog(acceptFrl)
 
 			if err != nil {
@@ -128,7 +145,7 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 				PerformedBy: dfr.ReceiverId,
 			}
 
-			err := s.frlRepo.CreateFriendRequestLog(rejectFrl)
+			err = s.frlRepo.CreateFriendRequestLog(rejectFrl)
 
 			if err != nil {
 				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
