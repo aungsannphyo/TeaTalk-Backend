@@ -52,7 +52,7 @@ func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dt
 			return err
 		}
 		if !canSend {
-			return &e.BadRequestError{Message: "cannot send friend request: duplicate or active request exists"}
+			return &e.BadRequestError{Message: "You can't send this right now!"}
 		}
 		err = s.frlRepo.CreateFriendRequestLog(frl)
 
@@ -127,7 +127,7 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 				return err
 			}
 			if !canSend {
-				return &e.BadRequestError{Message: "cannot send friend request: duplicate or active request exists"}
+				return &e.BadRequestError{Message: "You can't send this right now!"}
 			}
 
 			err = s.frlRepo.CreateFriendRequestLog(acceptFrl)

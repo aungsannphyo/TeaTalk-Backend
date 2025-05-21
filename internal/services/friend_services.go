@@ -38,7 +38,7 @@ func (s *fService) MakeUnFriend(userID string, dto dto.UnFriendDto) error {
 		return err
 	}
 	if !canSend {
-		return &e.BadRequestError{Message: "cannot send friend request: duplicate or active request exists"}
+		return &e.BadRequestError{Message: "You can't send this right now!"}
 	}
 
 	//make Action to UnFriended
