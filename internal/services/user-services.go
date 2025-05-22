@@ -12,6 +12,7 @@ import (
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
 	"github.com/go-sql-driver/mysql"
+	"github.com/google/uuid"
 )
 
 type userServices struct {
@@ -25,6 +26,7 @@ func (s *userServices) Register(u *dto.RegisterRequestDto) error {
 		return &e.InternalServerError{Message: "Password hashing failed"}
 	}
 	user := &models.User{
+		ID:       uuid.New().String(),
 		Username: u.Username,
 		Email:    u.Email,
 		Password: hashedPassword,

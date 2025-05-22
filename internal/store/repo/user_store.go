@@ -69,7 +69,7 @@ func (r *userRepo) Register(u *models.User) error {
 
 	userIdentity := r.getUniqueUserIdentity(u.Username)
 
-	_, err = stmt.Exec(u.Username, userIdentity, strings.ToLower(u.Email), u.Password)
+	_, err = stmt.Exec(u.ID, u.Username, userIdentity, strings.ToLower(u.Email), u.Password)
 	if err != nil {
 		return err
 	}
@@ -85,6 +85,7 @@ func (r *userRepo) Register(u *models.User) error {
 	}
 
 	defer pdStmt.Close()
+
 	_, _ = pdStmt.Exec(u.ID, nil, nil, nil)
 
 	return nil
