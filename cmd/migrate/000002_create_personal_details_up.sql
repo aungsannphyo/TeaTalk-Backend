@@ -4,6 +4,8 @@ CREATE TABLE IF NOT EXISTS personal_details (
     gender ENUM('MALE', 'FEMALE', 'OTHER') NULL,
     date_of_birth DATE NULL,
     bio TEXT NULL,
+    is_online BOOLEAN DEFAULT FALSE,
+    last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );

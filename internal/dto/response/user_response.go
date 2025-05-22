@@ -31,6 +31,11 @@ type SearchResultResponse struct {
 	ProfileImage string `json:"profileImage"`
 }
 
+type UserDetailsResponse struct {
+	User    UserResponse            `json:"user"`
+	Details PersonalDetailsResponse `json:"personalDetails"`
+}
+
 func NewLoginResponse(user *models.User, token string) *LoginResponse {
 	return &LoginResponse{
 		ID:        user.ID,
@@ -49,5 +54,12 @@ func NewUserResponse(user *models.User) *UserResponse {
 		Username:     user.Username,
 		Email:        user.Email,
 		CreatedAt:    user.CreatedAt,
+	}
+}
+
+func NewUserDetailsResponse(user *models.User, details *models.PersonalDetails) *UserDetailsResponse {
+	return &UserDetailsResponse{
+		User:    *NewUserResponse(user),
+		Details: *NewPersonalDetailsResponse(details),
 	}
 }

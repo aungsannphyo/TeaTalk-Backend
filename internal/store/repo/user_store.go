@@ -97,24 +97,25 @@ func (r *userRepo) Login(user *models.User) (*models.User, error) {
 	return &foundUser, nil
 }
 
-func (r *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User, error) {
+func (r *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User, *models.PersonalDetails, error) {
 	query, err := r.loader.LoadQuery("sql/user/get_user_by_id.sql")
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	row := db.DBInstance.QueryRowContext(ctx, query, userID)
 
 	var user models.User
+	var ps models.PersonalDetails
 
-	err = row.Scan(&user.ID, &user.Username, &user.Email, &user.Password, &user.CreatedAt)
+	err = row.Scan(&user.ID, &user.Email, &user.UserIdentity, ps.ProfileImage, ps.Gender, ps.DateOfBirth, ps.Bio)
 
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	return &user, nil
+	return &user, &ps, nil
 }
 
 func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
@@ -288,5 +289,52 @@ func (r *userRepo) SearchUser(
 	}
 
 	return users, nil
+}
 
+func (r *userRepo) SetUserOnline(userID string) error {
+	query, err := r.loader.LoadQuery("sql/user/update_set_user_online.sql")
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (r *userRepo) SetUserOffline(userID string) error {
+	query, err := r.loader.LoadQuery("sql/user/update_set_user_offline.sql")
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

@@ -71,14 +71,14 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	return foundUser, token, nil
 }
 
-func (s *userServices) GetUserByID(ctx context.Context, userId string) (*models.User, error) {
-	user, err := s.userRepo.GetUserByID(ctx, userId)
+func (s *userServices) GetUserByID(ctx context.Context, userId string) (*models.User, *models.PersonalDetails, error) {
+	user, ps, err := s.userRepo.GetUserByID(ctx, userId)
 
 	if err != nil {
-		return nil, &e.NotFoundError{Message: "User not found"}
+		return nil, nil, &e.NotFoundError{Message: "User not found"}
 
 	}
-	return user, nil
+	return user, ps, nil
 }
 
 func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
@@ -164,4 +164,12 @@ func (s *userServices) SearchUser(ctx context.Context, userID string, searchInpu
 	}
 
 	return users, nil
+}
+
+func (s *userServices) SetUserOnline(userID string) error {
+	return s.userRepo.SetUserOnline(userID)
+}
+
+func (s *userServices) SetUserOffline(userID string) error {
+	return s.userRepo.SetUserOffline(userID)
 }

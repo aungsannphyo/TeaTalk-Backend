@@ -1,9 +1,5 @@
-SELECT
-    id,
-    username,
-    email,
-    password,
-    created_at
-FROM users
+SELECT u.id, u.email, u.username, u.user_identity, pd.profile_image, pd.gender, pd.date_of_birth, pd.bio
+FROM users u
+    LEFT JOIN personal_details pd ON u.id = pd.user_id
 WHERE
-    id = ?
+    u.id = ?;

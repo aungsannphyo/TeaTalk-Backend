@@ -33,12 +33,23 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	privateHub := private.NewPrivateHub()
 	groupHub := group.NewGroupHub(serviceFactory.ConversationService())
 
+	privateHubHandler := private.NewWebSocketPrivateHandler(
+		privateHub,
+		serviceFactory.MessageService(),
+		serviceFactory.UserService(),
+	)
+
+	groupHubHandler := group.NewWebSocketGroupHandler(
+		groupHub,
+		serviceFactory.MessageService(),
+	)
+
 	go privateHub.RunPrivateWebSocket()
 	go groupHub.RunGroupWebSocket()
 
 	return &HandlerSet{
-		PrivateHubHandler:    private.NewWebSocketPrivateHandler(privateHub, serviceFactory.MessageService()),
-		GroupHubHandler:      group.NewWebSocketGroupHandler(groupHub, serviceFactory.MessageService()),
+		PrivateHubHandler:    privateHubHandler,
+		GroupHubHandler:      groupHubHandler,
 		UserHandler:          NewUserHandler(serviceFactory.UserService()),
 		FriendRequestHandler: NewFriendRequestHandler(serviceFactory.FriendRequestService()),
 		FriendHandler:        NewFriendHandler(serviceFactory.FriendService()),

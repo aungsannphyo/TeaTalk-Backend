@@ -18,6 +18,7 @@ type PrivateClient struct {
 	send           chan []byte
 	userID         string
 	messageService service.MessageService
+	userService    service.UserService
 }
 
 type PrivateMessage struct {
@@ -116,5 +117,17 @@ func (c *PrivateClient) WritePrivatePump() {
 				return
 			}
 		}
+	}
+}
+
+func (c *PrivateClient) SetOnline() {
+	if err := c.userService.SetUserOnline(c.userID); err != nil {
+		log.Println("Failed to set user online")
+	}
+}
+
+func (c *PrivateClient) SetOffline() {
+	if err := c.userService.SetUserOffline(c.userID); err != nil {
+		log.Println("Failed to set user offline")
 	}
 }

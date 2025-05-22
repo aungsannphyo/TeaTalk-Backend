@@ -14,17 +14,20 @@ var upgrader = websocket.Upgrader{
 }
 
 type WebSocketPrivateHandler struct {
-	hub        *PrivateHub
-	msgService s.MessageService
+	hub         *PrivateHub
+	msgService  s.MessageService
+	userService s.UserService
 }
 
 func NewWebSocketPrivateHandler(
 	hub *PrivateHub,
 	msgS s.MessageService,
+	userS s.UserService,
 ) *WebSocketPrivateHandler {
 	return &WebSocketPrivateHandler{
-		hub:        hub,
-		msgService: msgS,
+		hub:         hub,
+		msgService:  msgS,
+		userService: userS,
 	}
 }
 
@@ -41,6 +44,7 @@ func (h *WebSocketPrivateHandler) WebSocketPrivateHandler(c *gin.Context) {
 		send:           make(chan []byte, 512),
 		userID:         userID,
 		messageService: h.msgService,
+		userService:    h.userService,
 	}
 
 	client.hub.register <- client

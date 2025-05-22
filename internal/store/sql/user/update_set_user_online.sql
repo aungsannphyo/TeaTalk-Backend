@@ -1,0 +1,1 @@
+UPDATE personal_details SET is_online = TRUE WHERE user_id = ?
