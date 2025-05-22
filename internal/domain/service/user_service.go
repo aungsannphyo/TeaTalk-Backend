@@ -13,7 +13,6 @@ type UserService interface {
 	Login(u *dto.LoginRequestDto) (*models.User, string, error)
 	GetUserByID(ctx context.Context, userID string) (*models.User, *models.PersonalDetails, error)
 	GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error)
-	CreatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error
 	UpdatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error
 	UploadProfileImage(ctx context.Context, userID string, imagePath string) error
 	SearchUser(ctx context.Context, userID string, searchInput string) ([]response.SearchResultResponse, error)

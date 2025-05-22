@@ -12,7 +12,6 @@ type UserRepository interface {
 	Login(user *models.User) (*models.User, error)
 	GetUserByID(ctx context.Context, userID string) (*models.User, *models.PersonalDetails, error)
 	GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error)
-	CreatePersonalDetail(ps *models.PersonalDetails) error
 	UpdatePersonalDetail(pd *models.PersonalDetails) error
 	GetProfileImagePath(ctx context.Context, userID string) (string, error)
 	UploadProfileImage(userID string, imagePath string) error

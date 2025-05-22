@@ -30,6 +30,5 @@ FROM users u
 WHERE (
         u.email = ?
         OR u.user_identity = ?
-        OR u.username LIKE CONCAT('%', ?, '%') -- ← partial match on username
     )
     AND u.id != ?;

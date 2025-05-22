@@ -87,28 +87,6 @@ func (h *UserHandler) GetChatListByUserIdHandler(c *gin.Context) {
 	}
 }
 
-func (h *UserHandler) CreatePersonalDetailsHandler(c *gin.Context) {
-	userID := c.GetString("userID")
-
-	var pd dto.PersonalDetailDto
-	if err := c.ShouldBindJSON(&pd); err != nil {
-		e.BadRequestResponse(c, err)
-		return
-	}
-
-	if err := dto.ValidateCreatePersonalDetails(pd); err != nil {
-		e.BadRequestResponse(c, err)
-		return
-	}
-
-	if err := h.userService.CreatePersonalDetail(userID, &pd); err != nil {
-		e.InternalServerResponse(c, err)
-		return
-	}
-
-	success.CreateResponse(c, "Personal details created successfully!")
-}
-
 func (h *UserHandler) UpdatePersonalDetailsHandler(c *gin.Context) {
 	userID := c.GetString("userID")
 	var ps dto.PersonalDetailDto
@@ -188,7 +166,7 @@ func (h *UserHandler) GetUserHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) GetFriendsByUserHandler(c *gin.Context) {
-	userID := c.Param("userID")
+	userID := c.GetString("userID")
 
 	friend, err := h.userService.GetFriendsByID(c.Request.Context(), userID)
 	if err != nil {

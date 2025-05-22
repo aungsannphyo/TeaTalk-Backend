@@ -91,22 +91,6 @@ func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) (
 	return chatList, nil
 }
 
-func (s *userServices) CreatePersonalDetail(userID string, dto *dto.PersonalDetailDto) error {
-
-	ps := &models.PersonalDetails{
-		UserID:      userID,
-		Gender:      dto.Gender,
-		DateOfBirth: dto.DateOfBirth,
-		Bio:         dto.Bio,
-	}
-	err := s.userRepo.CreatePersonalDetail(ps)
-
-	if err != nil {
-		return &e.InternalServerError{Message: err.Error()}
-	}
-	return nil
-}
-
 func (s *userServices) UpdatePersonalDetail(userID string, dto *dto.PersonalDetailDto) error {
 	ps := &models.PersonalDetails{
 		UserID:      userID,
@@ -136,11 +120,7 @@ func (s *userServices) UploadProfileImage(ctx context.Context, userID string, im
 		os.Remove(filePath)
 		return nil
 	} else {
-		ps := &models.PersonalDetails{
-			UserID:       userID,
-			ProfileImage: &imagePath,
-		}
-		err := s.userRepo.CreatePersonalDetail(ps)
+		err := s.userRepo.UploadProfileImage(userID, imagePath)
 
 		if err != nil {
 			return &e.InternalServerError{Message: err.Error()}

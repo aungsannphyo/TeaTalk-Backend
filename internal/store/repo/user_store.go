@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -69,10 +70,22 @@ func (r *userRepo) Register(u *models.User) error {
 	userIdentity := r.getUniqueUserIdentity(u.Username)
 
 	_, err = stmt.Exec(u.Username, userIdentity, strings.ToLower(u.Email), u.Password)
-
 	if err != nil {
 		return err
 	}
+
+	pdQuery, err := r.loader.LoadQuery("sql/user/create_personal_details.sql")
+	if err != nil {
+		return err
+	}
+
+	pdStmt, err := db.DBInstance.Prepare(pdQuery)
+	if err != nil {
+		return err
+	}
+
+	defer pdStmt.Close()
+	_, _ = pdStmt.Exec(u.ID, nil, nil, nil)
 
 	return nil
 }
@@ -152,30 +165,6 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 
 	return chatList, nil
 
-}
-
-func (r *userRepo) CreatePersonalDetail(ps *models.PersonalDetails) error {
-	query, err := r.loader.LoadQuery("sql/user/create_personal_details.sql")
-
-	if err != nil {
-		return err
-	}
-
-	stmt, err := db.DBInstance.Prepare(query)
-
-	if err != nil {
-		return err
-	}
-
-	defer stmt.Close()
-
-	_, err = stmt.Exec(ps.UserID, ps.Gender, ps.DateOfBirth, ps.Bio)
-
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *userRepo) UpdatePersonalDetail(ps *models.PersonalDetails) error {
@@ -267,7 +256,6 @@ func (r *userRepo) SearchUser(
 		userID,
 		searchInput,
 		searchInput,
-		searchInput,
 		userID,
 	)
 
@@ -306,12 +294,14 @@ func (r *userRepo) SetUserOnline(userID string) error {
 	query, err := r.loader.LoadQuery("sql/user/update_set_user_online.sql")
 
 	if err != nil {
+		log.Println("1", err)
 		return err
 	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
 	if err != nil {
+		log.Println("2", err)
 		return err
 	}
 
@@ -320,6 +310,7 @@ func (r *userRepo) SetUserOnline(userID string) error {
 	_, err = stmt.Exec(userID)
 
 	if err != nil {
+		log.Println("3", err)
 		return err
 	}
 
@@ -360,7 +351,12 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 		ctx, query,
 		userID,
 		userID,
+		userID,
 	)
+
+	if err != nil {
+		return nil, err
+	}
 
 	defer rows.Close()
 
@@ -379,6 +375,7 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 		)
 
 		if err != nil {
+
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, nil
 			}
