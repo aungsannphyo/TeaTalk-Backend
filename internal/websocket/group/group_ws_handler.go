@@ -5,6 +5,7 @@ import (
 
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 
+	ws "github.com/aungsannphyo/ywartalk/internal/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
@@ -14,18 +15,20 @@ var upgrader = websocket.Upgrader{
 }
 
 type WebSocketGroupHandler struct {
-	hub        *GroupHub
-	msgService s.MessageService
-	uService   s.UserService
+	hub           *GroupHub
+	msgService    s.MessageService
+	onlineManager *ws.SharedOnlineManager
 }
 
 func NewWebSocketGroupHandler(
 	hub *GroupHub,
 	msgS s.MessageService,
+	onlineManager *ws.SharedOnlineManager,
 ) *WebSocketGroupHandler {
 	return &WebSocketGroupHandler{
-		hub:        hub,
-		msgService: msgS,
+		hub:           hub,
+		msgService:    msgS,
+		onlineManager: onlineManager,
 	}
 }
 
@@ -42,6 +45,7 @@ func (h *WebSocketGroupHandler) NewWebSocketGroupHandler(c *gin.Context) {
 		send:           make(chan []byte, 512),
 		userID:         userID,
 		messageService: h.msgService,
+		onlineManager:  h.onlineManager,
 	}
 
 	client.hub.register <- client

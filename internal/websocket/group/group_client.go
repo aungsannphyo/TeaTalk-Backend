@@ -18,6 +18,7 @@ type GroupClient struct {
 	send           chan []byte
 	userID         string
 	messageService service.MessageService
+	onlineManager  *ws.SharedOnlineManager
 }
 
 type GroupMessage struct {

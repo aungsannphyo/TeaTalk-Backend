@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
-
+	ws "github.com/aungsannphyo/ywartalk/internal/websocket"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 )
@@ -14,20 +14,20 @@ var upgrader = websocket.Upgrader{
 }
 
 type WebSocketPrivateHandler struct {
-	hub         *PrivateHub
-	msgService  s.MessageService
-	userService s.UserService
+	hub           *PrivateHub
+	msgService    s.MessageService
+	onlineManager *ws.SharedOnlineManager
 }
 
 func NewWebSocketPrivateHandler(
 	hub *PrivateHub,
 	msgS s.MessageService,
-	userS s.UserService,
+	onlineManager *ws.SharedOnlineManager,
 ) *WebSocketPrivateHandler {
 	return &WebSocketPrivateHandler{
-		hub:         hub,
-		msgService:  msgS,
-		userService: userS,
+		hub:           hub,
+		msgService:    msgS,
+		onlineManager: onlineManager,
 	}
 }
 
@@ -44,7 +44,7 @@ func (h *WebSocketPrivateHandler) WebSocketPrivateHandler(c *gin.Context) {
 		send:           make(chan []byte, 512),
 		userID:         userID,
 		messageService: h.msgService,
-		userService:    h.userService,
+		onlineManager:  h.onlineManager,
 	}
 
 	client.hub.register <- client

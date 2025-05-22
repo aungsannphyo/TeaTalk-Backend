@@ -35,7 +35,9 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 
 			h.clients[c.userID] = c
 			h.mu.Unlock()
-			go c.SetOnline()
+
+			go c.onlineManager.SetUserOnline(c.userID)
+
 			log.Printf("User %s connected", c.userID)
 
 		case c := <-h.unregister:
@@ -45,7 +47,8 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 				close(c.send)
 			}
 			h.mu.Unlock()
-			go c.SetOffline()
+
+			go c.onlineManager.SetUserOffline(c.userID)
 
 		case pm := <-h.broadcast:
 			h.mu.RLock()

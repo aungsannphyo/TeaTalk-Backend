@@ -6,6 +6,7 @@ import (
 	"github.com/aungsannphyo/ywartalk/internal/services"
 	store "github.com/aungsannphyo/ywartalk/internal/store/repo"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
+	ws "github.com/aungsannphyo/ywartalk/internal/websocket"
 	"github.com/aungsannphyo/ywartalk/internal/websocket/group"
 	"github.com/aungsannphyo/ywartalk/internal/websocket/private"
 )
@@ -33,15 +34,18 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	privateHub := private.NewPrivateHub()
 	groupHub := group.NewGroupHub(serviceFactory.ConversationService())
 
+	onlineManager := ws.NewSharedOnlineManager(serviceFactory.UserService())
+
 	privateHubHandler := private.NewWebSocketPrivateHandler(
 		privateHub,
 		serviceFactory.MessageService(),
-		serviceFactory.UserService(),
+		onlineManager,
 	)
 
 	groupHubHandler := group.NewWebSocketGroupHandler(
 		groupHub,
 		serviceFactory.MessageService(),
+		onlineManager,
 	)
 
 	go privateHub.RunPrivateWebSocket()

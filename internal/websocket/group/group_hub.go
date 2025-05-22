@@ -44,6 +44,8 @@ func (h *GroupHub) RunGroupWebSocket() {
 			h.mu.Unlock()
 			log.Printf("User %s connected", c.userID)
 
+			go c.onlineManager.SetUserOnline(c.userID)
+
 			ctx := context.Background()
 			groups, err := h.convService.GetGroupsById(ctx, c.userID)
 
@@ -66,6 +68,8 @@ func (h *GroupHub) RunGroupWebSocket() {
 				log.Printf("User %s disconnected", c.userID)
 			}
 			h.mu.Unlock()
+
+			go c.onlineManager.SetUserOffline(c.userID)
 
 		case gm := <-h.broadcast:
 			h.mu.RLock()
