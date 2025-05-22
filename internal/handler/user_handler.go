@@ -70,19 +70,6 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 	success.OkResponse(c, loginResponse)
 }
 
-func (h *UserHandler) GetUserHandler(c *gin.Context) {
-	userId := c.Param("userID")
-
-	user, ps, err := h.userService.GetUserByID(c.Request.Context(), userId)
-	if err != nil {
-		e.NotFoundResponse(c, err)
-		return
-	}
-	userDetailsResponse := response.NewUserDetailsResponse(user, ps)
-
-	success.OkResponse(c, userDetailsResponse)
-}
-
 func (h *UserHandler) GetChatListByUserIdHandler(c *gin.Context) {
 	userID := c.GetString("userID")
 	chatList, err := h.userService.GetChatListByUserID(c.Request.Context(), userID)
@@ -185,4 +172,29 @@ func (h *UserHandler) SearchUserHandler(c *gin.Context) {
 	}
 
 	success.OkResponse(c, user)
+}
+
+func (h *UserHandler) GetUserHandler(c *gin.Context) {
+	userID := c.Param("userID")
+
+	user, ps, err := h.userService.GetUserByID(c.Request.Context(), userID)
+	if err != nil {
+		e.NotFoundResponse(c, err)
+		return
+	}
+	userDetailsResponse := response.NewUserDetailsResponse(user, ps)
+
+	success.OkResponse(c, userDetailsResponse)
+}
+
+func (h *UserHandler) GetFriendsByUserHandler(c *gin.Context) {
+	userID := c.Param("userID")
+
+	friend, err := h.userService.GetFriendsByID(c.Request.Context(), userID)
+	if err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+
+	success.OkResponse(c, friend)
 }

@@ -19,7 +19,12 @@ SELECT
         TRUE,
         FALSE
     ) AS is_friend,
-    COALESCE(pd.profile_image, '') AS profile_image
+    COALESCE(pd.profile_image, '') AS profile_image,
+    COALESCE(pd.is_online, FALSE) AS is_online,
+    COALESCE(
+        pd.last_seen,
+        CURRENT_TIMESTAMP
+    ) AS last_seen
 FROM users u
     LEFT JOIN personal_details pd ON u.id = pd.user_id
 WHERE (

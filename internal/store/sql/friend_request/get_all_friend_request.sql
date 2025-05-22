@@ -5,4 +5,5 @@ FROM
     LEFT JOIN personal_details pd ON u.id = pd.user_id
 WHERE
     fr.receiver_id = ?
-    AND fr.status = 'PENDING';
+    AND fr.status = 'PENDING'
+ORDER BY fr.created_at DESC;

@@ -1,0 +1,1 @@
+CREATE INDEX idx_personal_details_user_id ON personal_details (user_id);

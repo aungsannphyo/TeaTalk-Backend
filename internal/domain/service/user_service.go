@@ -19,4 +19,5 @@ type UserService interface {
 	SearchUser(ctx context.Context, userID string, searchInput string) ([]response.SearchResultResponse, error)
 	SetUserOnline(userID string) error
 	SetUserOffline(userID string) error
+	GetFriendsByID(ctx context.Context, userID string) ([]response.FriendResponse, error)
 }

@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"log"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
@@ -94,7 +93,6 @@ func (r *conRepo) CheckExistsGroup(ctx context.Context, c *models.Conversation) 
 
 	err = row.Scan(&con)
 	if err != nil {
-		log.Println("ERR", err)
 		if errors.Is(err, sql.ErrNoRows) {
 			return false
 		}

@@ -71,8 +71,8 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	return foundUser, token, nil
 }
 
-func (s *userServices) GetUserByID(ctx context.Context, userId string) (*models.User, *models.PersonalDetails, error) {
-	user, ps, err := s.userRepo.GetUserByID(ctx, userId)
+func (s *userServices) GetUserByID(ctx context.Context, userID string) (*models.User, *models.PersonalDetails, error) {
+	user, ps, err := s.userRepo.GetUserByID(ctx, userID)
 
 	if err != nil {
 		return nil, nil, &e.NotFoundError{Message: "User not found"}
@@ -172,4 +172,17 @@ func (s *userServices) SetUserOnline(userID string) error {
 
 func (s *userServices) SetUserOffline(userID string) error {
 	return s.userRepo.SetUserOffline(userID)
+}
+
+func (s *userServices) GetFriendsByID(ctx context.Context, userID string) (
+	[]response.FriendResponse,
+	error,
+) {
+	friend, err := s.userRepo.GetFriendsByID(ctx, userID)
+
+	if err != nil {
+		return nil, &e.InternalServerError{Message: "Something went wrong.Please try again later!"}
+
+	}
+	return friend, nil
 }

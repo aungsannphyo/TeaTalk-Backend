@@ -17,4 +17,6 @@ type PersonalDetails struct {
 	DateOfBirth  *string   `json:"date_of_birth,omitempty" db:"date_of_birth"` // Nullable DATE
 	Bio          *string   `json:"bio,omitempty" db:"bio"`                     // Nullable TEXT
 	CreatedAt    time.Time `json:"created_at" db:"created_at"`
+	IsOnline     bool      `json:"isOnline"`
+	LastSeen     time.Time `json:"lastSeen"`
 }

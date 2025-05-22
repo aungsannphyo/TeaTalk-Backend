@@ -1,6 +1,10 @@
 package response
 
-import "github.com/aungsannphyo/ywartalk/internal/domain/models"
+import (
+	"time"
+
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
+)
 
 type PersonalDetailsResponse struct {
 	UserID       string         `json:"userId"`
@@ -8,6 +12,8 @@ type PersonalDetailsResponse struct {
 	DateOfBirth  *string        `json:"dateOfBirth"` // Nullable DATE
 	Bio          *string        `json:"bio"`         // Nullable TEXT
 	ProfileImage *string        `json:"profileImage"`
+	IsOnline     bool           `json:"isOnline"`
+	LastSeen     time.Time      `json:"lastSeen"`
 }
 
 func NewPersonalDetailsResponse(ps *models.PersonalDetails) *PersonalDetailsResponse {
@@ -17,5 +23,7 @@ func NewPersonalDetailsResponse(ps *models.PersonalDetails) *PersonalDetailsResp
 		DateOfBirth:  ps.DateOfBirth,
 		Bio:          ps.Bio,
 		ProfileImage: ps.ProfileImage,
+		IsOnline:     ps.IsOnline,
+		LastSeen:     ps.LastSeen,
 	}
 }

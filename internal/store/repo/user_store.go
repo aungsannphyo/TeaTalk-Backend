@@ -277,8 +277,19 @@ func (r *userRepo) SearchUser(
 
 	for rows.Next() {
 		var user response.SearchResultResponse
-		err = rows.Scan(&user.ID, &user.Email, &user.Username, &user.UserIdentity, &user.IsFriend, &user.ProfileImage)
+		err = rows.Scan(
+			&user.ID,
+			&user.Email,
+			&user.Username,
+			&user.UserIdentity,
+			&user.IsFriend,
+			&user.ProfileImage,
+			&user.IsOnline,
+			&user.LastSeen,
+		)
+
 		if err != nil {
+
 			if errors.Is(err, sql.ErrNoRows) {
 				return nil, nil
 			}
@@ -337,4 +348,44 @@ func (r *userRepo) SetUserOffline(userID string) error {
 	}
 
 	return nil
+}
+
+func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]response.FriendResponse, error) {
+	query, err := r.loader.LoadQuery("sql/user/get_friend_list.sql")
+	if err != nil {
+		return nil, err
+	}
+
+	rows, err := db.DBInstance.QueryContext(
+		ctx, query,
+		userID,
+		userID,
+	)
+
+	defer rows.Close()
+
+	var friend []response.FriendResponse
+
+	for rows.Next() {
+		var f response.FriendResponse
+		err = rows.Scan(
+			&f.ID,
+			&f.Username,
+			&f.UserIdentity,
+			&f.Email,
+			&f.ProfileImage,
+			&f.IsOnline,
+			&f.LastSeen,
+		)
+
+		if err != nil {
+			if errors.Is(err, sql.ErrNoRows) {
+				return nil, nil
+			}
+			return nil, err
+		}
+
+		friend = append(friend, f)
+	}
+	return friend, nil
 }
