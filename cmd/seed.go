@@ -10,6 +10,7 @@ import (
 )
 
 func seedDatabase(db *sql.DB) {
+	log.Println("[SEED] Dummy Data Start SEEDING ...")
 	var count int
 	err := db.QueryRow("SELECT COUNT(*) FROM users").Scan(&count)
 	if err != nil {
