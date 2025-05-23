@@ -150,6 +150,7 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 		var chat models.ChatListItem
 		if err := rows.Scan(
 			&chat.ConversationID,
+			&chat.ReceiverID,
 			&chat.IsGroup,
 			&chat.Name,
 			&chat.LastMessageID,
@@ -359,6 +360,7 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 	)
 
 	if err != nil {
+		log.Println("ERROR", err)
 		return nil, err
 	}
 
@@ -379,10 +381,11 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 		)
 
 		if err != nil {
-
 			if errors.Is(err, sql.ErrNoRows) {
+				log.Println("ERROR", err)
 				return nil, nil
 			}
+			log.Println("ERROR", err)
 			return nil, err
 		}
 

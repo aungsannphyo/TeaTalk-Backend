@@ -5,10 +5,7 @@ SELECT
     u.email,
     pd.profile_image,
     COALESCE(pd.is_online, FALSE) AS is_online,
-    COALESCE(
-        pd.last_seen,
-        CURRENT_TIMESTAMP
-    ) AS last_seen
+    pd.last_seen AS last_seen
 FROM (
         SELECT DISTINCT
             CASE

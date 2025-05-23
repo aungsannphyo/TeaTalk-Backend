@@ -86,13 +86,8 @@ func (s *userServices) GetUserByID(ctx context.Context, userID string) (*models.
 func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
 	chatList, err := s.userRepo.GetChatListByUserID(ctx, userID)
 	if err != nil {
-		return nil, &e.InternalServerError{Message: err.Error()}
-	}
 
-	for _, c := range chatList {
-		if c.LastMessageID == "" {
-			return []models.ChatListItem{}, nil
-		}
+		return nil, &e.InternalServerError{Message: err.Error()}
 	}
 
 	return chatList, nil

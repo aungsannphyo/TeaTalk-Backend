@@ -23,14 +23,14 @@ type UserResponse struct {
 }
 
 type SearchResultResponse struct {
-	ID           string    `json:"id"`
-	Username     string    `json:"username"`
-	Email        string    `json:"email"`
-	UserIdentity string    `json:"userIdentity"`
-	IsFriend     bool      `json:"isFriend"`
-	ProfileImage string    `json:"profileImage"`
-	IsOnline     bool      `json:"isOnline"`
-	LastSeen     time.Time `json:"lastSeen"`
+	ID           string     `json:"id"`
+	Username     string     `json:"username"`
+	Email        string     `json:"email"`
+	UserIdentity string     `json:"userIdentity"`
+	IsFriend     bool       `json:"isFriend"`
+	ProfileImage *string    `json:"profileImage"`
+	IsOnline     bool       `json:"isOnline"`
+	LastSeen     *time.Time `json:"lastSeen"`
 }
 
 type UserDetailsResponse struct {
