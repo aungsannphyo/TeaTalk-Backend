@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/aungsannphyo/ywartalk/internal/handler"
 	"github.com/aungsannphyo/ywartalk/internal/routes"
@@ -16,6 +17,10 @@ func main() {
 	mysqlConfig := config.LoadMySQLConfig()
 	database.InitDb(mysqlConfig)
 	handler := handler.InitHandler(db.DBInstance)
+
+	if os.Getenv("APP_ENV") == "dev" {
+		seedDatabase(db.DBInstance)
+	}
 
 	s := gin.Default()
 	s.Use(cors.Default())
