@@ -158,7 +158,6 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 			&chat.LastMessageCreatedAt,
 			&chat.UnreadCount,
 		); err != nil {
-
 			return nil, err
 		}
 		chatList = append(chatList, chat)
@@ -322,12 +321,14 @@ func (r *userRepo) SetUserOffline(userID string) error {
 	query, err := r.loader.LoadQuery("sql/user/update_set_user_offline.sql")
 
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
 	if err != nil {
+		log.Println(err)
 		return err
 	}
 
@@ -336,6 +337,8 @@ func (r *userRepo) SetUserOffline(userID string) error {
 	_, err = stmt.Exec(userID)
 
 	if err != nil {
+
+		log.Println(err)
 		return err
 	}
 
