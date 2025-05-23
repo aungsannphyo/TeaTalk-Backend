@@ -2,7 +2,7 @@ package config
 
 import "os"
 
-func GetEnv(key, fallback string) string {
+func getEnv(key, fallback string) string {
 	if value, ok := os.LookupEnv(key); ok {
 		return value
 	}

@@ -139,8 +139,11 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 		return nil, err
 	}
 
-	rows, err := db.DBInstance.QueryContext(ctx, query, userID, userID, userID, userID, userID, userID)
+	rows, err := db.DBInstance.QueryContext(
+		ctx, query, userID, userID, userID, userID, userID, userID, userID,
+	)
 	if err != nil {
+
 		return nil, err
 	}
 	defer rows.Close()
@@ -153,6 +156,9 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 			&chat.ReceiverID,
 			&chat.IsGroup,
 			&chat.Name,
+			&chat.ProfileImage,
+			&chat.TotalOnline,
+			&chat.LastSeen,
 			&chat.LastMessageID,
 			&chat.LastMessageContent,
 			&chat.LastMessageSender,

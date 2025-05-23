@@ -17,10 +17,6 @@ func main() {
 	database.InitDb(mysqlConfig)
 	handler := handler.InitHandler(db.DBInstance)
 
-	if config.GetEnv("APP_ENV", "dev") == "dev" {
-		seedDatabase(db.DBInstance)
-	}
-
 	s := gin.Default()
 	s.Use(cors.Default())
 	err := s.SetTrustedProxies([]string{

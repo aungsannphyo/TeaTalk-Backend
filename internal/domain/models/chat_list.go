@@ -10,4 +10,7 @@ type ChatListItem struct {
 	LastMessageCreatedAt *string `json:"last_message_created_at"`
 	UnreadCount          int     `json:"unread_count"`
 	ReceiverID           *string `json:"receiver_id"`
+	ProfileImage         *string `json:"profile_image"`
+	TotalOnline          int     `json:"is_online"`
+	LastSeen             *string `json:"last_seen"`
 }

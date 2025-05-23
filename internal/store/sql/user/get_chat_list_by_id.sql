@@ -1,9 +1,11 @@
 SELECT *
 FROM (
-        -- Friend Chats
+        -- Private (Friend) Chats
         (
             SELECT
-                c.id AS conversation_id, u.id AS receiver_id, FALSE AS is_group, u.username AS name, m.id AS last_message_id, m.content AS last_message_content, m.sender_id AS last_message_sender, m.created_at AS last_message_created_at, (
+                c.id AS conversation_id, u.id AS receiver_id, FALSE AS is_group, u.username AS name, pd.profile_image, IF(pd.is_online, 1, 0) AS is_online, COALESCE(
+                    pd.last_seen, CURRENT_TIMESTAMP
+                ) AS last_seen, m.id AS last_message_id, m.content AS last_message_content, m.sender_id AS last_message_sender, m.created_at AS last_message_created_at, (
                     SELECT COUNT(*)
                     FROM
                         messages m2
@@ -20,6 +22,7 @@ FROM (
                 JOIN conversation_members cm2 ON cm2.conversation_id = c.id
                 AND cm1.user_id != cm2.user_id
                 JOIN users u ON u.id = cm2.user_id
+                LEFT JOIN personal_details pd ON pd.user_id = u.id
                 LEFT JOIN messages m ON m.id = (
                     SELECT id
                     FROM messages
@@ -48,7 +51,16 @@ FROM (
         -- Group Chats
         (
             SELECT
-                c.id AS conversation_id, NULL AS receiver_id, TRUE AS is_group, c.name AS name, m.id AS last_message_id, m.content AS last_message_content, m.sender_id AS last_message_sender, m.created_at AS last_message_created_at, (
+                c.id AS conversation_id, NULL AS receiver_id, TRUE AS is_group, c.name AS name, NULL AS profile_image, (
+                    SELECT COUNT(*)
+                    FROM
+                        conversation_members cmg
+                        JOIN personal_details pdg ON pdg.user_id = cmg.user_id
+                    WHERE
+                        cmg.conversation_id = c.id
+                        AND pdg.is_online = TRUE
+                        AND cmg.user_id != ?
+                ) AS is_online, NULL AS last_seen, m.id AS last_message_id, m.content AS last_message_content, m.sender_id AS last_message_sender, m.created_at AS last_message_created_at, (
                     SELECT COUNT(*)
                     FROM
                         messages m2
