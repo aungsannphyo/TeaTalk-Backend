@@ -36,3 +36,28 @@ func (r *mrRepo) CreateReadMessage(mr *models.MessageRead) error {
 	}
 	return nil
 }
+
+func (r *mrRepo) MarkAllReadMessages(userID, conversationID string) error {
+	query, err := r.loader.LoadQuery("sql/message_read/mark_all_read_messages.sql")
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(userID, userID, conversationID)
+
+	if err != nil {
+		return err
+	}
+	return nil
+
+}

@@ -62,5 +62,6 @@ func (f *serviceFactory) MessageService() s.MessageService {
 		fRepo:  f.repoFactory.NewFriendRepo(),
 		cRepo:  f.repoFactory.NewConversationRepo(),
 		cmRepo: f.repoFactory.NewConversationMemberRepo(),
+		mrRepo: f.repoFactory.NewMessageReadRepo(),
 	}
 }

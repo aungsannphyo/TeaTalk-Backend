@@ -13,14 +13,15 @@ import (
 )
 
 type HandlerSet struct {
-	UserHandler          *UserHandler
-	FriendRequestHandler *FriendRequestHandler
-	FriendHandler        *FriendHandler
-	ConversationsHandler *ConversationsHandler
-	PrivateHubHandler    *private.WebSocketPrivateHandler
-	GroupHubHandler      *group.WebSocketGroupHandler
-	MessageHandler       *MessageHandler
-	ReadMessageHandler   *readmessage.WebSocketReadMessageHandler
+	UserHandler           *UserHandler
+	FriendRequestHandler  *FriendRequestHandler
+	FriendHandler         *FriendHandler
+	ConversationsHandler  *ConversationsHandler
+	PrivateHubHandler     *private.WebSocketPrivateHandler
+	GroupHubHandler       *group.WebSocketGroupHandler
+	MessageHandler        *MessageHandler
+	ReadMessageHubHandler *readmessage.WebSocketReadMessageHandler
+	MessageReadHandler    *MessageReadHandler
 }
 
 func InitHandler(db *sql.DB) *HandlerSet {
@@ -62,13 +63,14 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	go readMessageHub.RunReadMessageHub()
 
 	return &HandlerSet{
-		PrivateHubHandler:    privateHubHandler,
-		GroupHubHandler:      groupHubHandler,
-		ReadMessageHandler:   msgReadHubHandler,
-		UserHandler:          NewUserHandler(serviceFactory.UserService()),
-		FriendRequestHandler: NewFriendRequestHandler(serviceFactory.FriendRequestService()),
-		FriendHandler:        NewFriendHandler(serviceFactory.FriendService()),
-		ConversationsHandler: NewConversationHandler(serviceFactory.ConversationService()),
-		MessageHandler:       NewMessageHandler(serviceFactory.MessageService()),
+		PrivateHubHandler:     privateHubHandler,
+		GroupHubHandler:       groupHubHandler,
+		ReadMessageHubHandler: msgReadHubHandler,
+		UserHandler:           NewUserHandler(serviceFactory.UserService()),
+		FriendRequestHandler:  NewFriendRequestHandler(serviceFactory.FriendRequestService()),
+		FriendHandler:         NewFriendHandler(serviceFactory.FriendService()),
+		ConversationsHandler:  NewConversationHandler(serviceFactory.ConversationService()),
+		MessageHandler:        NewMessageHandler(serviceFactory.MessageService()),
+		MessageReadHandler:    NewMessageReadHandler(serviceFactory.MessageReadService()),
 	}
 }

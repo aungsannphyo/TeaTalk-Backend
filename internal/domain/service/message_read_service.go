@@ -6,4 +6,5 @@ import (
 
 type MessageReadService interface {
 	CreateReadMessage(mr *models.MessageRead) error
+	MarkAllReadMessages(userID, conversationID string) error
 }
