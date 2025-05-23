@@ -14,4 +14,5 @@ func SetupRoutes(r *gin.Engine, h *handler.HandlerSet) {
 	RegisterFriendRoutes(api.Group("/friend"), h)
 	RegisterConversationRoutes(api.Group("/group"), h)
 	RegisterWebSocketRoute(api.Group("/"), h)
+	RegisterMessageRoute(api.Group("/message"), h)
 }

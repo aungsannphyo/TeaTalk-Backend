@@ -1,34 +1,26 @@
-package private
+package readmessage
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"strings"
 	"time"
 
+	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/service"
-	"github.com/aungsannphyo/ywartalk/internal/dto"
 	ws "github.com/aungsannphyo/ywartalk/internal/websocket"
 	"github.com/gorilla/websocket"
 )
 
-type PrivateClient struct {
-	hub            *PrivateHub
+type ReadMessageClient struct {
+	hub            *ReadMessageHub
 	conn           *websocket.Conn
 	send           chan []byte
 	userID         string
-	messageService service.MessageService
-	onlineManager  *ws.SharedOnlineManager
+	msgReadService service.MessageReadService
 }
 
-type PrivateMessage struct {
-	SenderID   string
-	ReceiverID string
-	Content    []byte
-}
-
-func (c *PrivateClient) ReadPrivatePump() {
+func (c *ReadMessageClient) ReadMessageReadPump() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -54,46 +46,42 @@ func (c *PrivateClient) ReadPrivatePump() {
 			continue
 		}
 
-		var wsMsg WSPrivateMessage
+		var wsMsg WSReadMessage
 		if err := json.Unmarshal(message, &wsMsg); err != nil {
 			log.Printf("Failed to unmarshal WSPrivateMessage. Raw message: %s, error: %v", string(message), err)
 			continue
 		}
 		wsMsg.CreatedAt = time.Now()
 
-		if wsMsg.ReceiverID == "" {
-			log.Printf("Missing receiverId for private message. Raw message: %s", string(message))
+		if wsMsg.ReaderId == "" {
+			log.Printf("Missing readerId for read message. Raw message: %s", string(message))
 			continue
 		}
 
-		if len(wsMsg.Content) == 0 || len(trimSpaces(wsMsg.Content)) == 0 {
+		if len(wsMsg.ReaderId) == 0 {
 			continue
 		}
 
 		response, _ := json.Marshal(wsMsg)
 
-		dto := dto.SendPrivateMessageDto{
-			ReceiverId: wsMsg.ReceiverID,
-			Content:    wsMsg.Content,
+		msgRead := &models.MessageRead{
+			MessageId: string(wsMsg.MessageID),
+			UserID:    wsMsg.ReaderId,
 		}
-		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-
-		defer cancel()
 
 		// insert into database
-		if err := c.messageService.SendPrivateMessage(ctx, c.userID, dto); err != nil {
+		if err := c.msgReadService.CreateReadMessage(msgRead); err != nil {
 			log.Println(err)
 		}
 
-		c.hub.broadcast <- PrivateMessage{
-			SenderID:   c.userID,
-			ReceiverID: wsMsg.ReceiverID,
-			Content:    response,
+		c.hub.broadcast <- WSReadMessage{
+			MessageID: response,
+			ReaderId:  wsMsg.ReaderId,
 		}
 	}
 }
 
-func (c *PrivateClient) WritePrivatePump() {
+func (c *ReadMessageClient) WriteMessageReadPump() {
 	ticker := time.NewTicker(ws.PingPeriod)
 	defer func() {
 		ticker.Stop()

@@ -2,10 +2,12 @@ package services
 
 import (
 	"context"
+	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
+	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/google/uuid"
 )
@@ -112,4 +114,20 @@ func (s *messageService) SendGroupMessage(
 	}
 
 	return s.mRepo.CreateMessage(message)
+}
+
+func (s *messageService) GetMessages(
+	ctx context.Context,
+	conversationID string,
+	cursorTimestamp *time.Time,
+	pageSize int,
+) ([]response.MessageResponse, error) {
+	messages, err := s.mRepo.GetMessages(ctx, conversationID, cursorTimestamp, pageSize)
+
+	if err != nil {
+		return nil, &e.InternalServerError{Message: "Something went wrong, please try again later"}
+	}
+
+	return messages, nil
+
 }
