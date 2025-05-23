@@ -3,7 +3,9 @@ FROM (
         -- Friend Chats
         (
             SELECT
-                c.id AS conversation_id, FALSE AS is_group, u.username AS name, m.id AS last_message_id, m.content AS last_message_content, m.sender_id AS last_message_sender, m.created_at AS last_message_created_at, (
+                c.id AS conversation_id, FALSE AS is_group, u.username AS name, COALESCE(m.id, '') AS last_message_id, COALESCE(m.content, '') AS last_message_content, COALESCE(m.sender_id, '') AS last_message_sender, COALESCE(
+                    CAST(m.created_at AS TEXT), ''
+                ) AS last_message_created_at, (
                     SELECT COUNT(*)
                     FROM
                         messages m2
@@ -48,7 +50,9 @@ FROM (
         -- Group Chats
         (
             SELECT
-                c.id AS conversation_id, TRUE AS is_group, c.name AS name, m.id AS last_message_id, m.content AS last_message_content, m.sender_id AS last_message_sender, m.created_at AS last_message_created_at, (
+                c.id AS conversation_id, TRUE AS is_group, c.name AS name, COALESCE(m.id, '') AS last_message_id, COALESCE(m.content, '') AS last_message_content, COALESCE(m.sender_id, '') AS last_message_sender, COALESCE(
+                    CAST(m.created_at AS TEXT), ''
+                ) AS last_message_created_at, (
                     SELECT COUNT(*)
                     FROM
                         messages m2
