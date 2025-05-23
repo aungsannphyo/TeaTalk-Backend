@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/service"
@@ -49,15 +50,23 @@ func (c *GroupClient) ReadGroupPump() {
 			break
 		}
 
+		if len(message) == 0 || len(trimSpaces(string(message))) == 0 {
+			continue
+		}
+
 		var wsMsg WSGroupMessage
 		if err := json.Unmarshal(message, &wsMsg); err != nil {
-			log.Println("Failed to marshal WSMessage:", err)
+			log.Printf("Failed to unmarshal WSGroupMessage. Raw message: %s, error: %v", string(message), err)
 			continue
 		}
 		wsMsg.CreatedAt = time.Now()
 
 		if wsMsg.GroupID == "" {
-			log.Println("Missing group_id for group message")
+			log.Printf("Missing groupId for group message. Raw message: %s", string(message))
+			continue
+		}
+
+		if len(wsMsg.Content) == 0 || len(trimSpaces(wsMsg.Content)) == 0 {
 			continue
 		}
 
@@ -117,4 +126,8 @@ func (c *GroupClient) WriteGroupPump() {
 			}
 		}
 	}
+}
+
+func trimSpaces(s string) string {
+	return strings.TrimSpace(s)
 }

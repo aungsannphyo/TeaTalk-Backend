@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/service"
@@ -49,15 +50,23 @@ func (c *PrivateClient) ReadPrivatePump() {
 			break
 		}
 
+		if len(message) == 0 || len(trimSpaces(string(message))) == 0 {
+			continue
+		}
+
 		var wsMsg WSPrivateMessage
 		if err := json.Unmarshal(message, &wsMsg); err != nil {
-			log.Println("Failed to marshal WSMessage:", err)
+			log.Printf("Failed to unmarshal WSPrivateMessage. Raw message: %s, error: %v", string(message), err)
 			continue
 		}
 		wsMsg.CreatedAt = time.Now()
 
 		if wsMsg.ReceiverID == "" {
-			log.Println("Missing receiverId for private message")
+			log.Printf("Missing receiverId for private message. Raw message: %s", string(message))
+			continue
+		}
+
+		if len(wsMsg.Content) == 0 || len(trimSpaces(wsMsg.Content)) == 0 {
 			continue
 		}
 
@@ -118,4 +127,8 @@ func (c *PrivateClient) WritePrivatePump() {
 			}
 		}
 	}
+}
+
+func trimSpaces(s string) string {
+	return strings.TrimSpace(s)
 }
