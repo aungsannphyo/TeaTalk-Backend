@@ -160,5 +160,29 @@ func seedDatabase(db *sql.DB) {
 		log.Fatalf("failed to insert Marvel Group messages: %v", err)
 	}
 
+	// Bidirectional friend relationships
+	friendPairs := [][2]string{
+		{"user-1", "user-2"},  // Batman <-> Superman
+		{"user-1", "user-3"},  // Batman <-> Flash
+		{"user-2", "user-4"},  // Superman <-> Wonder Woman
+		{"user-3", "user-4"},  // Flash <-> Wonder Woman
+		{"user-5", "user-6"},  // Iron Man <-> Spider-Man
+		{"user-5", "user-7"},  // Iron Man <-> Ant-Man
+		{"user-6", "user-8"},  // Spider-Man <-> Thanos
+		{"user-7", "user-9"},  // Ant-Man <-> Doctor Strange
+		{"user-8", "user-10"}, // Thanos <-> Hulk
+		{"user-9", "user-10"}, // Doctor Strange <-> Hulk
+	}
+
+	for _, pair := range friendPairs {
+		// Insert both directions
+		if _, err := db.Exec(`INSERT INTO friends (user_id, friend_id) VALUES (?, ?)`, pair[0], pair[1]); err != nil {
+			log.Printf("🔁 Error inserting friend pair (%s, %s): %v", pair[0], pair[1], err)
+		}
+		if _, err := db.Exec(`INSERT INTO friends (user_id, friend_id) VALUES (?, ?)`, pair[1], pair[0]); err != nil {
+			log.Printf("🔁 Error inserting friend pair (%s, %s): %v", pair[1], pair[0], err)
+		}
+	}
+
 	log.Println("✅ Seed completed.")
 }
