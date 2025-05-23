@@ -24,8 +24,6 @@ func (m *SharedOnlineManager) SetUserOnline(userID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
-	log.Println("USERID", userID)
-
 	m.onlineUsers[userID]++
 	if m.onlineUsers[userID] == 1 {
 		if err := m.userService.SetUserOnline(userID); err != nil {
@@ -37,8 +35,6 @@ func (m *SharedOnlineManager) SetUserOnline(userID string) {
 func (m *SharedOnlineManager) SetUserOffline(userID string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-
-	log.Println("USERID", userID)
 
 	if m.onlineUsers[userID] > 0 {
 		m.onlineUsers[userID]--
