@@ -1,4 +1,5 @@
 SELECT
+    m.id AS messageID,
     m.conversation_id AS conversationID,
     m.sender_id AS senderID,
     cm.user_id AS receiverID,

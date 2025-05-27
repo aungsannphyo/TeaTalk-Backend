@@ -1,16 +1,16 @@
 package response
 
 import (
-	"database/sql"
 	"time"
 )
 
 type MessageResponse struct {
-	ConversationID   string
-	SenderID         string
-	ReceiverID       string
-	Content          string
-	IsRead           bool
-	SeenByName       sql.NullString
-	MessageCreatedAt time.Time
+	ID               string    `json:"id"`
+	ConversationID   string    `json:"conversationId"`
+	SenderID         string    `json:"senderId"`
+	ReceiverID       string    `json:"receiverId"`
+	Content          string    `json:"content"`
+	IsRead           bool      `json:"isRead"`
+	SeenByName       *string   `json:"seenByName,omitempty"`
+	MessageCreatedAt time.Time `json:"messageCreatedAt"`
 }

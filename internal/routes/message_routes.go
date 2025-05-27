@@ -8,5 +8,5 @@ import (
 
 func RegisterMessageRoute(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
-	rg.GET("/", h.MessageHandler.GetMessages)
+	rg.GET("/:conversationID", h.MessageHandler.GetMessages)
 }

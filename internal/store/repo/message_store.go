@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"log"
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -62,6 +63,7 @@ func (r *messageRepo) GetMessages(
 	}
 
 	if err != nil {
+		log.Panicln("Failed to execute query for getting messages:", err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -69,13 +71,23 @@ func (r *messageRepo) GetMessages(
 	messages := []response.MessageResponse{}
 	for rows.Next() {
 		var m response.MessageResponse
-		err := rows.Scan(&m.ConversationID, &m.SenderID, &m.ReceiverID, &m.Content, &m.IsRead, &m.SeenByName, &m.MessageCreatedAt)
+		err := rows.Scan(
+			&m.ID,
+			&m.ConversationID,
+			&m.SenderID,
+			&m.ReceiverID,
+			&m.Content,
+			&m.IsRead,
+			&m.SeenByName,
+			&m.MessageCreatedAt)
 		if err != nil {
+			log.Panicf("Failed to scan message row: %v", err)
 			return nil, err
 		}
 		messages = append(messages, m)
 	}
 	if err = rows.Err(); err != nil {
+		log.Panicf("Error occurred while iterating over message rows: %v", err)
 		return nil, err
 	}
 
