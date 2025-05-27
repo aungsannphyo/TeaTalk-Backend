@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 	"time"
 
@@ -135,6 +136,7 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 	query, err := r.loader.LoadQuery("sql/user/get_chat_list_by_id.sql")
 
 	if err != nil {
+		log.Panicln(err)
 		return nil, err
 	}
 
@@ -142,7 +144,7 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 		ctx, query, userID, userID, userID, userID, userID, userID, userID,
 	)
 	if err != nil {
-
+		log.Panicln(err)
 		return nil, err
 	}
 	defer rows.Close()
@@ -164,6 +166,7 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 			&chat.LastMessageCreatedAt,
 			&chat.UnreadCount,
 		); err != nil {
+			log.Panicln(err)
 			return nil, err
 		}
 		chatList = append(chatList, chat)

@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"log"
 	"os"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -169,7 +168,6 @@ func (s *userServices) GetFriendsByID(ctx context.Context, userID string) (
 	error,
 ) {
 	friend, err := s.userRepo.GetFriendsByID(ctx, userID)
-	log.Println("Friend List:", err)
 
 	if err != nil {
 		return nil, &e.InternalServerError{Message: "Something went wrong.Please try again later!"}
