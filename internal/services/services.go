@@ -11,7 +11,6 @@ type ServiceFactory interface {
 	FriendRequestService() s.FriendRequestService
 	FriendService() s.FriendService
 	MessageService() s.MessageService
-	MessageReadService() s.MessageReadService
 }
 
 type serviceFactory struct {
@@ -20,10 +19,6 @@ type serviceFactory struct {
 
 func NewServiceFactory(repoFactory store.RepositoryFactory) ServiceFactory {
 	return &serviceFactory{repoFactory: repoFactory}
-}
-
-func (f *serviceFactory) MessageReadService() s.MessageReadService {
-	return &messageReadService{mrRepo: f.repoFactory.NewMessageReadRepo()}
 }
 
 func (f *serviceFactory) UserService() s.UserService {
@@ -62,6 +57,5 @@ func (f *serviceFactory) MessageService() s.MessageService {
 		fRepo:  f.repoFactory.NewFriendRepo(),
 		cRepo:  f.repoFactory.NewConversationRepo(),
 		cmRepo: f.repoFactory.NewConversationMemberRepo(),
-		mrRepo: f.repoFactory.NewMessageReadRepo(),
 	}
 }

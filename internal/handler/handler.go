@@ -9,19 +9,16 @@ import (
 	ws "github.com/aungsannphyo/ywartalk/internal/websocket"
 	"github.com/aungsannphyo/ywartalk/internal/websocket/group"
 	"github.com/aungsannphyo/ywartalk/internal/websocket/private"
-	readmessage "github.com/aungsannphyo/ywartalk/internal/websocket/read_message"
 )
 
 type HandlerSet struct {
-	UserHandler           *UserHandler
-	FriendRequestHandler  *FriendRequestHandler
-	FriendHandler         *FriendHandler
-	ConversationsHandler  *ConversationsHandler
-	PrivateHubHandler     *private.WebSocketPrivateHandler
-	GroupHubHandler       *group.WebSocketGroupHandler
-	MessageHandler        *MessageHandler
-	ReadMessageHubHandler *readmessage.WebSocketReadMessageHandler
-	MessageReadHandler    *MessageReadHandler
+	UserHandler          *UserHandler
+	FriendRequestHandler *FriendRequestHandler
+	FriendHandler        *FriendHandler
+	ConversationsHandler *ConversationsHandler
+	PrivateHubHandler    *private.WebSocketPrivateHandler
+	GroupHubHandler      *group.WebSocketGroupHandler
+	MessageHandler       *MessageHandler
 }
 
 func InitHandler(db *sql.DB) *HandlerSet {
@@ -37,7 +34,6 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	//WebSocket
 	privateHub := private.NewPrivateHub()
 	groupHub := group.NewGroupHub(serviceFactory.ConversationService())
-	readMessageHub := readmessage.NewReadMessageHub()
 
 	onlineManager := ws.NewSharedOnlineManager(serviceFactory.UserService())
 
@@ -53,24 +49,16 @@ func InitHandler(db *sql.DB) *HandlerSet {
 		onlineManager,
 	)
 
-	msgReadHubHandler := readmessage.NewWebSocketReadMessageHandler(
-		readMessageHub,
-		serviceFactory.MessageReadService(),
-	)
-
 	go privateHub.RunPrivateWebSocket()
 	go groupHub.RunGroupWebSocket()
-	go readMessageHub.RunReadMessageHub()
 
 	return &HandlerSet{
-		PrivateHubHandler:     privateHubHandler,
-		GroupHubHandler:       groupHubHandler,
-		ReadMessageHubHandler: msgReadHubHandler,
-		UserHandler:           NewUserHandler(serviceFactory.UserService()),
-		FriendRequestHandler:  NewFriendRequestHandler(serviceFactory.FriendRequestService()),
-		FriendHandler:         NewFriendHandler(serviceFactory.FriendService()),
-		ConversationsHandler:  NewConversationHandler(serviceFactory.ConversationService()),
-		MessageHandler:        NewMessageHandler(serviceFactory.MessageService()),
-		MessageReadHandler:    NewMessageReadHandler(serviceFactory.MessageReadService()),
+		PrivateHubHandler:    privateHubHandler,
+		GroupHubHandler:      groupHubHandler,
+		UserHandler:          NewUserHandler(serviceFactory.UserService()),
+		FriendRequestHandler: NewFriendRequestHandler(serviceFactory.FriendRequestService()),
+		FriendHandler:        NewFriendHandler(serviceFactory.FriendService()),
+		ConversationsHandler: NewConversationHandler(serviceFactory.ConversationService()),
+		MessageHandler:       NewMessageHandler(serviceFactory.MessageService()),
 	}
 }

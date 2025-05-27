@@ -17,7 +17,6 @@ type messageService struct {
 	fRepo  r.FriendRepository
 	cRepo  r.ConversationRepository
 	cmRepo r.ConversationMemeberRepository
-	mrRepo r.MessageReadRepository
 }
 
 func (s *messageService) SendPrivateMessage(
@@ -85,16 +84,6 @@ func (s *messageService) SendPrivateMessage(
 		Content:        dto.Content,
 	}
 
-	//Step 4: Create Message Read Default for Sender and save the message reads
-	msgRead := &models.MessageRead{
-		MessageId: messageID,
-		UserID:    senderID,
-	}
-	err = s.mrRepo.CreateReadMessage(msgRead)
-	if err != nil {
-		return &e.InternalServerError{Message: "Failed to add sender to message read table"}
-	}
-
 	return s.mRepo.CreateMessage(message)
 }
 
@@ -127,15 +116,6 @@ func (s *messageService) SendGroupMessage(
 		ConversationID: cID,
 		SenderID:       userID,
 		Content:        dto.Content,
-	}
-
-	msgRead := &models.MessageRead{
-		MessageId: messageID,
-		UserID:    userID,
-	}
-	err := s.mrRepo.CreateReadMessage(msgRead)
-	if err != nil {
-		return &e.InternalServerError{Message: "Failed to add sender to message read table"}
 	}
 
 	return s.mRepo.CreateMessage(message)

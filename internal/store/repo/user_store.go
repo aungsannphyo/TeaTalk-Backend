@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"strings"
 	"time"
 
@@ -301,14 +300,13 @@ func (r *userRepo) SetUserOnline(userID string) error {
 	query, err := r.loader.LoadQuery("sql/user/update_set_user_online.sql")
 
 	if err != nil {
-		log.Println("1", err)
 		return err
 	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
 	if err != nil {
-		log.Println("2", err)
+
 		return err
 	}
 
@@ -317,7 +315,6 @@ func (r *userRepo) SetUserOnline(userID string) error {
 	_, err = stmt.Exec(userID)
 
 	if err != nil {
-		log.Println("3", err)
 		return err
 	}
 
@@ -328,14 +325,12 @@ func (r *userRepo) SetUserOffline(userID string) error {
 	query, err := r.loader.LoadQuery("sql/user/update_set_user_offline.sql")
 
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
 	stmt, err := db.DBInstance.Prepare(query)
 
 	if err != nil {
-		log.Println(err)
 		return err
 	}
 
@@ -345,7 +340,6 @@ func (r *userRepo) SetUserOffline(userID string) error {
 
 	if err != nil {
 
-		log.Println(err)
 		return err
 	}
 
@@ -363,10 +357,11 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 		userID,
 		userID,
 		userID,
+		userID,
+		userID,
 	)
 
 	if err != nil {
-		log.Println("ERROR", err)
 		return nil, err
 	}
 
@@ -384,14 +379,13 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 			&f.ProfileImage,
 			&f.IsOnline,
 			&f.LastSeen,
+			&f.ConversationId,
 		)
 
 		if err != nil {
 			if errors.Is(err, sql.ErrNoRows) {
-				log.Println("ERROR", err)
 				return nil, nil
 			}
-			log.Println("ERROR", err)
 			return nil, err
 		}
 

@@ -5,7 +5,33 @@ SELECT
     u.email,
     pd.profile_image,
     COALESCE(pd.is_online, FALSE) AS is_online,
-    pd.last_seen AS last_seen
+    pd.last_seen AS last_seen,
+    (
+        SELECT c.id
+        FROM
+            conversations c
+            JOIN conversation_members m1 ON c.id = m1.conversation_id
+            JOIN conversation_members m2 ON c.id = m2.conversation_id
+        WHERE
+            c.is_group = FALSE
+            AND (
+                (
+                    m1.user_id = ?
+                    AND m2.user_id = u.id
+                )
+                OR (
+                    m1.user_id = u.id
+                    AND m2.user_id = ?
+                )
+            )
+            AND m1.user_id != m2.user_id
+        GROUP BY
+            c.id
+        HAVING
+            COUNT(DISTINCT m1.user_id) = 1
+            AND COUNT(DISTINCT m2.user_id) = 1
+        LIMIT 1
+    ) AS conversation_id
 FROM (
         SELECT DISTINCT
             CASE

@@ -17,7 +17,6 @@ type RepositoryFactory interface {
 	NewConversationMemberRepo() r.ConversationMemeberRepository
 	NewGroupAdminRepo() r.GroupAdminRepository
 	NewGroupInviteRepo() r.GroupInviteRepository
-	NewMessageReadRepo() r.MessageReadRepository
 }
 
 type repofactory struct {
@@ -63,8 +62,4 @@ func (f *repofactory) NewGroupAdminRepo() r.GroupAdminRepository {
 
 func (f *repofactory) NewGroupInviteRepo() r.GroupInviteRepository {
 	return &giRepo{db: f.db, loader: f.loader}
-}
-
-func (f *repofactory) NewMessageReadRepo() r.MessageReadRepository {
-	return &mrRepo{db: f.db, loader: f.loader}
 }

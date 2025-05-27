@@ -3,6 +3,7 @@ package services
 import (
 	"context"
 	"errors"
+	"log"
 	"os"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -83,14 +84,21 @@ func (s *userServices) GetUserByID(ctx context.Context, userID string) (*models.
 	return user, ps, nil
 }
 
-func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
+func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) ([]response.ChatListResponse, error) {
 	chatList, err := s.userRepo.GetChatListByUserID(ctx, userID)
 	if err != nil {
-
 		return nil, &e.InternalServerError{Message: err.Error()}
 	}
 
-	return chatList, nil
+	var list []response.ChatListResponse
+	for _, chat := range chatList {
+		l := response.NewChatListResponse(
+			&chat,
+		)
+		list = append(list, *l)
+	}
+
+	return list, nil
 }
 
 func (s *userServices) UpdatePersonalDetail(userID string, dto *dto.PersonalDetailDto) error {
@@ -161,6 +169,7 @@ func (s *userServices) GetFriendsByID(ctx context.Context, userID string) (
 	error,
 ) {
 	friend, err := s.userRepo.GetFriendsByID(ctx, userID)
+	log.Println("Friend List:", err)
 
 	if err != nil {
 		return nil, &e.InternalServerError{Message: "Something went wrong.Please try again later!"}

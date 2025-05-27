@@ -7,13 +7,14 @@ import (
 )
 
 type FriendResponse struct {
-	ID           string     `json:"id"`
-	UserIdentity string     `json:"userIdentity"`
-	Username     string     `json:"username"`
-	Email        string     `json:"email"`
-	ProfileImage *string    `json:"profileImage"`
-	IsOnline     *bool      `json:"isOnline"`
-	LastSeen     *time.Time `json:"lastSeen"`
+	ID             string     `json:"id"`
+	UserIdentity   string     `json:"userIdentity"`
+	Username       string     `json:"username"`
+	Email          string     `json:"email"`
+	ProfileImage   *string    `json:"profileImage"`
+	IsOnline       *bool      `json:"isOnline"`
+	LastSeen       *time.Time `json:"lastSeen"`
+	ConversationId *string    `json:"conversationId,omitempty"`
 }
 
 func NewFriendResponse(user *models.User, ps *models.PersonalDetails) *FriendResponse {

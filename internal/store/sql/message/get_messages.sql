@@ -16,9 +16,8 @@ FROM
     AND mr.user_id = cm.user_id
     LEFT JOIN users u_reader ON u_reader.id = mr.user_id
 WHERE
-    m.conversation_id = ? -- replace with actual conversation ID
-    AND m.created_at < IFNULL(?, NOW()) -- replace cursor timestamp or NULL to get latest
-    AND cm.user_id != m.sender_id -- exclude sender from receivers
+    m.conversation_id = ?
+    AND m.created_at < IFNULL(?, NOW())
+    AND cm.user_id != m.sender_id
 ORDER BY m.created_at DESC
-LIMIT 50;
--- adjust limit as needed
+LIMIT ?;
