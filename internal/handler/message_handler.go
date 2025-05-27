@@ -24,6 +24,7 @@ func (h *MessageHandler) GetMessages(c *gin.Context) {
 	conversationID := c.Param("conversationID")
 	pageSizeStr := c.Query("pageSize")
 	cursorTimeStr := c.Query("cursorTime")
+	userID := c.GetString("userID")
 
 	const defaultPageSize = 50
 	pageSize, err := strconv.Atoi(pageSizeStr)
@@ -46,6 +47,7 @@ func (h *MessageHandler) GetMessages(c *gin.Context) {
 	messages, err := h.mService.GetMessages(
 		c.Request.Context(),
 		conversationID,
+		userID,
 		&cursorTime,
 		pageSize,
 	)

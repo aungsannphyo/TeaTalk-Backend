@@ -14,6 +14,7 @@ type MessageService interface {
 	GetMessages(
 		ctx context.Context,
 		conversationID string,
+		userID string,
 		cursorTimestamp *time.Time,
 		pageSize int,
 	) ([]response.MessageResponse, error)

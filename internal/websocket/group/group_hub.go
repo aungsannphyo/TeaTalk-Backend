@@ -2,11 +2,17 @@ package group
 
 import (
 	"context"
+	"encoding/json"
 	"log"
 	"sync"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/service"
 )
+
+type StatusUpdate struct {
+	UserID string `json:"userId"`
+	Status int    `json:"status"`
+}
 
 type GroupHub struct {
 	clients     map[string]*GroupClient
@@ -57,6 +63,8 @@ func (h *GroupHub) RunGroupWebSocket() {
 				h.AddUserToGroup(group.ID, c.userID, c)
 			}
 
+			h.broadcastStatusToGroups(c.userID, 1) // 1 for online status
+
 		case c := <-h.unregister:
 			h.mu.Lock()
 			if _, ok := h.clients[c.userID]; ok {
@@ -70,6 +78,8 @@ func (h *GroupHub) RunGroupWebSocket() {
 			h.mu.Unlock()
 
 			go c.onlineManager.SetUserOffline(c.userID)
+
+			h.broadcastStatusToGroups(c.userID, 0) // 0 for offline status
 
 		case gm := <-h.broadcast:
 			h.mu.RLock()
@@ -101,6 +111,24 @@ func (h *GroupHub) RemoveUserFromGroup(groupID, userID string) {
 		delete(members, userID)
 		if len(members) == 0 {
 			delete(h.groups, groupID)
+		}
+	}
+}
+
+func (h *GroupHub) broadcastStatusToGroups(userID string, status int) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	update, _ := json.Marshal(StatusUpdate{UserID: userID, Status: status})
+	for _, members := range h.groups {
+		if _, ok := members[userID]; ok {
+			for uid, member := range members {
+				if uid != userID {
+					select {
+					case member.send <- update:
+					default:
+					}
+				}
+			}
 		}
 	}
 }

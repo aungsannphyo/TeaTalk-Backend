@@ -1,9 +1,15 @@
 package private
 
 import (
+	"encoding/json"
 	"log"
 	"sync"
 )
+
+type StatusUpdate struct {
+	UserID string `json:"userId"`
+	Status int    `json:"status"`
+}
 
 type PrivateHub struct {
 	register   chan *PrivateClient
@@ -38,6 +44,8 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 
 			go c.onlineManager.SetUserOnline(c.userID)
 
+			h.broadcastStatusToAll(c.userID, 1) // 1 for online status
+
 			log.Printf("User %s connected", c.userID)
 
 		case c := <-h.unregister:
@@ -50,6 +58,8 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 
 			go c.onlineManager.SetUserOffline(c.userID)
 
+			h.broadcastStatusToAll(c.userID, 0) // 0 for offline status
+
 		case pm := <-h.broadcast:
 			h.mu.RLock()
 			recipient, ok := h.clients[pm.ReceiverID]
@@ -57,6 +67,18 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 			if ok {
 				recipient.send <- pm.Content
 			}
+		}
+	}
+}
+
+func (h *PrivateHub) broadcastStatusToAll(userID string, status int) {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	update, _ := json.Marshal(StatusUpdate{UserID: userID, Status: status})
+	for _, client := range h.clients {
+		select {
+		case client.send <- update:
+		default:
 		}
 	}
 }

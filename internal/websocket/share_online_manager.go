@@ -47,3 +47,20 @@ func (m *SharedOnlineManager) SetUserOffline(userID string) {
 		}
 	}
 }
+
+func (m *SharedOnlineManager) IsOnline(userID string) bool {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	return m.onlineUsers[userID] > 0
+}
+
+// GetOnlineUsers returns a list of user IDs that are currently online.
+func (m *SharedOnlineManager) GetOnlineUsers() []string {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	users := make([]string, 0, len(m.onlineUsers))
+	for userID := range m.onlineUsers {
+		users = append(users, userID)
+	}
+	return users
+}

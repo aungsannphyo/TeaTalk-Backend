@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
-	"github.com/aungsannphyo/ywartalk/internal/dto/response"
+	"github.com/aungsannphyo/ywartalk/internal/dto"
 )
 
 type MessageRepository interface {
@@ -15,5 +15,5 @@ type MessageRepository interface {
 		conversationID string,
 		cursorTimestamp *time.Time,
 		pageSize int,
-	) ([]response.MessageResponse, error)
+	) ([]dto.MessagesDto, error)
 }

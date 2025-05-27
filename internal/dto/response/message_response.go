@@ -5,10 +5,9 @@ import (
 )
 
 type MessageResponse struct {
-	ID               string    `json:"id"`
-	ConversationID   string    `json:"conversationId"`
+	MessageID        string    `json:"messageId"`
+	TargetID         string    `json:"targetId"`
 	SenderID         string    `json:"senderId"`
-	ReceiverID       string    `json:"receiverId"`
 	Content          string    `json:"content"`
 	IsRead           bool      `json:"isRead"`
 	SeenByName       *string   `json:"seenByName,omitempty"`

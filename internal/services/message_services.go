@@ -124,6 +124,7 @@ func (s *messageService) SendGroupMessage(
 func (s *messageService) GetMessages(
 	ctx context.Context,
 	conversationID string,
+	userID string,
 	cursorTimestamp *time.Time,
 	pageSize int,
 ) ([]response.MessageResponse, error) {
@@ -133,6 +134,27 @@ func (s *messageService) GetMessages(
 		return nil, &e.InternalServerError{Message: "Something went wrong, please try again later"}
 	}
 
-	return messages, nil
+	msgMap := map[string]response.MessageResponse{}
+	for _, msg := range messages {
+		// Skip logged-in user's perspective row
+		if msg.MemberID == userID {
+			continue
+		}
+		msgMap[msg.MessageID] = response.MessageResponse{
+			MessageID:        msg.MessageID,
+			TargetID:         msg.MemberID,
+			SenderID:         msg.SenderID,
+			Content:          msg.Content,
+			IsRead:           msg.IsRead,
+			SeenByName:       msg.SeenByName,
+			MessageCreatedAt: msg.MessageCreatedAt,
+		}
+	}
 
+	msgResponse := make([]response.MessageResponse, 0, len(msgMap))
+	for _, m := range msgMap {
+		msgResponse = append(msgResponse, m)
+	}
+
+	return msgResponse, nil
 }

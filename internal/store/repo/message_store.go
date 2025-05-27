@@ -3,11 +3,10 @@ package store
 import (
 	"context"
 	"database/sql"
-	"log"
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
-	"github.com/aungsannphyo/ywartalk/internal/dto/response"
+	"github.com/aungsannphyo/ywartalk/internal/dto"
 	sqlloader "github.com/aungsannphyo/ywartalk/internal/store/sql_loader"
 	"github.com/aungsannphyo/ywartalk/pkg/db"
 )
@@ -46,7 +45,7 @@ func (r *messageRepo) GetMessages(
 	conversationID string,
 	cursorTimestamp *time.Time,
 	pageSize int,
-) ([]response.MessageResponse, error) {
+) ([]dto.MessagesDto, error) {
 
 	query, err := r.loader.LoadQuery("sql/message/get_messages.sql")
 
@@ -63,31 +62,27 @@ func (r *messageRepo) GetMessages(
 	}
 
 	if err != nil {
-		log.Panicln("Failed to execute query for getting messages:", err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	messages := []response.MessageResponse{}
+	messages := []dto.MessagesDto{}
 	for rows.Next() {
-		var m response.MessageResponse
+		var m dto.MessagesDto
 		err := rows.Scan(
-			&m.ID,
-			&m.ConversationID,
+			&m.MessageID,
+			&m.MemberID,
 			&m.SenderID,
-			&m.ReceiverID,
 			&m.Content,
 			&m.IsRead,
 			&m.SeenByName,
 			&m.MessageCreatedAt)
 		if err != nil {
-			log.Panicf("Failed to scan message row: %v", err)
 			return nil, err
 		}
 		messages = append(messages, m)
 	}
 	if err = rows.Err(); err != nil {
-		log.Panicf("Error occurred while iterating over message rows: %v", err)
 		return nil, err
 	}
 
