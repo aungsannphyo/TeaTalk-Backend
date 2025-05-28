@@ -42,8 +42,10 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 			h.clients[c.userID] = c
 			h.mu.Unlock()
 
+			// Send the current list of online users only to the new client
+			h.sendOnlineUsersToClient(c)
 			go c.onlineManager.SetUserOnline(c.userID)
-
+			// Broadcast this user's status online to all clients (including the new client)
 			h.broadcastStatusToAll(c.userID, 1) // 1 for online status
 
 			log.Printf("User %s connected", c.userID)
@@ -56,9 +58,10 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 			}
 			h.mu.Unlock()
 
+			h.broadcastStatusToAll(c.userID, 0)
 			go c.onlineManager.SetUserOffline(c.userID)
 
-			h.broadcastStatusToAll(c.userID, 0) // 0 for offline status
+			// 0 for offline status
 
 		case pm := <-h.broadcast:
 			h.mu.RLock()
@@ -67,6 +70,26 @@ func (h *PrivateHub) RunPrivateWebSocket() {
 			if ok {
 				recipient.send <- pm.Content
 			}
+		}
+	}
+}
+
+func (h *PrivateHub) sendOnlineUsersToClient(c *PrivateClient) {
+	onlineUsers := c.onlineManager.GetOnlineUsers()
+	statuses := make([]StatusUpdate, 0)
+	for _, uid := range onlineUsers {
+		if uid == c.userID {
+			continue
+		}
+		statuses = append(statuses, StatusUpdate{
+			UserID: uid,
+			Status: 1,
+		})
+	}
+
+	if len(statuses) > 0 {
+		if data, err := json.Marshal(statuses); err == nil {
+			c.send <- data
 		}
 	}
 }
