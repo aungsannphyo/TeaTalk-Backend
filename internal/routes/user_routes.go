@@ -11,7 +11,7 @@ func RegisterUserRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.GET("/:userID", h.UserHandler.GetUserHandler)
 	rg.GET("/:userID/chat-list", h.UserHandler.GetChatListByUserIdHandler)
 	rg.PUT("/:userID/personal-details", h.UserHandler.UpdatePersonalDetailsHandler)
-	rg.PATCH("/:userID/upload-profile-image", h.UserHandler.UploadProfileImageHandler)
+	rg.PATCH("/upload-profile-image", h.UserHandler.UploadProfileImageHandler)
 	rg.GET("/search", h.UserHandler.SearchUserHandler)
 	rg.GET("/friend", h.UserHandler.GetFriendsByUserHandler)
 }

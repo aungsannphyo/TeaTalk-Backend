@@ -1,1 +1,1 @@
-SELECT id, username, email, password FROM users WHERE email = ?
+SELECT id, username, email, password, salt, encrypted_user_key, user_key_nonce FROM users WHERE email = ?

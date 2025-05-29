@@ -69,7 +69,16 @@ func (r *userRepo) Register(u *models.User) error {
 
 	userIdentity := r.getUniqueUserIdentity(u.Username)
 
-	_, err = stmt.Exec(u.ID, u.Username, userIdentity, strings.ToLower(u.Email), u.Password)
+	_, err = stmt.Exec(
+		u.ID,
+		u.Username,
+		userIdentity,
+		strings.ToLower(u.Email),
+		u.Password,
+		u.Salt,
+		u.EncryptedUserKey,
+		u.UserKeyNonce,
+	)
 	if err != nil {
 		return err
 	}
@@ -102,7 +111,15 @@ func (r *userRepo) Login(user *models.User) (*models.User, error) {
 
 	var foundUser models.User
 
-	err = row.Scan(&foundUser.ID, &foundUser.Username, &foundUser.Email, &foundUser.Password)
+	err = row.Scan(
+		&foundUser.ID,
+		&foundUser.Username,
+		&foundUser.Email,
+		&foundUser.Password,
+		&foundUser.Salt,
+		&foundUser.EncryptedUserKey,
+		&foundUser.UserKeyNonce,
+	)
 
 	if err != nil {
 		return nil, err
@@ -210,7 +227,7 @@ func (r *userRepo) GetProfileImagePath(ctx context.Context, userID string) (stri
 
 	row := db.DBInstance.QueryRowContext(ctx, query, userID)
 
-	var profileImage string
+	var profileImage sql.NullString
 
 	err = row.Scan(&profileImage)
 
@@ -221,7 +238,11 @@ func (r *userRepo) GetProfileImagePath(ctx context.Context, userID string) (stri
 		return "", err
 	}
 
-	return profileImage, nil
+	if profileImage.Valid {
+		return profileImage.String, nil
+	}
+
+	return "", nil
 }
 
 func (r *userRepo) UploadProfileImage(userID string, imagePath string) error {
@@ -267,6 +288,10 @@ func (r *userRepo) SearchUser(
 		searchInput,
 		userID,
 	)
+
+	if err != nil {
+		return nil, nil
+	}
 
 	defer rows.Close()
 

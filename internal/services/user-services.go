@@ -20,16 +20,24 @@ type userServices struct {
 }
 
 func (s *userServices) Register(u *dto.RegisterRequestDto) error {
+	salt, _ := utils.GenerateRandomBytes(utils.SaltLength)
 	hashedPassword, err := utils.HashPassword(u.Password)
+
+	pdk := utils.DeriveKey([]byte(u.Password), salt)
+	uek, _ := utils.GenerateRandomBytes(utils.KeyLength) // UserEncryptionKey
+	encryptedUEK, nonce, _ := utils.Encrypt(uek, pdk)
 
 	if err != nil {
 		return &e.InternalServerError{Message: "Password hashing failed"}
 	}
 	user := &models.User{
-		ID:       uuid.New().String(),
-		Username: u.Username,
-		Email:    u.Email,
-		Password: hashedPassword,
+		ID:               uuid.New().String(),
+		Username:         u.Username,
+		Email:            u.Email,
+		Password:         hashedPassword,
+		Salt:             salt,
+		EncryptedUserKey: encryptedUEK,
+		UserKeyNonce:     nonce,
 	}
 
 	err = s.userRepo.Register(user)
@@ -62,6 +70,12 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 
 	if !checkPassword {
 		return nil, "", &e.UnAuthorizedError{Message: "Password doesn't match"}
+	}
+
+	pdk := utils.DeriveKey([]byte(u.Password), foundUser.Salt)
+	_, err = utils.Decrypt(foundUser.EncryptedUserKey, foundUser.UserKeyNonce, pdk)
+	if err != nil {
+		return nil, "", &e.InternalServerError{Message: "Something went wrong while generating token"}
 	}
 
 	token, err := utils.GenerateToken(foundUser.Email, foundUser.ID)

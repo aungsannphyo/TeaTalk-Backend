@@ -18,6 +18,43 @@ type conService struct {
 	fRepo  r.FriendRepository
 }
 
+func (s *conService) addMemberAndAdmin(conversationID, userID string) error {
+	member := &models.ConversationMember{
+		ConversationID: conversationID,
+		UserID:         userID,
+	}
+	if err := s.cmRepo.CreateConversationMember(member); err != nil {
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	admin := &models.GroupAdmin{
+		ConversationID: conversationID,
+		UserID:         userID,
+	}
+	if err := s.gaRepo.CreateGroupAdmin(admin); err != nil {
+		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	return nil
+}
+
+func (s *conService) addGroupMembers(conversationID string, memberIDs *[]string) error {
+	if memberIDs == nil || len(*memberIDs) == 0 {
+		return nil
+	}
+
+	for _, memberID := range *memberIDs {
+		member := &models.ConversationMember{
+			ConversationID: conversationID,
+			UserID:         memberID,
+		}
+		if err := s.cmRepo.CreateConversationMember(member); err != nil {
+			return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+		}
+	}
+	return nil
+}
+
 func (s *conService) CreateGroup(userID string, dto dto.CreateGroupDto) error {
 	cID := uuid.NewString()
 
@@ -28,27 +65,21 @@ func (s *conService) CreateGroup(userID string, dto dto.CreateGroupDto) error {
 		CreatedBy: &userID,
 	}
 
-	conversationMember := &models.ConversationMember{
-		ConversationID: cID,
-		UserID:         userID,
-	}
-
-	groupAdmin := &models.GroupAdmin{
-		ConversationID: cID,
-		UserID:         userID,
-	}
-
+	// Create the group conversation
 	if err := s.cRepo.CreateConversation(conversation); err != nil {
 		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 	}
 
-	if err := s.cmRepo.CreateConversationMember(conversationMember); err != nil {
-		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+	// Add the creator as a member and admin
+	if err := s.addMemberAndAdmin(cID, userID); err != nil {
+		return err
 	}
 
-	if err := s.gaRepo.CreateGroupAdmin(groupAdmin); err != nil {
-		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+	// Add other members (if any)
+	if err := s.addGroupMembers(cID, dto.MemberID); err != nil {
+		return err
 	}
+
 	return nil
 }
 

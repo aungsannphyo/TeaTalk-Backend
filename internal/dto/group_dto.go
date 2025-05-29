@@ -8,8 +8,9 @@ import (
 )
 
 type CreateGroupDto struct {
-	IsGroup bool   `json:"isGroup"`
-	Name    string `json:"name"`
+	IsGroup  bool      `json:"isGroup"`
+	Name     string    `json:"name"`
+	MemberID *[]string `json:"memberId,omitempty"`
 }
 
 type UpdateGroupNameDto struct {
