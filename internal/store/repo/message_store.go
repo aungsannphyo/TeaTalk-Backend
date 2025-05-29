@@ -32,7 +32,7 @@ func (r *messageRepo) CreateMessage(m *models.Message) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(m.ConversationID, m.SenderID, m.Content)
+	_, err = stmt.Exec(m.ConversationID, m.SenderID, m.Content, m.MessageNonce)
 
 	if err != nil {
 		return err

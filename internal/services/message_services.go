@@ -6,6 +6,7 @@ import (
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
+	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
@@ -13,10 +14,12 @@ import (
 )
 
 type messageService struct {
-	mRepo  r.MessageRepository
-	fRepo  r.FriendRepository
-	cRepo  r.ConversationRepository
-	cmRepo r.ConversationMemeberRepository
+	mRepo      r.MessageRepository
+	fRepo      r.FriendRepository
+	cRepo      r.ConversationRepository
+	cmRepo     r.ConversationMemeberRepository
+	convKeySvc s.ConversationKeyService
+	cKeyRepo   r.ConversationKeyRepository
 }
 
 func (s *messageService) SendPrivateMessage(
@@ -24,14 +27,13 @@ func (s *messageService) SendPrivateMessage(
 	senderID string,
 	dto dto.SendPrivateMessageDto,
 ) error {
-
 	// Step 1: Ensure sender and receiver are friends
-	if !s.fRepo.AlreadyFriends(ctx, senderID, dto.ReceiverId) {
+	if !s.fRepo.AlreadyFriends(ctx, senderID, dto.ReceiverID) {
 		return &e.UnAuthorizedError{Message: "You can't send the message right now!"}
 	}
 
 	// Step 2: Check for existing private conversation
-	conversation, err := s.cRepo.CheckExistsConversation(ctx, senderID, dto.ReceiverId)
+	conversation, err := s.cRepo.CheckExistsConversation(ctx, senderID, dto.ReceiverID)
 
 	if err != nil {
 		return &e.InternalServerError{Message: err.Error()}
@@ -53,26 +55,44 @@ func (s *messageService) SendPrivateMessage(
 			return &e.InternalServerError{Message: err.Error()}
 		}
 
+		// store conversation key for both sender and receiver
+		userIDs := []string{senderID, dto.ReceiverID}
+		if err := s.convKeySvc.EncryptConversationForUsers(ctx, userIDs, conversationID); err != nil {
+			return err
+		}
+
 		// Add both users as members
-		senderMember := &models.ConversationMember{
-			ConversationID: conversationID,
-			UserID:         senderID,
-		}
-		receiverMember := &models.ConversationMember{
-			ConversationID: conversationID,
-			UserID:         dto.ReceiverId,
+		members := []*models.ConversationMember{
+			{
+				ConversationID: conversationID,
+				UserID:         senderID,
+			},
+			{
+				ConversationID: conversationID,
+				UserID:         dto.ReceiverID,
+			},
 		}
 
-		if err := s.cmRepo.CreateConversationMember(senderMember); err != nil {
-
-			return &e.InternalServerError{Message: "Failed to add sender to conversation"}
-		}
-		if err := s.cmRepo.CreateConversationMember(receiverMember); err != nil {
-
-			return &e.InternalServerError{Message: "Failed to add receiver to conversation"}
+		//create conversation for both sender and receiver
+		for _, member := range members {
+			if err := s.cmRepo.CreateConversationMember(member); err != nil {
+				return &e.InternalServerError{Message: "Failed to add user to conversation"}
+			}
 		}
 	} else {
 		conversationID = conversation.ID
+	}
+
+	//  Load user's encrypted conversation key + nonce from DB
+	encryptedKey, nonce, err := s.cKeyRepo.GetConversationKey(ctx, conversationID, senderID)
+	if err != nil {
+		return &e.InternalServerError{Message: "Failed to add retrieve to conversation key"}
+	}
+
+	encryptedMessage, messageNonce, err := s.convKeySvc.EncryptMessage(ctx, encryptedKey, nonce, senderID, dto.Content)
+
+	if err != nil {
+		return err
 	}
 
 	messageID := uuid.New().String()
@@ -81,7 +101,8 @@ func (s *messageService) SendPrivateMessage(
 		ID:             messageID,
 		ConversationID: conversationID,
 		SenderID:       senderID,
-		Content:        dto.Content,
+		Content:        encryptedMessage,
+		MessageNonce:   messageNonce,
 	}
 
 	return s.mRepo.CreateMessage(message)
@@ -115,7 +136,7 @@ func (s *messageService) SendGroupMessage(
 		ID:             messageID,
 		ConversationID: cID,
 		SenderID:       userID,
-		Content:        dto.Content,
+		Content:        []byte(dto.Content),
 	}
 
 	return s.mRepo.CreateMessage(message)
@@ -140,11 +161,18 @@ func (s *messageService) GetMessages(
 		if msg.MemberID == userID {
 			continue
 		}
+
+		plainContentBytes, err := s.convKeySvc.DecryptMessage(ctx, userID, conversationID, []byte(msg.Content), msg.MessageNonce)
+
+		if err != nil {
+			return nil, &e.InternalServerError{Message: "Something went wrong, please try again later"}
+		}
+
 		msgMap[msg.MessageID] = response.MessageResponse{
 			MessageID:        msg.MessageID,
 			TargetID:         msg.MemberID,
 			SenderID:         msg.SenderID,
-			Content:          msg.Content,
+			Content:          string(plainContentBytes),
 			IsRead:           msg.IsRead,
 			SeenByName:       msg.SeenByName,
 			MessageCreatedAt: msg.MessageCreatedAt,

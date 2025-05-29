@@ -87,6 +87,10 @@ func (r *conRepo) UpdateGroupName(c *models.Conversation) error {
 func (r *conRepo) CheckExistsGroup(ctx context.Context, c *models.Conversation) bool {
 	query, err := r.loader.LoadQuery("sql/conversation/check_exists_group.sql")
 
+	if err != nil {
+		return false
+	}
+
 	row := db.DBInstance.QueryRowContext(ctx, query, c.ID)
 
 	var con int64

@@ -38,6 +38,13 @@ type UserDetailsResponse struct {
 	Details PersonalDetailsResponse `json:"personalDetails"`
 }
 
+type UserKeyResponse struct {
+	UserID           string `json:"id"`
+	Salt             []byte `json:"salt"`
+	EncryptedUserKey []byte `json:"encryptedUserKey"`
+	UserKeyNonce     []byte `json:"userKeyNonce"`
+}
+
 func NewLoginResponse(user *models.User, token string) *LoginResponse {
 	return &LoginResponse{
 		ID:        user.ID,

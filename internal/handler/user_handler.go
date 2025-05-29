@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	s "github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/dto/response"
@@ -80,7 +79,7 @@ func (h *UserHandler) GetChatListByUserIdHandler(c *gin.Context) {
 	}
 
 	if len(chatList) == 0 {
-		success.OkResponse(c, []models.ChatListItem{})
+		success.OkResponse(c, []response.ChatListResponse{})
 	} else {
 
 		success.OkResponse(c, chatList)

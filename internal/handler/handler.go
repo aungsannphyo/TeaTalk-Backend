@@ -25,7 +25,6 @@ func InitHandler(db *sql.DB) *HandlerSet {
 
 	//sql loader
 	sqlLoader := sqlloader.SQLLoaderFactory(sqlloader.EmbedLoader)
-
 	//Repositories
 	repoFactory := store.NewRepositoryFactory(db, sqlLoader)
 	//Services

@@ -6,7 +6,7 @@ type Message struct {
 	ID             string    `json:"id"`
 	ConversationID string    `json:"conversation_id"`
 	SenderID       string    `json:"sender_id"`
-	Content        string    `json:"content"`
-	Nonce          []byte    `json:"nonce"`
+	Content        []byte    `json:"content"`
+	MessageNonce   []byte    `json:"message_nonce"`
 	CreatedAt      time.Time `json:"created_at"`
 }

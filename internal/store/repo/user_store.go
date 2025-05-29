@@ -149,7 +149,7 @@ func (r *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User
 	return &user, &ps, nil
 }
 
-func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]models.ChatListItem, error) {
+func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]response.ChatListResponse, error) {
 	query, err := r.loader.LoadQuery("sql/user/get_chat_list_by_id.sql")
 
 	if err != nil {
@@ -166,9 +166,9 @@ func (r *userRepo) GetChatListByUserID(ctx context.Context, userID string) ([]mo
 	}
 	defer rows.Close()
 
-	var chatList []models.ChatListItem
+	var chatList []response.ChatListResponse
 	for rows.Next() {
-		var chat models.ChatListItem
+		var chat response.ChatListResponse
 		if err := rows.Scan(
 			&chat.ConversationID,
 			&chat.ReceiverID,
@@ -420,4 +420,24 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 		friend = append(friend, f)
 	}
 	return friend, nil
+}
+
+func (r *userRepo) GetUserKeyByID(ctx context.Context, userID string) (*response.UserKeyResponse, error) {
+	query, err := r.loader.LoadQuery("sql/user/get_user_key_by_id.sql")
+
+	if err != nil {
+		return nil, err
+	}
+
+	row := db.DBInstance.QueryRowContext(ctx, query, userID)
+
+	var uKey response.UserKeyResponse
+
+	err = row.Scan(&uKey.UserID, &uKey.Salt, &uKey.EncryptedUserKey, &uKey.UserKeyNonce)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &uKey, nil
 }

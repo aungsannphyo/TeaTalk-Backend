@@ -2,6 +2,7 @@ INSERT INTO
     messages (
         conversation_id,
         sender_id,
-        content
+        content,
+        message_nonce
     )
-VALUES (?, ?, ?)
+VALUES (?, ?, ?, ?)

@@ -73,7 +73,7 @@ func (c *PrivateClient) ReadPrivatePump() {
 		response, _ := json.Marshal(wsMsg)
 
 		dto := dto.SendPrivateMessageDto{
-			ReceiverId: wsMsg.ReceiverID,
+			ReceiverID: wsMsg.ReceiverID,
 			Content:    wsMsg.Content,
 		}
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

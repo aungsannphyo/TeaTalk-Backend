@@ -3,6 +3,7 @@ SELECT
     cm.user_id AS memberId,
     m.sender_id AS senderId,
     m.content,
+    m.message_nonce,
     CASE WHEN mr.read_at IS NOT NULL THEN TRUE ELSE FALSE END AS isRead,
     u_reader.username AS seenByName,
     m.created_at AS messageCreatedAt

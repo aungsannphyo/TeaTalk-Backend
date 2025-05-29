@@ -17,6 +17,7 @@ type RepositoryFactory interface {
 	NewConversationMemberRepo() r.ConversationMemeberRepository
 	NewGroupAdminRepo() r.GroupAdminRepository
 	NewGroupInviteRepo() r.GroupInviteRepository
+	NewConversationKeyRepo() r.ConversationKeyRepository
 }
 
 type repofactory struct {
@@ -26,6 +27,10 @@ type repofactory struct {
 
 func NewRepositoryFactory(db *sql.DB, loader sqlloader.SQLLoader) RepositoryFactory {
 	return &repofactory{db: db, loader: loader}
+}
+
+func (f *repofactory) NewConversationKeyRepo() r.ConversationKeyRepository {
+	return &cKeyRepo{db: f.db, loader: f.loader}
 }
 
 func (f *repofactory) NewUserRepo() r.UserRepository {

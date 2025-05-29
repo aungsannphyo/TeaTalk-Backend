@@ -16,7 +16,8 @@ import (
 )
 
 type userServices struct {
-	userRepo repository.UserRepository
+	userRepo        repository.UserRepository
+	sessionKeyCache *SessionKeyCache
 }
 
 func (s *userServices) Register(u *dto.RegisterRequestDto) error {
@@ -25,7 +26,7 @@ func (s *userServices) Register(u *dto.RegisterRequestDto) error {
 
 	pdk := utils.DeriveKey([]byte(u.Password), salt)
 	uek, _ := utils.GenerateRandomBytes(utils.KeyLength) // UserEncryptionKey
-	encryptedUEK, nonce, _ := utils.Encrypt(uek, pdk)
+	encryptedUEK, nonce, _ := utils.EncryptUserKey(uek, pdk)
 
 	if err != nil {
 		return &e.InternalServerError{Message: "Password hashing failed"}
@@ -72,10 +73,14 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 		return nil, "", &e.UnAuthorizedError{Message: "Password doesn't match"}
 	}
 
+	//setting for session key
 	pdk := utils.DeriveKey([]byte(u.Password), foundUser.Salt)
-	_, err = utils.Decrypt(foundUser.EncryptedUserKey, foundUser.UserKeyNonce, pdk)
+	decryptUserKey, err := utils.DecryptUserKey(foundUser.EncryptedUserKey, foundUser.UserKeyNonce, pdk)
+
+	s.sessionKeyCache.SetUserDecryptedKey(foundUser.ID, decryptUserKey)
+
 	if err != nil {
-		return nil, "", &e.InternalServerError{Message: "Something went wrong while generating token"}
+		return nil, "", &e.InternalServerError{Message: "Something went wrong while decryption key"}
 	}
 
 	token, err := utils.GenerateToken(foundUser.Email, foundUser.ID)
@@ -105,10 +110,21 @@ func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) (
 
 	var list []response.ChatListResponse
 	for _, chat := range chatList {
-		l := response.NewChatListResponse(
-			&chat,
-		)
-		list = append(list, *l)
+		l := response.ChatListResponse{
+			ConversationID:       chat.ConversationID,
+			IsGroup:              chat.IsGroup,
+			Name:                 chat.Name,
+			LastMessageID:        chat.LastMessageID,
+			LastMessageContent:   chat.LastMessageContent,
+			LastMessageSender:    chat.LastMessageSender,
+			LastMessageCreatedAt: chat.LastMessageCreatedAt,
+			UnreadCount:          chat.UnreadCount,
+			ReceiverID:           chat.ReceiverID,
+			ProfileImage:         chat.ProfileImage,
+			TotalOnline:          chat.TotalOnline,
+			LastSeen:             chat.LastSeen,
+		}
+		list = append(list, l)
 	}
 
 	return list, nil
