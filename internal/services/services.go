@@ -11,54 +11,24 @@ type ServiceFactory interface {
 	FriendRequestService() s.FriendRequestService
 	FriendService() s.FriendService
 	MessageService() s.MessageService
-	ConversationKeyService() s.ConversationKeyService
 }
 
 type serviceFactory struct {
-	repoFactory     store.RepositoryFactory
-	msgSvc          s.MessageService
-	convKeySvc      s.ConversationKeyService
-	sessionKeyCache *SessionKeyCache
-	userSvc         s.UserService
+	repoFactory store.RepositoryFactory
 }
 
 func NewServiceFactory(repoFactory store.RepositoryFactory) ServiceFactory {
-	// manually wire after creation
-
-	sessionKeyCache := NewSessionKeyCache()
-
-	convKeySvc := &cKeyService{
-		cKeyRepo:        repoFactory.NewConversationKeyRepo(),
-		userRepo:        repoFactory.NewUserRepo(),
-		sessionKeyCache: sessionKeyCache,
-	}
-
-	userSvc := &userServices{
-		userRepo:        repoFactory.NewUserRepo(),
-		sessionKeyCache: sessionKeyCache,
-	}
-
-	messageSvc := &messageService{
-		mRepo:      repoFactory.NewMessageRepo(),
-		fRepo:      repoFactory.NewFriendRepo(),
-		cRepo:      repoFactory.NewConversationRepo(),
-		cmRepo:     repoFactory.NewConversationMemberRepo(),
-		cKeyRepo:   repoFactory.NewConversationKeyRepo(),
-		convKeySvc: convKeySvc,
-	}
 
 	return &serviceFactory{
-		repoFactory:     repoFactory,
-		msgSvc:          messageSvc,
-		convKeySvc:      convKeySvc,
-		sessionKeyCache: sessionKeyCache,
-		userSvc:         userSvc,
+		repoFactory: repoFactory,
 	}
 
 }
 
 func (f *serviceFactory) UserService() s.UserService {
-	return f.userSvc
+	return &userServices{
+		userRepo: f.repoFactory.NewUserRepo(),
+	}
 }
 
 func (f *serviceFactory) ConversationService() s.ConversationService {
@@ -88,9 +58,11 @@ func (f *serviceFactory) FriendService() s.FriendService {
 }
 
 func (f *serviceFactory) MessageService() s.MessageService {
-	return f.msgSvc
-}
-
-func (f *serviceFactory) ConversationKeyService() s.ConversationKeyService {
-	return f.convKeySvc
+	return &messageService{
+		mRepo:    f.repoFactory.NewMessageRepo(),
+		fRepo:    f.repoFactory.NewFriendRepo(),
+		cRepo:    f.repoFactory.NewConversationRepo(),
+		cmRepo:   f.repoFactory.NewConversationMemberRepo(),
+		cKeyRepo: f.repoFactory.NewConversationKeyRepo(),
+	}
 }

@@ -16,29 +16,21 @@ import (
 )
 
 type userServices struct {
-	userRepo        repository.UserRepository
-	sessionKeyCache *SessionKeyCache
+	userRepo repository.UserRepository
 }
 
 func (s *userServices) Register(u *dto.RegisterRequestDto) error {
-	salt, _ := utils.GenerateRandomBytes(utils.SaltLength)
-	hashedPassword, err := utils.HashPassword(u.Password)
 
-	pdk := utils.DeriveKey([]byte(u.Password), salt)
-	uek, _ := utils.GenerateRandomBytes(utils.KeyLength) // UserEncryptionKey
-	encryptedUEK, nonce, _ := utils.EncryptUserKey(uek, pdk)
+	hashedPassword, err := utils.HashPassword(u.Password)
 
 	if err != nil {
 		return &e.InternalServerError{Message: "Password hashing failed"}
 	}
 	user := &models.User{
-		ID:               uuid.New().String(),
-		Username:         u.Username,
-		Email:            u.Email,
-		Password:         hashedPassword,
-		Salt:             salt,
-		EncryptedUserKey: encryptedUEK,
-		UserKeyNonce:     nonce,
+		ID:       uuid.New().String(),
+		Username: u.Username,
+		Email:    u.Email,
+		Password: hashedPassword,
 	}
 
 	err = s.userRepo.Register(user)
@@ -72,12 +64,6 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	if !checkPassword {
 		return nil, "", &e.UnAuthorizedError{Message: "Password doesn't match"}
 	}
-
-	//setting for session key
-	pdk := utils.DeriveKey([]byte(u.Password), foundUser.Salt)
-	decryptUserKey, err := utils.DecryptUserKey(foundUser.EncryptedUserKey, foundUser.UserKeyNonce, pdk)
-
-	s.sessionKeyCache.SetUserDecryptedKey(foundUser.ID, decryptUserKey)
 
 	if err != nil {
 		return nil, "", &e.InternalServerError{Message: "Something went wrong while decryption key"}
