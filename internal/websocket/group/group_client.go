@@ -23,9 +23,9 @@ type GroupClient struct {
 }
 
 type GroupMessage struct {
-	SenderID string
-	GroupID  string
-	Content  []byte
+	SenderID       string
+	ConversationID string
+	Content        []byte
 }
 
 func (c *GroupClient) ReadGroupPump() {
@@ -61,8 +61,8 @@ func (c *GroupClient) ReadGroupPump() {
 		}
 		wsMsg.CreatedAt = time.Now()
 
-		if wsMsg.GroupID == "" {
-			log.Printf("Missing groupId for group message. Raw message: %s", string(message))
+		if wsMsg.ConversationID == "" {
+			log.Printf("Missing conversation id  for group message. Raw message: %s", string(message))
 			continue
 		}
 
@@ -77,14 +77,14 @@ func (c *GroupClient) ReadGroupPump() {
 		}
 		ctx := context.Background()
 
-		if err := c.messageService.SendGroupMessage(ctx, wsMsg.GroupID, c.userID, dto); err != nil {
+		if err := c.messageService.SendGroupMessage(ctx, wsMsg.ConversationID, c.userID, dto); err != nil {
 			log.Println(err)
 		}
 
 		c.hub.broadcast <- GroupMessage{
-			SenderID: c.userID,
-			GroupID:  wsMsg.GroupID,
-			Content:  response,
+			SenderID:       c.userID,
+			ConversationID: wsMsg.ConversationID,
+			Content:        response,
 		}
 	}
 }

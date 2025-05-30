@@ -39,7 +39,7 @@ func (r *conRepo) CreateConversation(c *models.Conversation) error {
 	return nil
 }
 
-func (r *conRepo) CheckExistsConversation(ctx context.Context, senderId, receiverId string) (models.Conversation, error) {
+func (r *conRepo) GetConversation(ctx context.Context, senderId, receiverId string) (models.Conversation, error) {
 	query, err := r.loader.LoadQuery("sql/conversation/check_exists_conversation.sql")
 
 	if err != nil {

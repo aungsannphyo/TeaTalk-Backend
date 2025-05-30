@@ -30,56 +30,18 @@ func (s *messageService) SendPrivateMessage(
 		return &e.UnAuthorizedError{Message: "You can't send the message right now!"}
 	}
 
-	// Step 2: Check for existing private conversation
-	conversation, err := s.cRepo.CheckExistsConversation(ctx, senderID, dto.ReceiverID)
+	// Step 2: Get for existing private conversation
+	conversation, err := s.cRepo.GetConversation(ctx, senderID, dto.ReceiverID)
 
 	if err != nil {
 		return &e.InternalServerError{Message: err.Error()}
-	}
-
-	var conversationID string
-	if conversation.ID == "" {
-		// Create new conversation
-		conversationID = uuid.NewString()
-		conversation := &models.Conversation{
-			ID:        conversationID,
-			IsGroup:   false,
-			Name:      nil,
-			CreatedBy: nil,
-		}
-
-		if err := s.cRepo.CreateConversation(conversation); err != nil {
-
-			return &e.InternalServerError{Message: err.Error()}
-		}
-
-		// Add both users as members
-		senderMember := &models.ConversationMember{
-			ConversationID: conversationID,
-			UserID:         senderID,
-		}
-		receiverMember := &models.ConversationMember{
-			ConversationID: conversationID,
-			UserID:         dto.ReceiverID,
-		}
-
-		if err := s.cmRepo.CreateConversationMember(senderMember); err != nil {
-
-			return &e.InternalServerError{Message: "Failed to add sender to conversation"}
-		}
-		if err := s.cmRepo.CreateConversationMember(receiverMember); err != nil {
-
-			return &e.InternalServerError{Message: "Failed to add receiver to conversation"}
-		}
-	} else {
-		conversationID = conversation.ID
 	}
 
 	messageID := uuid.New().String()
 	// Step 3: Create and save the message
 	message := &models.Message{
 		ID:             messageID,
-		ConversationID: conversationID,
+		ConversationID: conversation.ID,
 		SenderID:       senderID,
 		Content:        []byte(dto.Content),
 	}

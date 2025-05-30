@@ -7,7 +7,7 @@ import (
 	v "github.com/aungsannphyo/ywartalk/pkg/validator"
 )
 
-type CreateGroupDto struct {
+type CreateConversationDto struct {
 	IsGroup  bool      `json:"isGroup"`
 	Name     string    `json:"name"`
 	MemberID *[]string `json:"memberId,omitempty"`
@@ -45,7 +45,7 @@ func ValidateModerateGroupInvite(mgi ModerateGroupInviteDto) error {
 	return nil
 }
 
-func ValidateCreateGroup(g CreateGroupDto) error {
+func ValidateCreateGroup(g CreateConversationDto) error {
 	var errs v.ValidationErrors
 
 	if strings.TrimSpace(g.Name) == "" {

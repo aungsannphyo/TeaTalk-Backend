@@ -70,8 +70,8 @@ func (h *GroupHub) RunGroupWebSocket() {
 			if _, ok := h.clients[c.userID]; ok {
 				delete(h.clients, c.userID)
 				close(c.send)
-				for groupID := range h.groups {
-					h.RemoveUserFromGroup(groupID, c.userID)
+				for ConversationID := range h.groups {
+					h.RemoveUserFromGroup(ConversationID, c.userID)
 				}
 				log.Printf("User %s disconnected", c.userID)
 			}
@@ -83,7 +83,7 @@ func (h *GroupHub) RunGroupWebSocket() {
 
 		case gm := <-h.broadcast:
 			h.mu.RLock()
-			members, ok := h.groups[gm.GroupID]
+			members, ok := h.groups[gm.ConversationID]
 			h.mu.RUnlock()
 			if ok {
 				for uid, member := range members {
@@ -96,21 +96,21 @@ func (h *GroupHub) RunGroupWebSocket() {
 	}
 }
 
-func (h *GroupHub) AddUserToGroup(groupID, userID string, c *GroupClient) {
+func (h *GroupHub) AddUserToGroup(ConversationID, userID string, c *GroupClient) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
-	if h.groups[groupID] == nil {
-		h.groups[groupID] = make(map[string]*GroupClient)
+	if h.groups[ConversationID] == nil {
+		h.groups[ConversationID] = make(map[string]*GroupClient)
 	}
-	h.groups[groupID][userID] = c
+	h.groups[ConversationID][userID] = c
 
 }
 
-func (h *GroupHub) RemoveUserFromGroup(groupID, userID string) {
-	if members, ok := h.groups[groupID]; ok {
+func (h *GroupHub) RemoveUserFromGroup(ConversationID, userID string) {
+	if members, ok := h.groups[ConversationID]; ok {
 		delete(members, userID)
 		if len(members) == 0 {
-			delete(h.groups, groupID)
+			delete(h.groups, ConversationID)
 		}
 	}
 }
