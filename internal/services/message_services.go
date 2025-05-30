@@ -52,6 +52,25 @@ func (s *messageService) SendPrivateMessage(
 
 			return &e.InternalServerError{Message: err.Error()}
 		}
+
+		// Add both users as members
+		senderMember := &models.ConversationMember{
+			ConversationID: conversationID,
+			UserID:         senderID,
+		}
+		receiverMember := &models.ConversationMember{
+			ConversationID: conversationID,
+			UserID:         dto.ReceiverID,
+		}
+
+		if err := s.cmRepo.CreateConversationMember(senderMember); err != nil {
+
+			return &e.InternalServerError{Message: "Failed to add sender to conversation"}
+		}
+		if err := s.cmRepo.CreateConversationMember(receiverMember); err != nil {
+
+			return &e.InternalServerError{Message: "Failed to add receiver to conversation"}
+		}
 	} else {
 		conversationID = conversation.ID
 	}
