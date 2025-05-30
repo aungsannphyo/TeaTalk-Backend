@@ -61,10 +61,9 @@ func (r *frlRepo) HasRejectedFriendRequestLog(frl *models.FriendRequestLog) (boo
 		}
 		return false, nil
 	}
-
 	if lastAction == string(models.ActionRejected) {
-		return true, nil
+		return false, nil
 	}
 
-	return false, nil
+	return true, nil
 }

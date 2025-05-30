@@ -8,11 +8,12 @@ import (
 )
 
 type ConversationService interface {
-	CreateConversation(userID string, dto dto.CreateConversationDto) error
+	CreateConversation(userID *string, dto dto.CreateConversationDto) error
 	UpdateGroupName(conversationID string, dto dto.UpdateGroupNameDto) error
 	InviteGroup(ctx context.Context, conversationID string, userID string, dto dto.InviteGroupDto) error
 	ModerateGroupInvite(ctx context.Context, conversationID string, inviteID string, userID string, dto dto.ModerateGroupInviteDto) error
 	AssignAdmin(ctx context.Context, conversationID string, userID string, dto dto.AssignAdminDto) error
 	GetGroupMembers(ctx context.Context, conversationId string) ([]models.User, error)
 	GetGroupsById(ctx context.Context, userID string) ([]models.Conversation, error)
+	GetConversation(ctx context.Context, senderID, receiverID string) (*models.Conversation, error)
 }

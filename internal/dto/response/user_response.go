@@ -12,7 +12,7 @@ type LoginResponse struct {
 	Username         string    `json:"username"`
 	Email            string    `json:"email"`
 	Token            string    `json:"token"`
-	Salt             string    `json:"salt"`
+	PDK              string    `json:"pdk"`
 	EncryptedUserKey string    `json:"encryptedUserKey"`
 	UserKeyNonce     string    `json:"userKeyNonce"`
 	CreatedAt        time.Time `json:"createdAt"`
@@ -42,13 +42,13 @@ type UserDetailsResponse struct {
 	Details PersonalDetailsResponse `json:"personalDetails"`
 }
 
-func NewLoginResponse(user *models.User, token string) *LoginResponse {
+func NewLoginResponse(user *models.User, token string, pdk []byte) *LoginResponse {
 	return &LoginResponse{
 		ID:               user.ID,
 		Username:         user.Username,
 		Email:            user.Email,
 		CreatedAt:        user.CreatedAt,
-		Salt:             utils.EncodeBase64(user.Salt),
+		PDK:              utils.EncodeBase64(pdk),
 		EncryptedUserKey: utils.EncodeBase64(user.EncryptedUserKey),
 		UserKeyNonce:     utils.EncodeBase64(user.UserKeyNonce),
 		Token:            token,

@@ -8,6 +8,6 @@ import (
 
 func RegisterWebSocketRoute(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
-	rg.GET("/ws/private", h.PrivateHubHandler.WebSocketPrivateHandler)
-	rg.GET("/ws/group", h.GroupHubHandler.NewWebSocketGroupHandler)
+	rg.GET("/private", h.PrivateHubHandler.WebSocketPrivateHandler)
+	rg.GET("/group", h.GroupHubHandler.NewWebSocketGroupHandler)
 }

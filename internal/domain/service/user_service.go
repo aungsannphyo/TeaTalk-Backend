@@ -10,7 +10,7 @@ import (
 
 type UserService interface {
 	Register(u *dto.RegisterRequestDto) error
-	Login(u *dto.LoginRequestDto) (*models.User, string, error)
+	Login(u *dto.LoginRequestDto) (*models.User, string, []byte, error)
 	GetUserByID(ctx context.Context, userID string) (*models.User, *models.PersonalDetails, error)
 	GetChatListByUserID(ctx context.Context, userID string) ([]response.ChatListResponse, error)
 	UpdatePersonalDetail(userID string, pd *dto.PersonalDetailDto) error

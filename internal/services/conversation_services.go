@@ -18,58 +18,20 @@ type conService struct {
 	fRepo  r.FriendRepository
 }
 
-func (s *conService) addMemberAndAdmin(conversationID, userID string) error {
-	member := &models.ConversationMember{
-		ConversationID: conversationID,
-		UserID:         userID,
-	}
-	if err := s.cmRepo.CreateConversationMember(member); err != nil {
-		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
-	}
-
-	admin := &models.GroupAdmin{
-		ConversationID: conversationID,
-		UserID:         userID,
-	}
-	if err := s.gaRepo.CreateGroupAdmin(admin); err != nil {
-		return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
-	}
-
-	return nil
-}
-
-func (s *conService) addConversationMember(conversationID string, memberIDs *[]string) error {
-	if memberIDs == nil || len(*memberIDs) == 0 {
-		return nil
-	}
-
-	for _, memberID := range *memberIDs {
-		member := &models.ConversationMember{
-			ConversationID: conversationID,
-			UserID:         memberID,
-		}
-		if err := s.cmRepo.CreateConversationMember(member); err != nil {
-			return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
-		}
-	}
-	return nil
-}
-
-func (s *conService) CreateConversation(userID string, dto dto.CreateConversationDto) error {
-	cID := uuid.NewString()
-
+func (s *conService) CreateConversation(userID *string, dto dto.CreateConversationDto) error {
+	conversationID := uuid.NewString()
 	var c *models.Conversation
 
 	if dto.IsGroup {
 		c = &models.Conversation{
-			ID:        cID,
+			ID:        conversationID,
 			IsGroup:   true,
-			Name:      &dto.Name,
-			CreatedBy: &userID,
+			Name:      dto.Name,
+			CreatedBy: userID,
 		}
 	} else {
 		c = &models.Conversation{
-			ID:        cID,
+			ID:        conversationID,
 			IsGroup:   false,
 			Name:      nil,
 			CreatedBy: nil,
@@ -84,14 +46,28 @@ func (s *conService) CreateConversation(userID string, dto dto.CreateConversatio
 	// Add the creator as a member and admin
 	//if isGroup is true
 	if dto.IsGroup {
-		if err := s.addMemberAndAdmin(cID, userID); err != nil {
-			return err
+		admin := &models.GroupAdmin{
+			ConversationID: conversationID,
+			UserID:         *userID,
+		}
+		if err := s.gaRepo.CreateGroupAdmin(admin); err != nil {
+			return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 		}
 	}
 
 	// Add other members (if any)
-	if err := s.addConversationMember(cID, dto.MemberID); err != nil {
-		return err
+	if dto.MemberID == nil || len(*dto.MemberID) == 0 {
+		return nil
+	}
+
+	for _, memberID := range *dto.MemberID {
+		member := &models.ConversationMember{
+			ConversationID: conversationID,
+			UserID:         memberID,
+		}
+		if err := s.cmRepo.CreateConversationMember(member); err != nil {
+			return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+		}
 	}
 
 	return nil
@@ -237,4 +213,18 @@ func (s *conService) GetGroupsById(ctx context.Context, userID string) ([]models
 	}
 
 	return conversations, nil
+}
+
+func (s *conService) GetConversation(
+	ctx context.Context,
+	senderID string,
+	receiverID string,
+) (*models.Conversation, error) {
+	conversation, err := s.cRepo.GetConversation(ctx, senderID, receiverID)
+
+	if err != nil {
+		return nil, &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	return &conversation, nil
 }

@@ -30,7 +30,7 @@ func (r *cKeyRepo) CreateConversationKey(cKey *models.ConversationKey) error {
 
 	defer stmt.Close()
 
-	_, err = stmt.Exec(cKey.ConversationId, cKey.UserID, cKey.EncryptedKey, cKey.ConversationKeyNonce)
+	_, err = stmt.Exec(cKey.ConversationId, cKey.UserID, cKey.ConversationEncryptedKey, cKey.ConversationKeyNonce)
 
 	if err != nil {
 		return err

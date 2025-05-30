@@ -12,13 +12,14 @@ import (
 )
 
 type HandlerSet struct {
-	UserHandler          *UserHandler
-	FriendRequestHandler *FriendRequestHandler
-	FriendHandler        *FriendHandler
-	ConversationsHandler *ConversationsHandler
-	PrivateHubHandler    *private.WebSocketPrivateHandler
-	GroupHubHandler      *group.WebSocketGroupHandler
-	MessageHandler       *MessageHandler
+	UserHandler            *UserHandler
+	FriendRequestHandler   *FriendRequestHandler
+	FriendHandler          *FriendHandler
+	ConversationsHandler   *ConversationHandler
+	PrivateHubHandler      *private.WebSocketPrivateHandler
+	GroupHubHandler        *group.WebSocketGroupHandler
+	MessageHandler         *MessageHandler
+	ConversationKeyHandler *ConversationKeyHandler
 }
 
 func InitHandler(db *sql.DB) *HandlerSet {
@@ -52,12 +53,13 @@ func InitHandler(db *sql.DB) *HandlerSet {
 	go groupHub.RunGroupWebSocket()
 
 	return &HandlerSet{
-		PrivateHubHandler:    privateHubHandler,
-		GroupHubHandler:      groupHubHandler,
-		UserHandler:          NewUserHandler(serviceFactory.UserService()),
-		FriendRequestHandler: NewFriendRequestHandler(serviceFactory.FriendRequestService()),
-		FriendHandler:        NewFriendHandler(serviceFactory.FriendService()),
-		ConversationsHandler: NewConversationHandler(serviceFactory.ConversationService()),
-		MessageHandler:       NewMessageHandler(serviceFactory.MessageService()),
+		PrivateHubHandler:      privateHubHandler,
+		GroupHubHandler:        groupHubHandler,
+		ConversationKeyHandler: NewConversationKeyHandler(serviceFactory.ConversationKeyService()),
+		UserHandler:            NewUserHandler(serviceFactory.UserService()),
+		FriendRequestHandler:   NewFriendRequestHandler(serviceFactory.FriendRequestService()),
+		FriendHandler:          NewFriendHandler(serviceFactory.FriendService()),
+		ConversationsHandler:   NewConversationHandler(serviceFactory.ConversationService()),
+		MessageHandler:         NewMessageHandler(serviceFactory.MessageService()),
 	}
 }

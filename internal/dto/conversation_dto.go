@@ -1,16 +1,14 @@
 package dto
 
 import (
-	"strings"
-
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	v "github.com/aungsannphyo/ywartalk/pkg/validator"
 )
 
 type CreateConversationDto struct {
 	IsGroup  bool      `json:"isGroup"`
-	Name     string    `json:"name"`
-	MemberID *[]string `json:"memberId,omitempty"`
+	Name     *string   `json:"name,omitempty"`
+	MemberID *[]string `json:"memberIds"`
 }
 
 type UpdateGroupNameDto struct {
@@ -36,20 +34,6 @@ func ValidateModerateGroupInvite(mgi ModerateGroupInviteDto) error {
 		errs = append(errs, v.ValidationError{
 			Field:   "Status",
 			Message: "Status should be APPROVED or REJECTED"})
-	}
-
-	if len(errs) > 0 {
-		return errs
-	}
-
-	return nil
-}
-
-func ValidateCreateGroup(g CreateConversationDto) error {
-	var errs v.ValidationErrors
-
-	if strings.TrimSpace(g.Name) == "" {
-		errs = append(errs, v.ValidationError{Field: "Name", Message: "Friend Request Id is required"})
 	}
 
 	if len(errs) > 0 {

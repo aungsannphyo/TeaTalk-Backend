@@ -61,7 +61,7 @@ func (s *userServices) Register(u *dto.RegisterRequestDto) error {
 	return nil
 }
 
-func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, error) {
+func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, []byte, error) {
 	user := &models.User{
 		Email:    u.Email,
 		Password: u.Password,
@@ -70,26 +70,28 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, erro
 	foundUser, err := s.userRepo.Login(user)
 
 	if err != nil {
-		return nil, "", &e.UnAuthorizedError{Message: "Email or Password doesn't match"}
+		return nil, "", nil, &e.UnAuthorizedError{Message: "Email or Password doesn't match"}
 	}
 
 	checkPassword := utils.CheckPasswordHash(user.Password, foundUser.Password)
 
 	if !checkPassword {
-		return nil, "", &e.UnAuthorizedError{Message: "Password doesn't match"}
+		return nil, "", nil, &e.UnAuthorizedError{Message: "Password doesn't match"}
 	}
 
 	if err != nil {
-		return nil, "", &e.InternalServerError{Message: "Something went wrong while decryption key"}
+		return nil, "", nil, &e.InternalServerError{Message: "Something went wrong while decryption key"}
 	}
 
 	token, err := utils.GenerateToken(foundUser.Email, foundUser.ID)
 
 	if err != nil {
-		return nil, "", &e.InternalServerError{Message: "Something went wrong while generating token"}
+		return nil, "", nil, &e.InternalServerError{Message: "Something went wrong while generating token"}
 	}
 
-	return foundUser, token, nil
+	pdk := utils.DeriveKey([]byte(u.Password), foundUser.Salt)
+
+	return foundUser, token, pdk, nil
 }
 
 func (s *userServices) GetUserByID(ctx context.Context, userID string) (*models.User, *models.PersonalDetails, error) {

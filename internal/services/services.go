@@ -11,16 +11,35 @@ type ServiceFactory interface {
 	FriendRequestService() s.FriendRequestService
 	FriendService() s.FriendService
 	MessageService() s.MessageService
+	ConversationKeyService() s.ConversationKeyService
 }
 
 type serviceFactory struct {
 	repoFactory store.RepositoryFactory
+	frSvc       s.FriendRequestService
+	cSvc        s.ConversationService
 }
 
 func NewServiceFactory(repoFactory store.RepositoryFactory) ServiceFactory {
+	cSvc := &conService{
+		cRepo:  repoFactory.NewConversationRepo(),
+		cmRepo: repoFactory.NewConversationMemberRepo(),
+		gaRepo: repoFactory.NewGroupAdminRepo(),
+		giRepo: repoFactory.NewGroupInviteRepo(),
+		fRepo:  repoFactory.NewFriendRepo(),
+	}
+
+	frSvc := &frService{
+		frRepo:  repoFactory.NewFriendRequestRepo(),
+		fRepo:   repoFactory.NewFriendRepo(),
+		frlRepo: repoFactory.NewFriendRequestLogRepo(),
+		cSvc:    cSvc,
+	}
 
 	return &serviceFactory{
 		repoFactory: repoFactory,
+		cSvc:        cSvc,
+		frSvc:       frSvc,
 	}
 
 }
@@ -31,22 +50,18 @@ func (f *serviceFactory) UserService() s.UserService {
 	}
 }
 
-func (f *serviceFactory) ConversationService() s.ConversationService {
-	return &conService{
-		cRepo:  f.repoFactory.NewConversationRepo(),
-		cmRepo: f.repoFactory.NewConversationMemberRepo(),
-		gaRepo: f.repoFactory.NewGroupAdminRepo(),
-		giRepo: f.repoFactory.NewGroupInviteRepo(),
-		fRepo:  f.repoFactory.NewFriendRepo(),
+func (f *serviceFactory) ConversationKeyService() s.ConversationKeyService {
+	return &cKeyService{
+		cKeyRepo: f.repoFactory.NewConversationKeyRepo(),
 	}
 }
 
+func (f *serviceFactory) ConversationService() s.ConversationService {
+	return f.cSvc
+}
+
 func (f *serviceFactory) FriendRequestService() s.FriendRequestService {
-	return &frService{
-		frRepo:  f.repoFactory.NewFriendRequestRepo(),
-		fRepo:   f.repoFactory.NewFriendRepo(),
-		frlRepo: f.repoFactory.NewFriendRequestLogRepo(),
-	}
+	return f.frSvc
 }
 
 func (f *serviceFactory) FriendService() s.FriendService {

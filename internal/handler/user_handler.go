@@ -57,14 +57,14 @@ func (h *UserHandler) LoginHandler(c *gin.Context) {
 		return
 	}
 
-	foundUser, token, err := h.userService.Login(&u)
+	foundUser, token, pdk, err := h.userService.Login(&u)
 
 	if err != nil {
 		e.UnauthorizedResponse(c, err)
 		return
 	}
 
-	loginResponse := response.NewLoginResponse(foundUser, token)
+	loginResponse := response.NewLoginResponse(foundUser, token, pdk)
 
 	success.OkResponse(c, loginResponse)
 }

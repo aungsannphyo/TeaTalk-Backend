@@ -5,6 +5,7 @@ import (
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	"github.com/aungsannphyo/ywartalk/internal/domain/repository"
+	"github.com/aungsannphyo/ywartalk/internal/domain/service"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
 	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
@@ -14,9 +15,14 @@ type frService struct {
 	frRepo  repository.FriendRequestRepository
 	fRepo   repository.FriendRepository
 	frlRepo repository.FriendRequestLogRepository
+	cSvc    service.ConversationService
 }
 
-func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dto.SendFriendRequestDto) error {
+func (s *frService) SendFriendRequest(
+	ctx context.Context,
+	userID string,
+	dto dto.SendFriendRequestDto,
+) error {
 	fr := &models.FriendRequest{
 		SenderId:   userID,
 		ReceiverId: dto.ReceiverId,
@@ -70,15 +76,14 @@ func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dt
 func (s *frService) DecideFriendRequest(
 	ctx context.Context,
 	userID string,
-	dto dto.DecideFriendRequestDto,
+	dfrDto dto.DecideFriendRequestDto,
 ) error {
 
 	dfr := &models.FriendRequest{
-		ID:         dto.FriendRequestId,
+		ID:         dfrDto.FriendRequestId,
 		ReceiverId: userID,
-		Status:     dto.Status,
+		Status:     dfrDto.Status,
 	}
-
 	//check decide status is ACCEPTED
 	//then delete the friend request row
 	//write into friends database for both friendship 2 user id
@@ -119,7 +124,7 @@ func (s *frService) DecideFriendRequest(
 
 			//make Action to ACCEPTED
 			acceptFrl := &models.FriendRequestLog{
-				SenderID:    dfr.ReceiverId,
+				SenderID:    fr.SenderId,
 				ReceiverID:  dfr.ReceiverId,
 				Action:      models.ActionAccepted,
 				PerformedBy: dfr.ReceiverId,
@@ -130,6 +135,7 @@ func (s *frService) DecideFriendRequest(
 			if err != nil {
 				return err
 			}
+
 			if !canSend {
 				return &e.BadRequestError{Message: "You can't send this right now!"}
 			}
@@ -139,6 +145,17 @@ func (s *frService) DecideFriendRequest(
 			if err != nil {
 				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
 			}
+
+			//Make for conversation and conversation member for both after ACCEPTED
+			cDto := dto.CreateConversationDto{
+				IsGroup:  false,
+				Name:     nil,
+				MemberID: &[]string{fr.SenderId, fr.ReceiverId},
+			}
+			if err := s.cSvc.CreateConversation(nil, cDto); err != nil {
+				return err
+			}
+
 		} else {
 			//Reject Case
 			//make Action to REJECTED
