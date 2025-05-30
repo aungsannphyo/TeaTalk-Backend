@@ -67,7 +67,11 @@ func (s *frService) SendFriendRequest(ctx context.Context, userID string, dto dt
 
 }
 
-func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto dto.DecideFriendRequestDto) error {
+func (s *frService) DecideFriendRequest(
+	ctx context.Context,
+	userID string,
+	dto dto.DecideFriendRequestDto,
+) error {
 
 	dfr := &models.FriendRequest{
 		ID:         dto.FriendRequestId,
@@ -96,21 +100,21 @@ func (s *frService) DecideFriendRequest(ctx context.Context, userID string, dto 
 			}
 
 			//insert two row [bidirectional]
-			f1 := &models.Friend{
+			friends := make([]*models.Friend, 2)
+			friends[0] = &models.Friend{
 				UserID:   fr.SenderId,
 				FriendID: fr.ReceiverId,
 			}
 
-			f2 := &models.Friend{
+			friends[1] = &models.Friend{
 				UserID:   fr.ReceiverId,
 				FriendID: fr.SenderId,
 			}
 			//make friendship [bidirectional]
-			errf1 := s.fRepo.CreateFriendShip(f1)
-			errf2 := s.fRepo.CreateFriendShip(f2)
-
-			if errf1 != nil || errf2 != nil {
-				return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+			for _, f := range friends {
+				if err := s.fRepo.CreateFriendShip(f); err != nil {
+					return &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+				}
 			}
 
 			//make Action to ACCEPTED
