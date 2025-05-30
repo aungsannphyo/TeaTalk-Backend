@@ -7,9 +7,12 @@ import (
 )
 
 type RegisterRequestDto struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Username         string `json:"username"`
+	Email            string `json:"email"`
+	Password         string `json:"password"`
+	Salt             string `json:"salt"`
+	EncryptedUserKey string `json:"encryptedUserKey"`
+	UserKeyNonce     string `json:"userKeyNonce"`
 }
 
 type LoginRequestDto struct {

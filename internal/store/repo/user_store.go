@@ -421,23 +421,3 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 	}
 	return friend, nil
 }
-
-func (r *userRepo) GetUserKeyByID(ctx context.Context, userID string) (*response.UserKeyResponse, error) {
-	query, err := r.loader.LoadQuery("sql/user/get_user_key_by_id.sql")
-
-	if err != nil {
-		return nil, err
-	}
-
-	row := db.DBInstance.QueryRowContext(ctx, query, userID)
-
-	var uKey response.UserKeyResponse
-
-	err = row.Scan(&uKey.UserID, &uKey.Salt, &uKey.EncryptedUserKey, &uKey.UserKeyNonce)
-
-	if err != nil {
-		return nil, err
-	}
-
-	return &uKey, nil
-}

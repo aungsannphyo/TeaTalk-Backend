@@ -19,5 +19,4 @@ type UserRepository interface {
 	SetUserOnline(userID string) error
 	SetUserOffline(userID string) error
 	GetFriendsByID(ctx context.Context, userID string) ([]response.FriendResponse, error)
-	GetUserKeyByID(ctx context.Context, userID string) (*response.UserKeyResponse, error)
 }
