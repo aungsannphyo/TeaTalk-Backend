@@ -38,3 +38,17 @@ func (h *ConversationKeyHandler) CreateConversationKey(c *gin.Context) {
 	success.CreateResponse(c, "You have been successfully created the conversation key!")
 
 }
+
+func (h *ConversationKeyHandler) GetConversationKey(c *gin.Context) {
+	conversationID := c.Param("conversationId")
+	userID := c.Param("userId")
+
+	ckeyResp, err := h.cKeyService.GetConversationKey(c.Request.Context(), conversationID, userID)
+
+	if err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+
+	success.OkResponse(c, ckeyResp)
+}

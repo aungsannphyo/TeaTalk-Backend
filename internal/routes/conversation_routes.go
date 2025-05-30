@@ -14,5 +14,5 @@ func RegisterConversationRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.POST("/:conversationID/assign-admin", h.ConversationsHandler.AssignAdminHandler)
 	rg.GET("/member/:conversationID", h.ConversationsHandler.GetGroupMembersHandler)
 	rg.GET("/groups", h.ConversationsHandler.GetGroupsByIdHandler)
-	rg.GET("/conversation", h.ConversationsHandler.GetConversationHandler)
+	rg.GET("/sender/:senderId/receiver/:receiverId", h.ConversationsHandler.GetConversationHandler)
 }

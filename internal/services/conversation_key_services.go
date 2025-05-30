@@ -1,9 +1,12 @@
 package services
 
 import (
+	"context"
+
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
 	r "github.com/aungsannphyo/ywartalk/internal/domain/repository"
 	"github.com/aungsannphyo/ywartalk/internal/dto"
+	"github.com/aungsannphyo/ywartalk/internal/dto/response"
 	e "github.com/aungsannphyo/ywartalk/pkg/error"
 	"github.com/aungsannphyo/ywartalk/pkg/utils"
 )
@@ -33,4 +36,19 @@ func (s *cKeyService) CreateConversationKey(dto dto.CreateConversationKeyDto) er
 	}
 
 	return nil
+}
+
+func (s *cKeyService) GetConversationKey(ctx context.Context, conversationID, userID string) (
+	*response.ConversationKeyResponse,
+	error,
+) {
+	conv, err := s.cKeyRepo.GetConversationKey(ctx, conversationID, userID)
+
+	if err != nil {
+		return nil, &e.InternalServerError{Message: "Something went wrong, Please try again later"}
+	}
+
+	cKeyRes := response.NewConversationKeyResponse(conv)
+
+	return cKeyRes, nil
 }

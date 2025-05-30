@@ -39,26 +39,29 @@ func (r *cKeyRepo) CreateConversationKey(cKey *models.ConversationKey) error {
 	return nil
 }
 
-func (r *cKeyRepo) GetConversationKey(ctx context.Context, conversationID, userID string) ([]byte, []byte, error) {
+func (r *cKeyRepo) GetConversationKey(
+	ctx context.Context,
+	conversationID,
+	userID string,
+) (*models.ConversationKey, error) {
 	query, err := r.loader.LoadQuery("sql/conversation_key/get_conversation_key.sql")
 
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	row := db.DBInstance.QueryRowContext(ctx, query, conversationID, userID)
 
-	var encryptedKey []byte
-	var nonce []byte
+	var cKey models.ConversationKey
 
-	err = row.Scan(&encryptedKey, &nonce)
+	err = row.Scan(&cKey.ConversationId, cKey.UserID, &cKey.ConversationEncryptedKey, cKey.ConversationKeyNonce)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return nil, nil, err
+			return nil, err
 		}
-		return nil, nil, err
+		return nil, err
 	}
 
-	return encryptedKey, nonce, nil
+	return &cKey, nil
 }

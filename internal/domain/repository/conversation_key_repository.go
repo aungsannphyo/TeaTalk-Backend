@@ -8,5 +8,5 @@ import (
 
 type ConversationKeyRepository interface {
 	CreateConversationKey(cKeys *models.ConversationKey) error
-	GetConversationKey(ctx context.Context, conversationID, userID string) ([]byte, []byte, error)
+	GetConversationKey(ctx context.Context, conversationID, userID string) (*models.ConversationKey, error)
 }

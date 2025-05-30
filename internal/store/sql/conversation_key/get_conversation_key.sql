@@ -1,1 +1,1 @@
-SELECT encrypted_key, nonce FROM conversation_keys WHERE conversation_id = ? AND user_id = ?
+SELECT conversation_id, user_id, encrypted_key, nonce FROM conversation_keys WHERE conversation_id = ? AND user_id = ?

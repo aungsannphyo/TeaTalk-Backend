@@ -156,8 +156,8 @@ func (h *ConversationHandler) GetGroupsByIdHandler(c *gin.Context) {
 }
 
 func (h *ConversationHandler) GetConversationHandler(c *gin.Context) {
-	senderID := c.Query("senderId")
-	receiverID := c.Query("receiverId")
+	senderID := c.Param("senderId")
+	receiverID := c.Param("receiverId")
 
 	conversation, err := h.cService.GetConversation(c.Request.Context(), senderID, receiverID)
 
