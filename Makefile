@@ -2,7 +2,7 @@ include .env
 export $(shell sed 's/=.*//' .env)
 
 MIGRATE_DIR=cmd/migrate
-CONTAINER_NAME=immin_infra_mariadb.1.2eo50qxw0r3hg1v3qcu8n0le8
+CONTAINER_NAME=immin_infra_mariadb.1.qxxeaphxn2jt6fqpeqsc2iu6d
 
 migrate:
 	@echo "Running all *_up.sql files in order inside container..."

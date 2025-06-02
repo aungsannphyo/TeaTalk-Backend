@@ -1,7 +1,6 @@
 package dto
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -22,7 +21,6 @@ type MessagesDto struct {
 	SenderID         string    `json:"senderId"`
 	MemberID         string    `json:"memberId"`
 	Content          string    `json:"content"`
-	MessageNonce     []byte    `json:"nomessnce"`
 	IsRead           bool      `json:"isRead"`
 	SeenByName       *string   `json:"seenByName,omitempty"`
 	MessageCreatedAt time.Time `json:"messageCreatedAt"`
@@ -31,12 +29,10 @@ type MessagesDto struct {
 func ValidateSendMessageRequest(smDto SendPrivateMessageDto) error {
 	var errs v.ValidationErrors
 	if strings.TrimSpace(smDto.ReceiverID) == "" {
-		log.Print("Check Reciver")
 		errs = append(errs, v.ValidationError{Field: "Receiver Id", Message: "Receiver Id is required"})
 	}
 
 	if strings.TrimSpace(smDto.Content) == "" {
-		log.Print("Check Content")
 		errs = append(errs, v.ValidationError{Field: "Content", Message: "Content is required"})
 	}
 
@@ -51,7 +47,6 @@ func ValidateSendGroupMessage(sgm SendGroupMessageDto) error {
 	var errs v.ValidationErrors
 
 	if strings.TrimSpace(sgm.Content) == "" {
-		log.Print("Check Content")
 		errs = append(errs, v.ValidationError{Field: "Content", Message: "Content is required"})
 	}
 

@@ -75,9 +75,6 @@ func (r *userRepo) Register(u *models.User) error {
 		userIdentity,
 		strings.ToLower(u.Email),
 		u.Password,
-		u.Salt,
-		u.EncryptedUserKey,
-		u.UserKeyNonce,
 	)
 	if err != nil {
 		return err
@@ -116,9 +113,6 @@ func (r *userRepo) Login(user *models.User) (*models.User, error) {
 		&foundUser.Username,
 		&foundUser.Email,
 		&foundUser.Password,
-		&foundUser.Salt,
-		&foundUser.EncryptedUserKey,
-		&foundUser.UserKeyNonce,
 	)
 
 	if err != nil {
@@ -149,6 +143,7 @@ func (r *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User
 		&ps.Gender,
 		&ps.DateOfBirth,
 		&ps.Bio,
+		&ps.IsOnline,
 	)
 
 	if err != nil {

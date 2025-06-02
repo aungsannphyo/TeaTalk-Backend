@@ -13,11 +13,10 @@ import (
 )
 
 type messageService struct {
-	mRepo    r.MessageRepository
-	fRepo    r.FriendRepository
-	cRepo    r.ConversationRepository
-	cmRepo   r.ConversationMemeberRepository
-	cKeyRepo r.ConversationKeyRepository
+	mRepo  r.MessageRepository
+	fRepo  r.FriendRepository
+	cRepo  r.ConversationRepository
+	cmRepo r.ConversationMemeberRepository
 }
 
 func (s *messageService) SendPrivateMessage(

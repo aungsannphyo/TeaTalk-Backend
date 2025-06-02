@@ -3,7 +3,6 @@ package services
 import (
 	"context"
 	"errors"
-	"log"
 	"os"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
@@ -28,27 +27,15 @@ func (s *userServices) Register(u *dto.RegisterRequestDto) error {
 		return &e.InternalServerError{Message: "Password hashing failed"}
 	}
 
-	salt, saleErr := utils.DecodeBase64(u.Salt)
-	encryptedUserKey, keyErr := utils.DecodeBase64(u.EncryptedUserKey)
-	userKeyNonce, nonceErr := utils.DecodeBase64(u.UserKeyNonce)
-
-	if saleErr != nil || keyErr != nil || nonceErr != nil {
-		return &e.InternalServerError{Message: "Fail to decode string"}
-	}
-
 	user := &models.User{
-		ID:               uuid.New().String(),
-		Username:         u.Username,
-		Email:            u.Email,
-		Password:         hashedPassword,
-		Salt:             salt,
-		EncryptedUserKey: encryptedUserKey,
-		UserKeyNonce:     userKeyNonce,
+		ID:       uuid.New().String(),
+		Username: u.Username,
+		Email:    u.Email,
+		Password: hashedPassword,
 	}
 
 	err = s.userRepo.Register(user)
 	if err != nil {
-		log.Println("ERR", err)
 		var mysqlErr *mysql.MySQLError
 		if errors.As(err, &mysqlErr) {
 			if mysqlErr.Number == 1062 {

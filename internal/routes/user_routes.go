@@ -8,7 +8,7 @@ import (
 
 func RegisterUserRoutes(rg *gin.RouterGroup, h *handler.HandlerSet) {
 	rg.Use(middleware.Middleware)
-	rg.GET("/", h.UserHandler.GetUserHandler)
+	rg.GET("/user", h.UserHandler.GetUserHandler)
 	rg.PUT("/username", h.UserHandler.UpdateUserName)
 	rg.GET("/chat-list", h.UserHandler.GetChatListByUserIdHandler)
 	rg.PUT("/personal-details", h.UserHandler.UpdatePersonalDetailsHandler)

@@ -4,18 +4,14 @@ import (
 	"time"
 
 	"github.com/aungsannphyo/ywartalk/internal/domain/models"
-	"github.com/aungsannphyo/ywartalk/pkg/utils"
 )
 
 type LoginResponse struct {
-	ID               string    `json:"id"`
-	Username         string    `json:"username"`
-	Email            string    `json:"email"`
-	Token            string    `json:"token"`
-	PDK              string    `json:"pdk"`
-	EncryptedUserKey string    `json:"encryptedUserKey"`
-	UserKeyNonce     string    `json:"userKeyNonce"`
-	CreatedAt        time.Time `json:"createdAt"`
+	ID        string    `json:"id"`
+	Username  string    `json:"username"`
+	Email     string    `json:"email"`
+	Token     string    `json:"token"`
+	CreatedAt time.Time `json:"createdAt"`
 }
 
 type UserResponse struct {
@@ -44,14 +40,11 @@ type UserDetailsResponse struct {
 
 func NewLoginResponse(user *models.User, token string, pdk []byte) *LoginResponse {
 	return &LoginResponse{
-		ID:               user.ID,
-		Username:         user.Username,
-		Email:            user.Email,
-		CreatedAt:        user.CreatedAt,
-		PDK:              utils.EncodeBase64(pdk),
-		EncryptedUserKey: utils.EncodeBase64(user.EncryptedUserKey),
-		UserKeyNonce:     utils.EncodeBase64(user.UserKeyNonce),
-		Token:            token,
+		ID:        user.ID,
+		Username:  user.Username,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+		Token:     token,
 	}
 
 }
