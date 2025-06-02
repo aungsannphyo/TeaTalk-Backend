@@ -20,6 +20,23 @@ type LoginRequestDto struct {
 	Password string `json:"password"`
 }
 
+type UpdateUserNameDto struct {
+	Username string `json:"username"`
+}
+
+func ValidateUpdateUsername(user UpdateUserNameDto) error {
+	var errs v.ValidationErrors
+
+	if strings.TrimSpace(user.Username) == "" {
+		errs = append(errs, v.ValidationError{Field: "username", Message: "Username is required"})
+	}
+
+	if len(errs) > 0 {
+		return errs
+	}
+	return nil
+}
+
 func ValidateRegisterUser(user RegisterRequestDto) error {
 	var errs v.ValidationErrors
 

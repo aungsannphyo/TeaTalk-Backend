@@ -106,7 +106,7 @@ func (h *UserHandler) UpdatePersonalDetailsHandler(c *gin.Context) {
 func (h *UserHandler) UploadProfileImageHandler(c *gin.Context) {
 	userID := c.GetString("userID")
 
-	file, err := c.FormFile("profile_image")
+	file, err := c.FormFile("profileImage")
 	if err != nil {
 		e.BadRequestResponse(c, errors.New("image file is required"))
 		return
@@ -152,7 +152,7 @@ func (h *UserHandler) SearchUserHandler(c *gin.Context) {
 }
 
 func (h *UserHandler) GetUserHandler(c *gin.Context) {
-	userID := c.Param("userID")
+	userID := c.GetString("userID")
 
 	user, ps, err := h.userService.GetUserByID(c.Request.Context(), userID)
 	if err != nil {
@@ -174,4 +174,25 @@ func (h *UserHandler) GetFriendsByUserHandler(c *gin.Context) {
 	}
 
 	success.OkResponse(c, friend)
+}
+
+func (h *UserHandler) UpdateUserName(c *gin.Context) {
+	userID := c.GetString("userID")
+	var userDto dto.UpdateUserNameDto
+
+	if err := c.ShouldBindJSON(&userDto); err != nil {
+		e.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := dto.ValidateUpdateUsername(userDto); err != nil {
+		e.BadRequestResponse(c, err)
+		return
+	}
+
+	if err := h.userService.UpdateUserName(userID, userDto.Username); err != nil {
+		e.InternalServerResponse(c, err)
+		return
+	}
+	success.OkResponse(c, "Username have been updated Successfull!")
 }

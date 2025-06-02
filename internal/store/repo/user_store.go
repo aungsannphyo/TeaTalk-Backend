@@ -140,7 +140,16 @@ func (r *userRepo) GetUserByID(ctx context.Context, userID string) (*models.User
 	var user models.User
 	var ps models.PersonalDetails
 
-	err = row.Scan(&user.ID, &user.Email, &user.UserIdentity, ps.ProfileImage, ps.Gender, ps.DateOfBirth, ps.Bio)
+	err = row.Scan(
+		&user.ID,
+		&user.Email,
+		&user.Username,
+		&user.UserIdentity,
+		&ps.ProfileImage,
+		&ps.Gender,
+		&ps.DateOfBirth,
+		&ps.Bio,
+	)
 
 	if err != nil {
 		return nil, nil, err
@@ -420,4 +429,29 @@ func (r *userRepo) GetFriendsByID(ctx context.Context, userID string) ([]respons
 		friend = append(friend, f)
 	}
 	return friend, nil
+}
+
+func (r *userRepo) UpdateUserName(userID string, username string) error {
+	query, err := r.loader.LoadQuery("sql/user/update_username.sql")
+
+	if err != nil {
+		return err
+	}
+
+	stmt, err := db.DBInstance.Prepare(query)
+
+	if err != nil {
+		return err
+	}
+
+	defer stmt.Close()
+
+	_, err = stmt.Exec(username, userID)
+
+	if err != nil {
+
+		return err
+	}
+
+	return nil
 }

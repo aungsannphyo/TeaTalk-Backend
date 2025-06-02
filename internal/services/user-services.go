@@ -96,7 +96,6 @@ func (s *userServices) Login(u *dto.LoginRequestDto) (*models.User, string, []by
 
 func (s *userServices) GetUserByID(ctx context.Context, userID string) (*models.User, *models.PersonalDetails, error) {
 	user, ps, err := s.userRepo.GetUserByID(ctx, userID)
-
 	if err != nil {
 		return nil, nil, &e.NotFoundError{Message: "User not found"}
 
@@ -133,6 +132,7 @@ func (s *userServices) GetChatListByUserID(ctx context.Context, userID string) (
 }
 
 func (s *userServices) UpdatePersonalDetail(userID string, dto *dto.PersonalDetailDto) error {
+
 	ps := &models.PersonalDetails{
 		UserID:      userID,
 		Gender:      dto.Gender,
@@ -141,7 +141,6 @@ func (s *userServices) UpdatePersonalDetail(userID string, dto *dto.PersonalDeta
 	}
 
 	err := s.userRepo.UpdatePersonalDetail(ps)
-
 	if err != nil {
 		return &e.InternalServerError{Message: err.Error()}
 	}
@@ -150,6 +149,7 @@ func (s *userServices) UpdatePersonalDetail(userID string, dto *dto.PersonalDeta
 }
 
 func (s *userServices) UploadProfileImage(ctx context.Context, userID string, imagePath string) error {
+
 	oldPath, err := s.userRepo.GetProfileImagePath(ctx, userID)
 
 	if err != nil {
@@ -206,4 +206,12 @@ func (s *userServices) GetFriendsByID(ctx context.Context, userID string) (
 
 	}
 	return friend, nil
+}
+
+func (s *userServices) UpdateUserName(userID string, username string) error {
+	err := s.userRepo.UpdateUserName(userID, username)
+	if err != nil {
+		return &e.InternalServerError{Message: "Something went wrong.Please try again later!"}
+	}
+	return nil
 }

@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS personal_details (
     user_id VARCHAR(255) PRIMARY KEY,
     profile_image VARCHAR(255) NULL,
     gender ENUM('MALE', 'FEMALE', 'OTHER') NULL,
-    date_of_birth DATE NULL,
+    date_of_birth VARCHAR(255) NULL,
     bio TEXT NULL,
     is_online BOOLEAN DEFAULT FALSE,
     last_seen TIMESTAMP DEFAULT CURRENT_TIMESTAMP,

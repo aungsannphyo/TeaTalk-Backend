@@ -11,6 +11,7 @@
 /bin/
 /build/
 /dist/
+/uploads/
 *.log
 
 # Dependency directories (remove if you use vendoring)
